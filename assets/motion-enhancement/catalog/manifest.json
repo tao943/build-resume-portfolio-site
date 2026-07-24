@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "catalog_version": 1,
+  "catalog_status": "ready",
+  "selection_policy": {"primary_recipes": 1, "optional_local_effects": 1},
+  "recipes": [
+    {"id":"minimalist-3d-ribbon","source_id":"01-minimalist-3d-ribbon","path":"recipes/minimalist-3d-ribbon.json","summary":"Monochrome ambient ribbon for a restrained technical hero."},
+    {"id":"dark-portfolio-stack","source_id":"02-dark-portfolio-stack","path":"recipes/dark-portfolio-stack.json","summary":"Dark identity-card stack for a product-focused portfolio."},
+    {"id":"cinematic-travel","source_id":"03-cinematic-travel","path":"recipes/cinematic-travel.json","summary":"Cinematic full-bleed media with editorial restraint."},
+    {"id":"editorial-healthcare","source_id":"04-editorial-healthcare","path":"recipes/editorial-healthcare.json","summary":"Soft editorial media mask below the primary call to action."},
+    {"id":"outdoor-video-mask","source_id":"05-outdoor-video-mask","path":"recipes/outdoor-video-mask.json","summary":"Organic bottom-centered media mask with spacious framing."},
+    {"id":"creator-portfolio","source_id":"06-creator-portfolio","path":"recipes/creator-portfolio.json","summary":"Portrait-led creator composition with contained motion."},
+    {"id":"vex-video-hero","source_id":"07-vex-video-hero","path":"recipes/vex-video-hero.json","summary":"High-contrast video hero for bold creative identities."},
+    {"id":"securify-typography","source_id":"08-securify-typography","path":"recipes/securify-typography.json","summary":"Typography-first full-bleed media with disciplined contrast."},
+    {"id":"neural-kinetics","source_id":"09-neural-kinetics","path":"recipes/neural-kinetics.json","summary":"Centered kinetic media for AI and research portfolios."},
+    {"id":"biotech-video","source_id":"10-biotech-video","path":"recipes/biotech-video.json","summary":"Scientific video field protected by a readability gradient."},
+    {"id":"assist-floating-cards","source_id":"11-assist-floating-cards","path":"recipes/assist-floating-cards.json","summary":"Contained media with lightweight floating support cards."}
+  ]
+}

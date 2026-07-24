@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-site-agent.local/schemas/media-art-direction-schema.json",
+  "title": "Media Art Direction Report",
+  "description": "Decision record written before applying selected media art direction to a confirmed React + Vite project.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "design_read", "visual_thesis", "energy_curve", "image_analysis", "internal_directions", "selected_direction_id", "selection_reason", "section_directions", "interaction_compatibility", "media_upgrades", "responsive_strategy", "reduced_motion_strategy", "implementation_choices", "preserve"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "design_read": { "$ref": "#/$defs/design_read" }, "visual_thesis": { "$ref": "#/$defs/non_empty" },
+    "energy_curve": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/energy_beat" } },
+    "image_analysis": { "type": "array", "items": { "$ref": "#/$defs/image_analysis" } },
+    "internal_directions": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/internal_direction" } },
+    "selected_direction_id": { "type": "string", "minLength": 1 }, "selection_reason": { "$ref": "#/$defs/non_empty" },
+    "section_directions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/section_direction" } },
+    "interaction_compatibility": { "type": "array", "items": { "$ref": "#/$defs/interaction_compatibility" } },
+    "media_upgrades": { "type": "array", "items": { "$ref": "#/$defs/non_empty" } },
+    "responsive_strategy": { "$ref": "#/$defs/responsive_strategy" }, "reduced_motion_strategy": { "$ref": "#/$defs/reduced_motion_strategy" },
+    "implementation_choices": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/non_empty" } },
+    "preserve": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/non_empty" } }
+  },
+  "$comment": "A deterministic workflow validator enforces selected_direction_id membership, trusted media-inventory authorization, factual and immutable-fact matching, controller ownership, and report shape. This standard JSON Schema validates portable report structure only.",
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 }, "non_empty": { "type": "string", "minLength": 1 },
+    "design_read": { "type": "object", "additionalProperties": false, "required": ["page_kind", "audience", "vibe"], "properties": { "page_kind": { "$ref": "#/$defs/non_empty" }, "audience": { "$ref": "#/$defs/non_empty" }, "vibe": { "$ref": "#/$defs/non_empty" } } },
+    "responsive_strategy": { "type": "object", "additionalProperties": false, "required": ["desktop", "tablet", "mobile", "coarse_pointer"], "properties": { "desktop": { "$ref": "#/$defs/non_empty" }, "tablet": { "$ref": "#/$defs/non_empty" }, "mobile": { "$ref": "#/$defs/non_empty" }, "coarse_pointer": { "$ref": "#/$defs/non_empty" } } },
+    "reduced_motion_strategy": { "type": "object", "additionalProperties": false, "required": ["trigger", "replacement", "content_visibility"], "properties": { "trigger": { "$ref": "#/$defs/non_empty" }, "replacement": { "$ref": "#/$defs/non_empty" }, "content_visibility": { "$ref": "#/$defs/non_empty" } } },
+    "energy_beat": { "type": "object", "additionalProperties": false, "required": ["section_id", "intensity", "reason"], "properties": { "section_id": { "$ref": "#/$defs/id" }, "intensity": { "enum": ["quiet", "rising", "peak", "release"] }, "reason": { "$ref": "#/$defs/non_empty" } } },
+    "image_analysis": { "type": "object", "additionalProperties": false, "required": ["image_id", "image_role", "factual_meaning", "immutable_facts"], "properties": { "image_id": { "$ref": "#/$defs/id" }, "image_role": { "$ref": "#/$defs/non_empty" }, "factual_meaning": { "$ref": "#/$defs/non_empty" }, "immutable_facts": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/non_empty" } } } },
+    "internal_direction": { "type": "object", "additionalProperties": false, "required": ["id", "name", "summary", "comparison"], "properties": { "id": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/non_empty" }, "summary": { "$ref": "#/$defs/non_empty" }, "comparison": { "$ref": "#/$defs/direction_comparison" } } },
+    "direction_comparison": { "type": "object", "additionalProperties": false, "required": ["beauty", "content", "narrative", "coherence", "device", "risk"], "properties": { "beauty": { "$ref": "#/$defs/non_empty" }, "content": { "$ref": "#/$defs/non_empty" }, "narrative": { "$ref": "#/$defs/non_empty" }, "coherence": { "$ref": "#/$defs/non_empty" }, "device": { "$ref": "#/$defs/non_empty" }, "risk": { "$ref": "#/$defs/non_empty" } } },
+    "interaction_controller": { "type": "object", "additionalProperties": false, "required": ["id", "type", "targets", "properties", "handoff", "conflict_resolution"], "properties": { "id": { "$ref": "#/$defs/id" }, "type": { "enum": ["scroll", "pointer", "drag", "camera", "video_progress", "transform", "filter"] }, "targets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } }, "properties": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/non_empty" } }, "handoff": { "$ref": "#/$defs/non_empty" }, "conflict_resolution": { "$ref": "#/$defs/non_empty" } } },
+    "section_direction": { "type": "object", "additionalProperties": false, "required": ["section_id", "image_ids", "composition", "effects", "purpose", "controllers", "mobile", "reduced_motion"], "properties": { "section_id": { "$ref": "#/$defs/id" }, "image_ids": { "type": "array", "items": { "$ref": "#/$defs/id" } }, "composition": { "$ref": "#/$defs/non_empty" }, "effects": { "type": "array", "items": { "$ref": "#/$defs/non_empty" } }, "purpose": { "$ref": "#/$defs/non_empty" }, "controllers": { "type": "array", "items": { "$ref": "#/$defs/interaction_controller" } }, "mobile": { "$ref": "#/$defs/non_empty" }, "reduced_motion": { "$ref": "#/$defs/non_empty" } } },
+    "interaction_compatibility": { "type": "object", "additionalProperties": false, "required": ["controller", "owners", "resolution"], "properties": { "controller": { "$ref": "#/$defs/id" }, "owners": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } }, "resolution": { "$ref": "#/$defs/non_empty" } } }
+  }
+}

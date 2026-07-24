@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-site-agent.local/schemas/apihz-media-schema.json",
+  "title": "APIHz Media Search Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "search_id",
+    "provider",
+    "query",
+    "created_at",
+    "candidates",
+    "rejected",
+    "rights_note"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "search_id": { "type": "string", "pattern": "^search-[a-f0-9]{12}$" },
+    "provider": { "const": "apihz" },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "words", "page", "limit"],
+      "properties": {
+        "mode": { "enum": ["keyword", "random"] },
+        "words": { "type": ["string", "null"], "maxLength": 10 },
+        "page": { "type": "integer", "minimum": 1 },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/candidate" }
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_url", "category"],
+        "properties": {
+          "source_url": { "type": "string" },
+          "category": { "type": "string" }
+        }
+      }
+    },
+    "rights_note": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "provider",
+        "asset_type",
+        "format",
+        "preview_path",
+        "source_url",
+        "width",
+        "height",
+        "byte_size",
+        "sha256",
+        "rights_note",
+        "selected"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^media-[a-f0-9]{12}$" },
+        "provider": { "const": "apihz" },
+        "asset_type": { "enum": ["image", "gif"] },
+        "format": { "enum": ["jpg", "png", "webp", "gif"] },
+        "preview_path": { "type": "string" },
+        "source_url": { "type": "string", "format": "uri" },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 },
+        "byte_size": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "rights_note": { "type": "string", "minLength": 1 },
+        "selected": { "const": false }
+      }
+    }
+  }
+}
+

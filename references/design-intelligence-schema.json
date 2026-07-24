@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-site-agent.local/schemas/design-intelligence-v1.json",
+  "title": "Portfolio design intelligence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mode", "query", "candidate_directions", "selected_direction_id", "guardrails", "react_guidelines", "provenance"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "mode": {"enum": ["recommend", "enrich"]},
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "industry", "content_density", "media_profile", "keywords"],
+      "properties": {
+        "role": {"type": "string"},
+        "industry": {"type": "string"},
+        "content_density": {"enum": ["low", "medium", "high"]},
+        "media_profile": {"enum": ["none", "limited", "rich"]},
+        "keywords": {"type": "array", "maxItems": 24, "items": {"type": "string"}}
+      }
+    },
+    "candidate_directions": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"$ref": "#/$defs/direction"}},
+    "selected_direction_id": {"type": "string"},
+    "guardrails": {"type": "array", "items": {"type": "string"}},
+    "react_guidelines": {"type": "array", "items": {"type": "string"}},
+    "reference_evidence_priority": {"type": "boolean"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["upstream", "catalog_version", "domains"],
+      "properties": {
+        "upstream": {"const": "nextlevelbuilder/ui-ux-pro-max-skill"},
+        "catalog_version": {"type": "string"},
+        "domains": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "$defs": {
+    "direction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "style_family", "composition", "color_relationships", "typography_roles", "surface_language", "media_strategy", "fit_reasons", "risks", "source_ids"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "style_family": {"type": "string"},
+        "composition": {"type": "string"},
+        "color_relationships": {"type": "array", "items": {"type": "string"}},
+        "typography_roles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["display", "body", "hierarchy"],
+          "properties": {
+            "display": {"type": "string"},
+            "body": {"type": "string"},
+            "hierarchy": {"type": "string"}
+          }
+        },
+        "surface_language": {"type": "string"},
+        "media_strategy": {"type": "string"},
+        "fit_reasons": {"type": "array", "items": {"type": "string"}},
+        "risks": {"type": "array", "items": {"type": "string"}},
+        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    }
+  }
+}
