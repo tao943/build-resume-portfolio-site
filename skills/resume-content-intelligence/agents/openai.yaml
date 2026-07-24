@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume Content Intelligence"
+  short_description: "Verify and optimize resume content before portfolio generation"
+  default_prompt: "Read my resume, identify factual gaps, ask me focused questions, and prepare approved content for my personal portfolio site."

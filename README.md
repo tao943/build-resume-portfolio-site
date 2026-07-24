@@ -1,6 +1,6 @@
 # build-resume-portfolio-site
 
-一个分阶段的 React + Vite 个人简历与作品集网站构建 skill。
+一个包含两个协作 skill 的 Codex plugin：先验证简历内容，再生成分阶段的 React + Vite 个人简历与作品集网站。
 
 ## 能力
 
@@ -11,11 +11,16 @@
 - 安全动效、视频 Poster 与本地视频升级
 - 可选的 APIHz 媒体搜索与导入流程
 
-入口文件：`SKILL.md`
+## 包含的 skills
+
+- `resume-content-intelligence`：提取事实、核验经历、优化文案并生成已确认内容包
+- `build-resume-portfolio-site`：根据已确认内容生成、审计和增强 React + Vite 网站
+
+Plugin manifest：`.codex-plugin/plugin.json`
 
 ## 使用
 
-在 Codex 中调用此 skill，并提供简历、作品集素材、视觉参考或现有网站路径。涉及事实型简历内容时，先使用 `resume-content-intelligence` 完成内容确认，再进入网站构建流程。
+在 Codex 中安装此 plugin 后，可以分别调用两个 skill；也可以直接描述目标。网站 skill 在发现内容包缺失时，会要求先走内容核验流程。
 
 ## 敏感信息
 

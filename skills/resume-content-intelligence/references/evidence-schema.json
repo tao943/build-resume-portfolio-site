@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex.local/schemas/resume-evidence.json",
+  "title": "ResumeEvidence",
+  "type": "object",
+  "required": ["evidence_id", "source_id", "quote", "location"],
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^evidence-[a-z0-9-]+$" },
+    "source_id": { "type": "string" },
+    "quote": { "type": "string", "minLength": 1 },
+    "location": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

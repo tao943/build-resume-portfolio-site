@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codex.local/schemas/resume-content.json",
+  "title": "ResumeContentPackage",
+  "type": "object",
+  "required": ["schema_version", "source_facts", "evidence", "open_questions", "approved_copy", "handoff"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "source_facts": { "$ref": "#/$defs/sourceFacts" },
+    "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "approved_copy": { "type": "object", "additionalProperties": { "$ref": "#/$defs/copyBlock" } },
+    "handoff": {
+      "type": "object",
+      "required": ["status", "revision"],
+      "properties": {
+        "status": { "enum": ["draft", "approved"] },
+        "revision": { "type": "integer", "minimum": 1 },
+        "source_hashes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "required": ["fact_id", "value", "source_ids", "confidence", "confirmation_status"],
+      "properties": {
+        "fact_id": { "type": "string", "pattern": "^fact-[a-z0-9-]+$" },
+        "value": {},
+        "source_ids": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "confirmation_status": { "enum": ["unreviewed", "needs_clarification", "user_confirmed"] }
+      },
+      "additionalProperties": false
+    },
+    "sourceFacts": {
+      "type": "object",
+      "required": ["basics", "work", "education", "projects", "skills", "links"],
+      "properties": {
+        "basics": { "type": "object", "additionalProperties": { "$ref": "#/$defs/fact" } },
+        "work": { "type": "array", "items": { "type": "object", "additionalProperties": { "$ref": "#/$defs/fact" } } },
+        "education": { "type": "array", "items": { "type": "object", "additionalProperties": { "$ref": "#/$defs/fact" } } },
+        "projects": { "type": "array", "items": { "type": "object", "additionalProperties": { "$ref": "#/$defs/fact" } } },
+        "skills": { "type": "array", "items": { "$ref": "#/$defs/fact" } },
+        "links": { "type": "array", "items": { "$ref": "#/$defs/fact" } }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["evidence_id", "source_id", "quote", "location"],
+      "properties": {
+        "evidence_id": { "type": "string", "pattern": "^evidence-[a-z0-9-]+$" },
+        "source_id": { "type": "string" },
+        "quote": { "type": "string" },
+        "location": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "copyBlock": {
+      "type": "object",
+      "required": ["text", "fact_ids", "version", "approval_status"],
+      "properties": {
+        "text": { "type": "string" },
+        "fact_ids": { "type": "array", "items": { "type": "string" } },
+        "version": { "type": "integer", "minimum": 1 },
+        "approval_status": { "enum": ["draft", "user_approved"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}
