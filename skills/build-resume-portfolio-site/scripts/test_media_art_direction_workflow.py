@@ -177,8 +177,8 @@ class MediaArtDirectionWorkflowTests(unittest.TestCase):
             "versions/v2-media-direction",
             "reports/media-art-direction.json",
             "reports/media-inventory.json",
-            '"schema_version": 3',
-            "reject unsupported old state schemas",
+            '"schema_version": 4',
+            "reject every other old schema",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, workflow + layout)

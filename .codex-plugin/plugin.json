@@ -1,26 +1,26 @@
 {
   "name": "resume-portfolio-workflow",
-  "version": "1.1.0",
-  "description": "A staged workflow for verified resume content and expressive React + Vite portfolio websites.",
+  "version": "1.2.0",
+  "description": "A user-confirmed workflow that verifies resume content, compares multiple design directions, selects one media-direction winner, and builds expressive React + Vite portfolios with optional media search.",
   "author": {
     "name": "tao943",
     "url": "https://github.com/tao943"
   },
   "repository": "https://github.com/tao943/build-resume-portfolio-site",
   "license": "MIT",
-  "keywords": ["resume", "portfolio", "react", "vite", "content", "design", "motion"],
+  "keywords": ["resume", "portfolio", "react", "vite", "content", "design", "motion", "workflow-planning", "design-intelligence", "offline-catalog", "media-art-direction", "optional-media"],
   "skills": "./skills/",
   "interface": {
     "displayName": "Resume Portfolio Workflow",
     "shortDescription": "Verified resume content to expressive portfolio site",
-    "longDescription": "Use resume-portfolio-workflow to route requests, resume-content-intelligence to verify and approve content, and build-resume-portfolio-site to design, audit, and motion-harden a React + Vite portfolio.",
+    "longDescription": "Use resume-portfolio-workflow to route full and fast changes, resume-content-intelligence to verify and approve content, and build-resume-portfolio-site to compare layouts, implement one media-direction winner, audit the result, and add source-agnostic production-hardened motion.",
     "developerName": "tao943",
     "category": "Productivity",
     "capabilities": ["Write", "Design", "Interactive"],
     "defaultPrompt": [
       "Turn my resume into a verified portfolio website",
-      "Build a React portfolio from my approved content",
-      "Audit and improve my portfolio's visual direction"
+      "Build a React portfolio from approved content and implement one media-direction winner",
+      "Audit and improve my portfolio with source-agnostic production-hardened motion"
     ],
     "brandColor": "#E8C547"
   }

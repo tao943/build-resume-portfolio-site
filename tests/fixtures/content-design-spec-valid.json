@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "spec_id": "content-spec-1",
+  "workflow_mode": "full",
+  "inventory_complete": true,
+  "target_audience": "frontend hiring team",
+  "fixed_facts": ["fact-1"],
+  "open_questions": [],
+  "alternatives": [
+    {
+      "id": "evidence-first",
+      "thesis": "Lead with verified outcomes",
+      "tradeoffs": ["less personal narrative"]
+    },
+    {
+      "id": "project-first",
+      "thesis": "Lead with technical projects",
+      "tradeoffs": ["work history appears later"]
+    }
+  ],
+  "selected_alternative_id": "evidence-first",
+  "decision_rationale": "Matches the target role and strongest evidence.",
+  "approval": {
+    "status": "user_approved",
+    "source": "explicit_user"
+  }
+}

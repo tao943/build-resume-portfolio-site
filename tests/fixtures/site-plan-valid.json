@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "design_spec_id": "site-spec-1",
+  "strategy": "single-agent",
+  "multi_agent_authorized": false,
+  "multi_agent_plan": null,
+  "tasks": [
+    {
+      "id": "prototype-shell",
+      "depends_on": [],
+      "files": ["src/App.jsx", "src/styles.css"],
+      "consumes": ["approved-copy.json", "site-design-spec.json"],
+      "produces": ["five-region prototype"],
+      "acceptance": ["Representative interaction is rendered."],
+      "verification": [
+        "python validate_vite_project.py .resume-site-work/site --stage prototype",
+        "npm run build"
+      ]
+    }
+  ],
+  "rollback_baseline": "empty/new site",
+  "snapshot_target": "versions/v1-prototype"
+}

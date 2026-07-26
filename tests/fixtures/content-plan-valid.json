@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "design_spec_id": "content-spec-1",
+  "tasks": [
+    {
+      "id": "rewrite-project-1",
+      "fact_ids": ["fact-1"],
+      "evidence_ids": ["evidence-1"],
+      "target_files": [".resume-site-work/input/approved-copy.json"],
+      "produces": ["approved_copy.project-1"],
+      "blocked_claims": [],
+      "verification": ["python validate_content_package.py package.json"]
+    }
+  ],
+  "handoff_criteria": [
+    "All visible claims cite facts or explicit confirmation."
+  ]
+}

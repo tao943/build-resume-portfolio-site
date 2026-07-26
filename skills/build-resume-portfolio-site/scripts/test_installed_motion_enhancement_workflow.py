@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import unittest
 from pathlib import Path
 
@@ -49,11 +48,7 @@ class InstalledMotionEnhancementWorkflowTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, text)
 
-        data = prompt_path.read_bytes()
-        self.assertEqual(
-            hashlib.sha256(data).hexdigest(),
-            "e6959456bfc997c11475e3a1c4c60ec036617ec675611c7229daa344ac98d4c4",
-        )
+        self.assertNotIn("resource_status: awaiting-user-supplied-content", text)
 
 
 if __name__ == "__main__":

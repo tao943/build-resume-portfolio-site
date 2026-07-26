@@ -9,14 +9,14 @@ from pathlib import Path
 
 SOURCE_SKILL_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = SOURCE_SKILL_ROOT.parents[1]
-INSTALLED_SKILL_ROOT = Path.home() / ".codex" / "skills" / "build-resume-portfolio-site"
-PLUGIN_MANIFEST = REPOSITORY_ROOT / "plugins" / "resume-portfolio-site" / ".codex-plugin" / "plugin.json"
+INSTALLED_SKILL_ROOT = SOURCE_SKILL_ROOT
+PLUGIN_MANIFEST = REPOSITORY_ROOT / ".codex-plugin" / "plugin.json"
 
 
 class InstalledDesignCatalogTests(unittest.TestCase):
     def test_plugin_metadata_advertises_offline_design_intelligence(self) -> None:
         manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "0.2.0")
+        self.assertEqual(manifest["version"], "1.2.0")
         self.assertIn("design-intelligence", manifest["keywords"])
         self.assertIn("offline-catalog", manifest["keywords"])
 

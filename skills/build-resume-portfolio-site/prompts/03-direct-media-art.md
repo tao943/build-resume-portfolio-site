@@ -7,7 +7,7 @@ output_contract: react-vite-project-update-and-media-art-direction-json
 
 # Direct the media art direction
 
-Direct media art for an already confirmed portfolio prototype. Consume the confirmed prototype, normalized facts, authorized media inventory, optional StyleBrief and reference evidence, design intelligence, and rejected direction IDs. Preserve the confirmed content model and work inside the same React + Vite project.
+Direct media art for an already confirmed portfolio prototype. Consume the confirmed prototype, normalized facts, authorized media inventory, optional StyleBrief and reference evidence, `reports/design-intelligence.json`, and rejected direction IDs; reference evidence has priority over Catalog aesthetics when references exist. Preserve the confirmed content model and work inside the same React + Vite project.
 
 Before source edits, inspect UI and each media item. Always write `reports/media-inventory.json` as the trusted authorization input before validating the report: use `{"schema_version": 1, "assets": []}` when no media is authorized. For each authorized item, record factual meaning, immutable facts, and image role. Treat user-provided media as protected evidence: do not crop, filter, animate, replace, or juxtapose it in a way that changes factual meaning.
 

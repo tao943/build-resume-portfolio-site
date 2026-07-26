@@ -33,7 +33,7 @@ or implementation-strategy change:
 
 1. Validate `discovery` resources.
 2. Inspect approved content, authorized media, references, and existing state.
-3. Ask one decision-bearing question at a time.
+3. Ask one question at a time; each question must be decision-bearing.
 4. Compare two or three materially different layout or experience families.
 5. Write `.resume-site-work\reports\site-design-spec.json`, validate it with
    `scripts\validate_site_design_spec.py`, show the recommendation and

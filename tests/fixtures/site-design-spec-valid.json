@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "spec_id": "site-spec-1",
+  "workflow_mode": "full",
+  "content_revision": 1,
+  "visual_protagonist": "project outcomes",
+  "fixed_constraints": ["preserve approved copy"],
+  "open_ceiling": ["composition", "motion language"],
+  "avoid": ["generic card grid"],
+  "alternatives": [
+    {
+      "id": "editorial",
+      "family": "radical editorial",
+      "tradeoffs": ["denser reading rhythm"]
+    },
+    {
+      "id": "cinematic",
+      "family": "cinematic portfolio",
+      "tradeoffs": ["higher media dependency"]
+    }
+  ],
+  "selected_alternative_id": "editorial",
+  "composition_commitment": "asymmetric editorial stage",
+  "type_color_character": "high-contrast serif and restrained yellow",
+  "representative_interaction": "project selection updates one detail panel",
+  "approval": {
+    "status": "user_approved",
+    "source": "explicit_user"
+  }
+}

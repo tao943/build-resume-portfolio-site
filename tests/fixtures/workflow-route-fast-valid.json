@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "route": "site-fast-change",
+  "reason": "bounded copy correction on a confirmed site",
+  "content_package_status": "ready",
+  "confirmed_artifact": "versions/v4-motion",
+  "strategic_scope_changed": false,
+  "structural_scope_changed": false,
+  "affected_files": ["src/content/hero.js"],
+  "verification": ["npm run build"],
+  "rollback_baseline": "versions/v4-motion"
+}

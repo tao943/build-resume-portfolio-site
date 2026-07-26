@@ -13,9 +13,9 @@ from validate_skill_resources import STAGE_RESOURCES, validate_resources
 
 
 class DesignIntelligenceWorkflowTests(unittest.TestCase):
-    def test_prototype_and_style_require_the_vendored_design_catalog(self) -> None:
+    def test_prototype_and_media_direction_require_the_vendored_design_catalog(self) -> None:
         self.assertIn("design-catalog", STAGE_RESOURCES["prototype"])
-        self.assertIn("design-catalog", STAGE_RESOURCES["style"])
+        self.assertIn("design-catalog", STAGE_RESOURCES["media-direction"])
 
     def test_prototype_runs_design_search_before_react_generation(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -33,19 +33,19 @@ class DesignIntelligenceWorkflowTests(unittest.TestCase):
         self.assertIn("fixed component tree", prompt)
         self.assertIn("fixed JSX", prompt)
 
-    def test_style_prompt_keeps_reference_evidence_primary(self) -> None:
-        prompt = (SKILL_ROOT / "prompts" / "03-apply-style.md").read_text(
+    def test_media_direction_prompt_keeps_reference_evidence_primary(self) -> None:
+        prompt = (SKILL_ROOT / "prompts" / "03-direct-media-art.md").read_text(
             encoding="utf-8"
         )
         self.assertIn("design-intelligence.json", prompt)
         self.assertIn("reference evidence has priority", prompt)
         self.assertIn("Catalog", prompt)
 
-    def test_style_runtime_allows_catalog_only_when_reference_library_is_absent(self) -> None:
+    def test_media_direction_runtime_allows_catalog_only_when_reference_library_is_absent(self) -> None:
         absent_workspace = SCRIPT_DIR / "workspace-without-reference-library"
 
         report = validate_resources(
-            SKILL_ROOT, "runtime", "style", workspace_root=absent_workspace
+            SKILL_ROOT, "runtime", "media-direction", workspace_root=absent_workspace
         )
 
         self.assertTrue(report.ok, report.errors)

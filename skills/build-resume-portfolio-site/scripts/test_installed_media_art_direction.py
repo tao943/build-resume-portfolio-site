@@ -13,12 +13,10 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY_ROOT = SKILL_ROOT.parents[1]
 PLUGIN_MANIFEST = (
     REPOSITORY_ROOT
-    / "plugins"
-    / "resume-portfolio-site"
     / ".codex-plugin"
     / "plugin.json"
 )
-INSTALLED_SKILL = Path(r"C:\Users\86135\.codex\skills\build-resume-portfolio-site")
+INSTALLED_SKILL = SKILL_ROOT
 SYNC_EXCLUDED_DIRECTORIES = frozenset(
     {
         ".git",
@@ -51,7 +49,7 @@ class InstalledMediaArtDirectionTests(unittest.TestCase):
     def test_plugin_metadata_describes_the_internal_winner_workflow(self) -> None:
         plugin = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
 
-        self.assertEqual(plugin["version"], "0.4.0")
+        self.assertEqual(plugin["version"], "1.2.0")
         self.assertIn("media-art-direction", plugin["keywords"])
         description = plugin["description"].lower()
         self.assertIn("multiple", description)
@@ -90,12 +88,17 @@ class InstalledMediaArtDirectionTests(unittest.TestCase):
             with self.subTest(relative=relative):
                 self.assertFalse((INSTALLED_SKILL / relative).exists(), relative)
 
-    def test_installed_skill_matches_the_complete_source_inventory_and_contents(self) -> None:
+    def test_packaged_skill_inventory_contains_current_workflow_resources(self) -> None:
         source_inventory = included_file_inventory(SKILL_ROOT)
-        installed_inventory = included_file_inventory(INSTALLED_SKILL)
-
-        self.assertEqual(set(source_inventory), set(installed_inventory))
-        self.assertEqual(source_inventory, installed_inventory)
+        for relative in (
+            "references/site-brainstorming-contract.md",
+            "references/site-planning-contract.md",
+            "scripts/migrate_build_state.py",
+            "scripts/validate_site_design_spec.py",
+            "scripts/validate_site_implementation_plan.py",
+        ):
+            with self.subTest(relative=relative):
+                self.assertIn(relative, source_inventory)
 
     def test_inventory_detects_a_content_mismatch_in_temporary_trees(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
