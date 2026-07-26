@@ -1,28 +1,53 @@
-# build-resume-portfolio-site
+# Resume Portfolio Workflow
 
-一个包含三个协作 skill 的 Codex plugin：先判断工作流，再验证简历内容并生成分阶段的 React + Vite 个人简历与作品集网站。
+一个包含三个协作 Skill 的 Codex 插件：先识别任务路径，再验证简历内容，最后生成具有明确视觉方向的 React + Vite 个人网站。
 
-## 能力
+## 包含的 Skills
 
-- 内容预检与事实边界
-- 视觉概念原型与创意方向
-- 媒体艺术指导与参考图库
-- 截图审计、响应式修复与可访问性检查
-- 安全动效、视频 Poster 与本地视频升级
-- 可选的 APIHz 媒体搜索与导入流程
+- `resume-portfolio-workflow`：在内容全流程、网站全流程和已有网站快速修改之间进行路由。
+- `resume-content-intelligence`：提取与核验事实，比较内容策略，生成实施计划，并输出用户批准的内容包。
+- `build-resume-portfolio-site`：比较创意版式方向，在用户批准后生成实施计划，再构建、审查和增强 React + Vite 网站。
 
-## 包含的 skills
+## 核心链路
 
-- `resume-portfolio-workflow`：判断内容全流程、网站全流程或已有网站快速修改
-- `resume-content-intelligence`：提取事实、核验经历、优化文案并生成已确认内容包
-- `build-resume-portfolio-site`：根据已确认内容生成、审计和增强 React + Vite 网站
+```text
+任务路由
+→ 内容盘点与逐问澄清
+→ 2–3 种内容策略
+→ 内容策略批准与实施计划
+→ 最终文案批准
+→ 2–3 种网站视觉方向
+→ 网站设计批准与实施计划
+→ 单 Agent 或经授权的多 Agent 实现
+→ 构建、截图审查、动效与媒体增强
+→ 最终验证和交付
+```
 
-Plugin manifest：`.codex-plugin/plugin.json`
+新网站、内容变化和结构/视觉方向变化必须经过完整探索与计划流程。只有已有确认版本上的局部修改，且不改变事实、定位、结构、视觉命题或交互架构时，才能进入快速修改路径。
+
+## 内置能力
+
+- Superpowers 式逐步头脑风暴、方案比较、显式批准和可执行计划。
+- 基于证据的简历内容核验，禁止虚构指标、经历和技能。
+- Taste 风格的创意版式词汇与开放视觉探索。
+- 离线 UI/UX 设计目录、媒体艺术指导和参考图工作流。
+- 经用户明确授权后使用多 Agent，并通过文件所有权避免并行冲突。
+- 截图审查、响应式修复、可访问性检查和安全动效。
+- 可选 APIHz 媒体搜索、本地 Poster 和视频升级。
+- `build-state.json` schema v4，以及安全的 v3→v4 原子迁移工具。
 
 ## 使用
 
-在 Codex 中安装此 plugin 后，可以分别调用两个 skill；也可以直接描述目标。网站 skill 在发现内容包缺失时，会要求先走内容核验流程。
+安装插件后，通常直接调用总控 Skill：
 
-## 敏感信息
+```text
+$resume-portfolio-workflow
+```
 
-API 凭据必须通过运行环境变量提供，不要写入仓库。用户素材、构建产物、缓存和 `.resume-site-work/` 状态目录不属于本 skill 发布内容。
+也可以在边界明确时单独调用内容或网站 Skill。网站 Skill 检测到内容包缺失或需要事实修改时，会要求先执行内容核验流程。
+
+插件清单位于 `.codex-plugin/plugin.json`。
+
+## 安全边界
+
+API 凭据只能通过运行环境变量提供，不应写入仓库。用户简历、个人素材、构建产物、缓存和 `.resume-site-work/` 状态目录均不属于插件发布内容。
