@@ -35,6 +35,28 @@ video_upgrade_validating --validate/build/promote--> complete
 video_upgrade_validating --failure--> complete with confirmed Poster restored
 ```
 
+## Content preflight transaction
+
+Content preflight runs before a new Stage 1 build and whenever a new resume,
+JD, factual claim, or copy revision enters scope. It is not a website stage or
+confirmation gate.
+
+Validate the four-file content handoff. `CONTENT_READY` continues to Stage 1.
+`ROUTE_REQUIRED` invokes the **REQUIRED SUB-SKILL**
+`resume-content-intelligence`, waits for its user approval and handoff, then
+reruns validation. `CONTENT_INVALID` freezes website source, state, preview,
+and snapshots until the content Skill repairs or revises the package.
+
+Do not reroute when the request is to resume an existing confirmed site after
+prototype confirmation for visual, media, motion, responsive, accessibility,
+or frontend-only changes. In that path, preserve the confirmed content
+baseline.
+
+Stage 1 builds `content-map.json` only from the validated
+`normalized-resume.json` facts and `approved-copy.json` blocks. A new content
+revision must increase `handoff.revision`; the builder never overwrites or
+silently rewrites approved content.
+
 ## Stage transaction
 
 Every generating or repair transition is one transaction:
@@ -48,6 +70,33 @@ Every generating or repair transition is one transaction:
 7. Capture and show `preview/dist/index.html`, then update state.
 
 If validation or build fails, keep the previous valid preview and confirmed snapshot active.
+
+## Multi-agent execution transaction
+
+Multi-agent work is an implementation strategy inside a generating or repair
+transaction. It never changes the state machine or adds a confirmation gate.
+Use it only after explicit user authorization and validate
+`reports/multi-agent-implementation.json` before dispatch.
+
+Choose one strategy:
+
+- `single-agent` for local or tightly coupled edits;
+- `fresh-agent-sequential` for dependency chains that benefit from fresh
+  contexts;
+- `parallel-wave` only for independent tasks with disjoint write sets.
+
+The main agent is the integration owner and retains workflow state, shared
+files, dependency decisions, preview promotion, snapshots, and publication.
+Parallel tasks have no overlapping file ownership. Tasks that need `App.jsx`,
+global CSS/tokens, central data, `package.json`, reports, state, preview, or
+versions hand those changes to the integration task instead of editing them
+concurrently.
+
+At each wave boundary, inspect task reports and the working tree. After the
+integration task, run an independent specification review and quality audit;
+both are read-only. Route repairs to the original owner, with shared-file
+repairs kept by the integration owner. Only then execute the normal validation,
+build, capture, promotion, snapshot, and state-update transaction once.
 
 ## Confirmation gates
 
@@ -83,9 +132,24 @@ Run screenshot audit and local repair without routine confirmation. Stop after t
 
 Before `prototype_generating` edits React source, create `reports/design-intelligence.json` from `content-map.json`. Persist `selected_direction_id` and `attempted_direction_ids` in `build-state.json`. A rejected prototype selects an unused candidate before a new Catalog query.
 
+After design intelligence and before the first React source edit, create and
+validate `reports/creative-direction.json`. Its fixed floor contains approved
+facts, priorities, required behavior, and prohibitions; its open ceiling keeps
+composition, layout vocabulary, motion language, metaphor, and surface
+treatment available for exploration. It is not a new workflow stage or
+confirmation gate. A rejected prototype may move to another recorded layout
+candidate while preserving the fixed floor unless explicit user feedback
+changes it.
+
+Stage 1 must implement the report's `concept_prototype` as a visual concept
+prototype: one visual protagonist, a visible selected-layout commitment,
+initial type/color character, one representative interaction state, and a
+template-independence test. Reference-derived finishing, final media treatment,
+and complex motion remains deferred; core visual hierarchy does not.
+
 During `media_direction_generating`, prepare a visual StyleBrief internally when references exist. Reference evidence has priority over Catalog aesthetics. When no reference manifest exists, continue with the Catalog-only input path; absence is not a malformed resource. A present malformed manifest remains `resource_blocked`.
 
-Restore `versions/v1-prototype` before each media-direction attempt. Inspect the UI and authorized media, always write the trusted `reports/media-inventory.json` (or `{"schema_version": 1, "assets": []}`), then write `reports/media-art-direction.json`, select one ID not present in `attempted_media_direction_ids`, implement that winner in the same React + Vite project, and validate/build it with `--media-inventory` before promotion. Snapshot only a successful candidate to `versions/v2-media-direction`; a failed attempt never replaces the last valid preview.
+Restore `versions/v1-prototype` before each media-direction attempt. Inspect the UI and authorized media, preserve the creative direction's fixed floor and avoid rules, and enrich only its open ceiling when reference evidence warrants it. Revalidate any changed creative-direction report. Always write the trusted `reports/media-inventory.json` (or `{"schema_version": 1, "assets": []}`), then write `reports/media-art-direction.json`, select one ID not present in `attempted_media_direction_ids`, implement that winner in the same React + Vite project, and validate/build it with `--media-inventory` before promotion. Snapshot only a successful candidate to `versions/v2-media-direction`; a failed attempt never replaces the last valid preview.
 ## optional APIHz media transaction
 
 APIHz media search is an explicit, optional side transaction:

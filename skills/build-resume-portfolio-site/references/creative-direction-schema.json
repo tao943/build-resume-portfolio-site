@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portfolio creative direction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "creative_thesis",
+    "experience_priority",
+    "creative_freedom",
+    "layout_candidates",
+    "selected_candidate_id",
+    "selection_rationale",
+    "concept_prototype",
+    "responsive_freedom",
+    "motion_freedom",
+    "review_questions"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "creative_thesis": {"type": "string", "minLength": 1},
+    "experience_priority": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "creative_freedom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixed", "open", "avoid"],
+      "properties": {
+        "fixed": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "open": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "composition",
+            "layout_patterns",
+            "motion_language",
+            "visual_metaphor",
+            "surface_treatment"
+          ],
+          "properties": {
+            "composition": {"$ref": "#/$defs/nonEmptyStringList"},
+            "layout_patterns": {"$ref": "#/$defs/nonEmptyStringList"},
+            "motion_language": {"$ref": "#/$defs/nonEmptyStringList"},
+            "visual_metaphor": {"$ref": "#/$defs/nonEmptyStringList"},
+            "surface_treatment": {"$ref": "#/$defs/nonEmptyStringList"}
+          }
+        },
+        "avoid": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "layout_candidates": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "family", "fit", "risks", "responsive_fallback"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "family": {"type": "string", "minLength": 1},
+          "fit": {"type": "string", "minLength": 1},
+          "risks": {"$ref": "#/$defs/nonEmptyStringList"},
+          "responsive_fallback": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "selected_candidate_id": {"type": "string", "minLength": 1},
+    "selection_rationale": {"type": "string", "minLength": 1},
+    "concept_prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visual_protagonist",
+        "composition_commitment",
+        "type_color_character",
+        "representative_interaction_state",
+        "template_independence_test",
+        "deferred_to_later"
+      ],
+      "properties": {
+        "visual_protagonist": {"type": "string", "minLength": 1},
+        "composition_commitment": {"type": "string", "minLength": 1},
+        "type_color_character": {"type": "string", "minLength": 1},
+        "representative_interaction_state": {"type": "string", "minLength": 1},
+        "template_independence_test": {"type": "string", "minLength": 1},
+        "deferred_to_later": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "responsive_freedom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["must_preserve", "may_adapt"],
+      "properties": {
+        "must_preserve": {"$ref": "#/$defs/nonEmptyStringList"},
+        "may_adapt": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "motion_freedom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "allowed", "avoid"],
+      "properties": {
+        "purpose": {"type": "string", "minLength": 1},
+        "allowed": {"$ref": "#/$defs/nonEmptyStringList"},
+        "avoid": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "review_questions": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "nonEmptyStringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}

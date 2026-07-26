@@ -5,6 +5,9 @@ Create all generated material under `.resume-site-work/` in the active user work
 ```text
 .resume-site-work/
 |-- input/
+|   |-- source-manifest.json
+|   |-- normalized-resume.json
+|   `-- approved-copy.json
 |-- site/                         # only editable React + Vite source project
 |-- versions/
 |   |-- v1-prototype/             # confirmed-source candidates; excludes dist/node_modules
@@ -19,6 +22,9 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   `-- mobile.png
 |-- reports/
 |   |-- content-map.json
+|   |-- content-provenance.json
+|   |-- creative-direction.json    # fixed floor, open ceiling, and selected layout family
+|   |-- multi-agent-implementation.json # only when multi-agent execution is authorized
 |   |-- reference-selection.json
 |   |-- style-brief.json
 |   |-- media-inventory.json       # trusted authorized-media facts and stable IDs
@@ -26,12 +32,31 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- visual-audit.json
 |   |-- capture-report.json
 |   `-- motion-plan.json
+|-- agent-reports/                # bounded task handoffs; no approval semantics
 `-- build-state.json
 ```
 
 `site/` is the sole source of truth. Do not maintain a separate HTML version. `preview/dist/` is disposable build output and must be replaced only after source validation and `npm run build` succeed.
 
+The three content files under `input/` plus
+`reports/content-provenance.json` are owned by
+`resume-content-intelligence`. The website builder validates and consumes
+them; it does not rewrite them.
+
 `reports/media-inventory.json` has the workspace-owned shape `{"schema_version": 1, "assets": [...]}`. It is always created before media-direction report validation; use the explicit empty inventory `{"schema_version": 1, "assets": []}` when no media is authorized. Every asset records a stable `id`, `factual_meaning`, and a non-empty `immutable_facts` list; `role` and `source` are optional. The media-direction report validator uses this inventory as the only authorization and factual-preservation source.
+
+`reports/creative-direction.json` is created after design intelligence and
+before the first React source edit. It carries the creative thesis,
+`creative_freedom`, layout candidates, responsive and motion freedoms, and
+review questions. It is not source code, a component tree, a new stage, or a
+confirmation artifact.
+
+`reports/multi-agent-implementation.json` exists only when the user explicitly
+authorizes multi-agent implementation. It records strategy, dependencies,
+waves, shared files, bounded write ownership, acceptance criteria, and
+verification. Validate it before dispatch. Task handoffs go to
+`agent-reports/<task-id>.md`; neither artifact creates a new confirmation gate
+or changes the workflow stage.
 
 Create immutable source snapshots with `scripts/snapshot_vite_project.py`. The tool excludes `node_modules`, `dist`, `.git`, nested `.resume-site-work`, and `__pycache__`. It refuses to overwrite an existing version directory.
 

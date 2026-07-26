@@ -10,11 +10,21 @@ Build one directly runnable React + Vite portfolio through four controlled stage
 ## Start or resume
 
 1. Resolve `SKILL_ROOT` as this Skill directory.
-2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, and `references/apihz-media-contract.md` completely.
+2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
 3. Create `.resume-site-work/` in the active user workspace or load `build-state.json`. The only supported state schema is version `3`; reject unsupported old state schemas rather than guessing a migration.
-4. Normalize supplied resume facts, portfolio material, links, and local media into `.resume-site-work\input`. Do not invent missing facts or assets.
-5. Use `.resume-site-work\site` as the only editable React + Vite project. Do not create a parallel standalone HTML page.
-6. Resume the recorded stage. Load only the resources required by that stage.
+4. Apply content preflight before a new Stage 1 build, when a new resume/JD/claim is supplied, or when the user requests factual/copy changes. Skip it only to resume an existing confirmed site for visual, media, motion, responsive, accessibility, or frontend-only work.
+5. For content preflight, run:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_content_handoff.py" --workspace-root "."
+```
+
+   - On `CONTENT_READY` (exit `0`), consume the approved package directly.
+   - On `ROUTE_REQUIRED` (exit `2`), **REQUIRED SUB-SKILL:** Use `resume-content-intelligence`. Wait for content approval and handoff, then rerun the validator.
+   - On `CONTENT_INVALID` (exit `1`), do not edit source, state, preview, or snapshots. Use the content Skill to repair or revise the package, then rerun validation.
+6. Normalize only authorized links and local media that are outside the content package. Do not silently rewrite approved copy, renormalize approved facts, or promote draft/inferred claims.
+7. Use `.resume-site-work\site` as the only editable React + Vite project. Do not create a parallel standalone HTML page.
+8. Resume the recorded stage. Load only the resources required by that stage.
 
 ## Resource and project checks
 
@@ -41,16 +51,52 @@ Then run `npm run build` from `.resume-site-work\site`. If dependencies are miss
 
 Keep the previous valid preview active when validation or build fails. For repeat attempts, add `-r2`, `-r3`, and so on to the snapshot directory rather than overwriting it.
 
-## Stage 1: Generate the prototype
+## Select the implementation strategy
+
+Choose the implementation strategy after scope and design intent are approved,
+and before editing source:
+
+- use `single-agent` for local or tightly coupled changes;
+- use `fresh-agent-sequential` when fresh contexts help but tasks form a
+  dependency chain;
+- use `parallel-wave` only for independently useful tasks with disjoint file
+  ownership.
+
+Multi-agent execution requires explicit user authorization. It does not add a
+workflow stage or confirmation gate. The main agent remains the visual director
+and integration owner; do not divide pages merely to maximize agent count.
+
+For either multi-agent strategy, read
+`references/multi-agent-implementation-contract.md`, write
+`reports/multi-agent-implementation.json`, and validate it before dispatch:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_multi_agent_plan.py" `
+  ".resume-site-work\reports\multi-agent-implementation.json"
+```
+
+Require bounded task packets, no overlapping file ownership in parallel waves,
+shared-file ownership by the integration task, and independent read-only review.
+Subagents never promote previews, create snapshots, change workflow state, or
+install dependencies. The main agent performs the original stage transaction
+once after integration and review.
+
+## Stage 1: Generate the visual concept prototype
 
 1. Validate `prototype` resources.
-2. Read `prompts/01-generate-prototype.md` and generate `reports/content-map.json` from normalized facts.
+2. Read `prompts/01-generate-prototype.md` and generate `reports/content-map.json` only from `input/normalized-resume.json` and `input/approved-copy.json`. Use normalized facts as evidence and approved blocks as visible-copy input; do not silently rewrite them or use drafts and low-confidence inference.
 3. Before creating React source, run `scripts\portfolio_design_search.py recommend --input .resume-site-work\reports\content-map.json --output .resume-site-work\reports\design-intelligence.json`.
 4. Read `references/design-intelligence-contract.md` and `reports\design-intelligence.json`. Use `selected_direction_id` as soft design intent; never turn Catalog output into fixed JSX, HTML, a fixed component tree, or a page template.
-5. Create a genuine React + Vite project at `.resume-site-work\site`. Follow the prompt's five-region composition, centralized content data, media fallbacks, approximately 1700px desktop width, and accessibility requirements.
-6. Keep the selected direction coherent and presentable but leave final palette, typography details, reference-derived motifs, and motion open for later stages.
-7. Validate as `prototype`, build, promote the successful preview, and snapshot to `.resume-site-work\versions\v1-prototype` (or the next retry suffix).
-8. Set `stage=prototype_waiting_confirmation`, show the built preview, and wait.
+5. Read `references/creative-direction-contract.md`. From normalized facts, user-approved intent, and the design-intelligence candidates, compare two or three materially different creative layout families. Write `reports/creative-direction.json` with a fixed floor, open ceiling, and complete `concept_prototype`, then validate it before editing source:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_creative_direction.py" ".resume-site-work\reports\creative-direction.json"
+```
+
+6. Create a genuine React + Vite project at `.resume-site-work\site`. Implement the `concept_prototype` now: establish its `visual_protagonist`, express the selected family through `composition_commitment`, apply the initial `type_color_character`, and render the `representative_interaction_state`. Follow the prompt's five-region composition, centralized content data, media fallbacks, approximately 1700px desktop width, and accessibility requirements.
+7. Run the `template_independence_test`: if removing final media and motion would leave a generic portfolio template, strengthen scale, rhythm, hierarchy, asymmetry, or the selected layout expression before presenting the prototype. Preserve every `creative_freedom.fixed` and `creative_freedom.avoid` entry while exploring the open ceiling. Reference-derived finishing, exact media treatment, and complex motion remains deferred.
+8. Validate as `prototype`, build, promote the successful preview, and snapshot to `.resume-site-work\versions\v1-prototype` (or the next retry suffix).
+9. Set `stage=prototype_waiting_confirmation`, show the built preview, and wait.
 
 ### Prototype confirmation gate
 
@@ -69,9 +115,9 @@ python "$SKILL_ROOT\scripts\index_reference_library.py" `
 ```
 
 2. When a reference-library manifest exists, inspect its `contact-sheets` with absolute Markdown image paths, then record selected source IDs and reasons in `reports/reference-selection.json`. Keep selected references at `usage_scope: "style_only"`; this evidence informs the internal media direction and never restores the old style confirmation gate.
-3. Read `references/reference-library-contract.md`, `references/style-brief-schema.md`, `references/media-art-direction-contract.md`, `references/media-art-direction-schema.json`, `prompts/02-analyze-reference.md`, and `prompts/03-direct-media-art.md`; read a generated workspace manifest only when references exist.
+3. Read `references/reference-library-contract.md`, `references/style-brief-schema.md`, `references/creative-direction-contract.md`, `reports/creative-direction.json`, `references/media-art-direction-contract.md`, `references/media-art-direction-schema.json`, `prompts/02-analyze-reference.md`, and `prompts/03-direct-media-art.md`; read a generated workspace manifest only when references exist.
 4. Validate `media-direction` resources with `--workspace-root .`. A ready catalog does not substitute for unavailable media-direction resources.
-5. Prepare a StyleBrief internally when references exist; it is input to media direction, never a separate user gate. Keep references at `usage_scope: "style_only"`; do not publish them as site assets without separate authorization.
+5. Prepare a StyleBrief internally when references exist; it is input to media direction, never a separate user gate. It may enrich the creative direction's open ceiling, but must not silently change its fixed floor or avoid rules. If the report changes, revalidate it before source edits. Keep references at `usage_scope: "style_only"`; do not publish them as site assets without separate authorization.
 6. Restore `.resume-site-work\versions\v1-prototype` into `.resume-site-work\site` when beginning or retrying this stage. Inspect the restored UI and authorized media, including each item's factual meaning and image role.
 7. Always create `reports\media-inventory.json` before writing the direction report. It must be the trusted, versioned inventory of authorized media; when no media is authorized, write the explicit empty inventory `{"schema_version": 1, "assets": []}`.
 8. Privately compare multiple media directions, exclude IDs in `attempted_media_direction_ids`, select exactly one winner, set `selected_media_direction_id`, and write `reports/media-art-direction.json` before editing source. Record structured `design_read`, `responsive_strategy`, and `reduced_motion_strategy` objects. Do not expose the internal comparison unless the user asks.
@@ -101,7 +147,7 @@ python "$SKILL_ROOT\scripts\capture_site.py" ".resume-site-work\preview\dist\ind
 ```
 
 3. On capture exit `2`, show its dependency commands and request approval before installation. Retry capture infrastructure once without consuming a visual repair round.
-4. Inspect desktop, tablet, and mobile screenshots plus `capture-report.json`; write schema-consistent findings to `reports/visual-audit.json`. Record `interaction_states_checked` evidence for the initial state and one representative active state per controller family, including each coarse-pointer/touch alternative and reduced-motion state. Exercise media loading, error, and Poster fallback states; check clipping, focus order, readability, image/UI cohesion, controller conflicts, and factual-media meaning.
+4. Inspect desktop, tablet, and mobile screenshots plus `capture-report.json`; write schema-consistent findings to `reports/visual-audit.json`. Use the observable questions in `reports/creative-direction.json` to check whether the implementation preserves its fixed floor while expressing the selected creative thesis. Record `interaction_states_checked` evidence for the initial state and one representative active state per controller family, including each coarse-pointer/touch alternative and reduced-motion state. Exercise media loading, error, and Poster fallback states; check clipping, focus order, readability, image/UI cohesion, controller conflicts, and factual-media meaning.
 5. For blocking or repairable findings with `visual_repair_round < 2`, edit only affected React/CSS regions in `.resume-site-work\site`, increment the round, validate as `refined`, build, promote, and recapture all viewports.
 6. Preserve content, the confirmed media direction, and overall design direction. Do not rewrite the whole page for a local defect.
 7. When no blocking findings remain, snapshot `.resume-site-work\versions\v3-refined`, update state, and advance automatically to `motion_generating`.
@@ -112,7 +158,7 @@ Do not request routine confirmation during successful screenshot repair. This dy
 ## Stage 4: Production-harden the confirmed motion layer
 
 1. Validate `motion` resources, then read `references/motion-safety-rules.md`, `references/motion-production-contract.md`, and `prompts/06-add-motion.md`.
-2. Restore the refined snapshot when beginning or retrying motion. Consume the confirmed media direction/report/refined audit and inventory installed effect sources, effects, controllers, and dependencies. Preserve the confirmed visual thesis; do not redesign it.
+2. Restore the refined snapshot when beginning or retrying motion. Consume the confirmed media direction, `reports/creative-direction.json`, refined audit, and inventory of installed effect sources, effects, controllers, and dependencies. Use `motion_freedom.purpose`, `allowed`, and `avoid` as the motion brief. Preserve the confirmed visual thesis; do not redesign it.
 3. Select only the sources the direction needs: CSS/native, React Bits, MotionSite, Motion, GSAP, and Three.js are available options, while React Bits is conditional. If React Bits is selected, register its official catalog and install exact `@react-bits` variants through the shadcn MCP.
 4. Write `reports/motion-plan.json` before editing source. There is no numeric effect cap: merge compatible controllers into shared timelines or isolate sections. Each item needs a unique ID plus source, target, purpose, controllers, dependencies, conflict_resolution, cleanup, mobile, reduced_motion, and fallback.
 5. Integrate only the planned source code in the same React + Vite project. Add lifecycle cleanup, coarse-pointer/mobile alternatives, static reduced-motion equivalents, and fallbacks. Do not restyle the page, rewrite resume content, or add runtime MCP dependence.
@@ -178,3 +224,8 @@ python "$SKILL_ROOT\scripts\import_media_selection.py" --workspace-root "." --ma
 - Treat source validation, `npm run build`, and built-preview inspection as separate required checks.
 - Keep reference images out of published content unless the user authorizes their use beyond style analysis.
 - Preserve supplied facts and omit missing details instead of fabricating them.
+- Treat `reports/creative-direction.json` as the intent boundary: preserve its
+  fixed floor and avoid rules while keeping its open ceiling available for
+  genuine visual exploration.
+- Keep the main agent as integration owner for multi-agent work; shared files,
+  workflow state, preview promotion, and snapshots are never delegated.
