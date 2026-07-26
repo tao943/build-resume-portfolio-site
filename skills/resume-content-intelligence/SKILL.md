@@ -9,16 +9,18 @@ Prepare trustworthy resume content before the website builder runs. Keep source 
 
 ## Workflow
 
-1. Read `references/content-package-contract.md`, `references/fact-verification-rules.md`, `references/conversation-workflow.md`, and `references/writing-coach-rules.md`. If a JD is supplied, also read `references/jd-customization-rules.md` and `references/ats-safety-checklist.md`.
+1. Read `references/content-package-contract.md`, `references/fact-verification-rules.md`, `references/conversation-workflow.md`, `references/content-brainstorming-contract.md`, `references/content-planning-contract.md`, and `references/writing-coach-rules.md`. If a JD is supplied, also read `references/jd-customization-rules.md` and `references/ats-safety-checklist.md`.
 2. Inventory supplied files without changing them. For local files, run `scripts/extract_resume_text.py`; for a folder, run `scripts/normalize_resume_sources.py`.
 3. Build a factual inventory from source text. Attach stable fact IDs and evidence IDs. Mark uncertain or contradictory fields as `needs_clarification`.
 4. Present the inventory briefly, then ask one question at a time. Prioritize questions that affect identity, dates, role scope, project outcomes, or factual metrics.
 5. After each answer, update the fact status. Do not silently change a fact because a rewrite would sound better.
-6. Propose concise copy variants using `references/writing-coach-rules.md`. Check each project with the technical STAR rubric: problem/context, task, action/method, and result. Every claim must cite evidence or explicit user confirmation.
-7. If the user provides a JD, build a keyword-to-fact matching matrix. Separate hard requirements, core capabilities, and bonus signals; reorder and rewrite only from supported facts. Keep unmatched requirements visible instead of filling them in.
-8. Ask the user to approve the proposed copy. Store only approved copy under `approved_copy` with `approval_status: user_approved`.
-9. Run `scripts/validate_content_package.py` before handoff. Then run `scripts/write_resume_site_input.py` to create `.resume-site-work\input\source-manifest.json`, `.resume-site-work\input\normalized-resume.json`, `.resume-site-work\input\approved-copy.json`, and `.resume-site-work\reports\content-provenance.json` for `build-resume-portfolio-site`.
-10. Tell the user the content package is ready and invoke `build-resume-portfolio-site` only after content approval.
+6. For full workflow, compare two or three materially different content strategies, recommend one with trade-offs, write `.resume-site-work\reports\content-design-spec.json`, validate it with `scripts\validate_content_design_spec.py`, and wait for explicit strategy approval.
+7. Write `.resume-site-work\reports\content-implementation-plan.json` with exact fact/evidence IDs, target files, outputs, blocked claims, and verification. Validate it with `scripts\validate_content_implementation_plan.py` before drafting copy.
+8. Propose concise copy variants using `references/writing-coach-rules.md`. Check each project with the technical STAR rubric: problem/context, task, action/method, and result. Every claim must cite evidence or explicit user confirmation.
+9. If the user provides a JD, build a keyword-to-fact matching matrix. Separate hard requirements, core capabilities, and bonus signals; reorder and rewrite only from supported facts. Keep unmatched requirements visible instead of filling them in.
+10. Ask the user to approve the proposed copy. Content-strategy approval does not approve final copy. Store only approved copy under `approved_copy` with `approval_status: user_approved`.
+11. Run `scripts/validate_content_package.py` before handoff. Then run `scripts/write_resume_site_input.py` to create `.resume-site-work\input\source-manifest.json`, `.resume-site-work\input\normalized-resume.json`, `.resume-site-work\input\approved-copy.json`, and `.resume-site-work\reports\content-provenance.json` for `build-resume-portfolio-site`.
+12. Tell the user the content package is ready and invoke `build-resume-portfolio-site` only after content approval.
 
 ## Boundaries
 
@@ -29,6 +31,8 @@ Prepare trustworthy resume content before the website builder runs. Keep source 
 - If a PDF is scanned or has no extractable text, report it and ask for a text-readable source or user-provided transcription.
 - Do not treat general ATS statistics, keyword counts, or one-page advice as facts about a specific employer.
 - Do not add a JD keyword unless the user's evidence supports the underlying skill or the user explicitly confirms it.
+- No external Superpowers skill is required at runtime.
+- Use the fast-change path only for a bounded revision to an existing approved package that changes no fact, claim, audience, or positioning.
 
 ## References
 
@@ -39,3 +43,5 @@ Prepare trustworthy resume content before the website builder runs. Keep source 
 - `references/jd-customization-rules.md`: optional JD parsing, keyword tiers, and matching matrix.
 - `references/ats-safety-checklist.md`: ATS-friendly structure without keyword stuffing or unsupported claims.
 - `references/content-package-contract.md`: handoff files and schema.
+- `references/content-brainstorming-contract.md`: full versus fast discovery and strategy approval.
+- `references/content-planning-contract.md`: evidence-linked implementation-plan requirements.

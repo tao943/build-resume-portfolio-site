@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContentDesignSpec",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "spec_id",
+    "workflow_mode",
+    "inventory_complete",
+    "target_audience",
+    "fixed_facts",
+    "open_questions",
+    "alternatives",
+    "selected_alternative_id",
+    "decision_rationale",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "spec_id": {"type": "string", "minLength": 1},
+    "workflow_mode": {"enum": ["full", "fast-change"]},
+    "inventory_complete": {"const": true},
+    "target_audience": {"type": "string", "minLength": 1},
+    "fixed_facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "alternatives": {"type": "array", "minItems": 1, "maxItems": 3},
+    "selected_alternative_id": {"type": "string", "minLength": 1},
+    "decision_rationale": {"type": "string", "minLength": 1},
+    "approval": {
+      "type": "object",
+      "required": ["status", "source"],
+      "properties": {
+        "status": {"const": "user_approved"},
+        "source": {"const": "explicit_user"}
+      }
+    }
+  }
+}
