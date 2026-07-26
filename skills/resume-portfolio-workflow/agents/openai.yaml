@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume Portfolio Workflow"
+  short_description: "Route verified resume content into portfolio delivery"
+  default_prompt: "Route my resume-to-portfolio request through the correct content and website workflow."

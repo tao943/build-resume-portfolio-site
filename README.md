@@ -1,6 +1,6 @@
 # build-resume-portfolio-site
 
-一个包含两个协作 skill 的 Codex plugin：先验证简历内容，再生成分阶段的 React + Vite 个人简历与作品集网站。
+一个包含三个协作 skill 的 Codex plugin：先判断工作流，再验证简历内容并生成分阶段的 React + Vite 个人简历与作品集网站。
 
 ## 能力
 
@@ -13,6 +13,7 @@
 
 ## 包含的 skills
 
+- `resume-portfolio-workflow`：判断内容全流程、网站全流程或已有网站快速修改
 - `resume-content-intelligence`：提取事实、核验经历、优化文案并生成已确认内容包
 - `build-resume-portfolio-site`：根据已确认内容生成、审计和增强 React + Vite 网站
 

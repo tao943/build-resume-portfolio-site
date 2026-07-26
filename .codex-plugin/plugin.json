@@ -1,6 +1,6 @@
 {
   "name": "resume-portfolio-workflow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A staged workflow for verified resume content and expressive React + Vite portfolio websites.",
   "author": {
     "name": "tao943",
@@ -13,12 +13,12 @@
   "interface": {
     "displayName": "Resume Portfolio Workflow",
     "shortDescription": "Verified resume content to expressive portfolio site",
-    "longDescription": "Use resume-content-intelligence to verify and approve content, then build-resume-portfolio-site to create, audit, and motion-harden a React + Vite portfolio.",
+    "longDescription": "Use resume-portfolio-workflow to route requests, resume-content-intelligence to verify and approve content, and build-resume-portfolio-site to design, audit, and motion-harden a React + Vite portfolio.",
     "developerName": "tao943",
     "category": "Productivity",
     "capabilities": ["Write", "Design", "Interactive"],
     "defaultPrompt": [
-      "Prepare my resume content for a portfolio site",
+      "Turn my resume into a verified portfolio website",
       "Build a React portfolio from my approved content",
       "Audit and improve my portfolio's visual direction"
     ],
