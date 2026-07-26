@@ -66,6 +66,19 @@ class ValidateDesignCatalogTests(unittest.TestCase):
         )
         self.assertFalse(report.ok)
 
+    def test_platform_line_endings_do_not_break_text_hashes(self) -> None:
+        validator = load_validator()
+        with tempfile.TemporaryDirectory(dir=SCRIPT_DIR) as directory:
+            copy = Path(directory) / "catalog"
+            shutil.copytree(CATALOG_ROOT, copy)
+            license_path = copy / "LICENSE"
+            normalized = license_path.read_bytes().replace(b"\r\n", b"\n")
+            license_path.write_bytes(normalized.replace(b"\n", b"\r\n"))
+
+            report = validator.validate_catalog(copy)
+
+        self.assertTrue(report.ok, report.errors)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -17,9 +17,10 @@ It is not a new workflow stage or confirmation gate.
 
 ## Creation
 
-Create the report after `design-intelligence.json` and before the first React
-source edit. Use the user's approved direction and normalized facts. Compare
-two or three materially different layout families before selecting one.
+Create the report after the approved `site-design-spec.json` and
+`design-intelligence.json`, and before the first React source edit. Translate
+the approved website decision and normalized facts without contradicting its
+fixed constraints, selected family, or avoid rules.
 Candidate vocabulary may include Kinetic Marquee, Horizontal Pan, Coverflow
 Carousel, Drag-to-Pan Grid, Sticky Stack, Split-Screen Scroll, Hover Image
 Trail, and Parallax Tilt Card, but the vocabulary is a search space rather than

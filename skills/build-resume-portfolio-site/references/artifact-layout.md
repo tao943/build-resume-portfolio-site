@@ -21,6 +21,9 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- tablet.png
 |   `-- mobile.png
 |-- reports/
+|   |-- workflow-route.json
+|   |-- site-design-spec.json     # explicit product/experience approval
+|   |-- site-implementation-plan.json # files, dependencies, checks, rollback
 |   |-- content-map.json
 |   |-- content-provenance.json
 |   |-- creative-direction.json    # fixed floor, open ceiling, and selected layout family
@@ -46,10 +49,18 @@ them; it does not rewrite them.
 `reports/media-inventory.json` has the workspace-owned shape `{"schema_version": 1, "assets": [...]}`. It is always created before media-direction report validation; use the explicit empty inventory `{"schema_version": 1, "assets": []}` when no media is authorized. Every asset records a stable `id`, `factual_meaning`, and a non-empty `immutable_facts` list; `role` and `source` are optional. The media-direction report validator uses this inventory as the only authorization and factual-preservation source.
 
 `reports/creative-direction.json` is created after design intelligence and
-before the first React source edit. It carries the creative thesis,
+the approved site design specification, and before the first React source
+edit. It carries the creative thesis,
 `creative_freedom`, layout candidates, responsive and motion freedoms, and
 review questions. It is not source code, a component tree, a new stage, or a
 confirmation artifact.
+
+`reports/site-design-spec.json` records the explicit website product and
+experience decision. `reports/site-implementation-plan.json` records exact
+files, task boundaries, interfaces, verification, rollback, and snapshot
+targets. Both validate before React source edits. The creative-direction report
+translates the approved design spec into an implementation-ready visual
+contract; it may not contradict it.
 
 `reports/multi-agent-implementation.json` exists only when the user explicitly
 authorizes multi-agent implementation. It records strategy, dependencies,

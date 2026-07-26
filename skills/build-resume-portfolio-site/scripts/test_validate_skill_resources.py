@@ -39,6 +39,13 @@ PROMPTS = {
     ),
 }
 
+CONTRACTS = (
+    "site-brainstorming-contract.md",
+    "site-design-spec-schema.json",
+    "site-planning-contract.md",
+    "site-implementation-plan-schema.json",
+)
+
 
 def write_prompt(root: Path, resource_id: str, *, ready: bool = False) -> None:
     filename, output_contract = PROMPTS[resource_id]
@@ -107,6 +114,10 @@ def write_complete_skeleton(root: Path) -> None:
     for resource_id in PROMPTS:
         write_prompt(root, resource_id)
     write_manifest(root)
+    references = root / "references"
+    references.mkdir(parents=True, exist_ok=True)
+    for filename in CONTRACTS:
+        shutil.copy2(SKILL_ROOT / "references" / filename, references / filename)
     shutil.copytree(
         SKILL_ROOT / "assets" / "motion-enhancement" / "catalog",
         root / "assets" / "motion-enhancement" / "catalog",
@@ -163,6 +174,28 @@ class ValidateSkillResourcesTests(unittest.TestCase):
             self.assertTrue(report.ok)
             self.assertFalse(report.ready)
             self.assertIn("resource_not_ready: generate-prototype", report.errors)
+
+    def test_runtime_accepts_discovery_contracts(self) -> None:
+        report = validate_resources(SKILL_ROOT, "runtime", "discovery")
+        self.assertTrue(report.ok, report.errors)
+        self.assertTrue(report.ready, report.errors)
+
+    def test_runtime_accepts_planning_contracts(self) -> None:
+        report = validate_resources(SKILL_ROOT, "runtime", "planning")
+        self.assertTrue(report.ok, report.errors)
+        self.assertTrue(report.ready, report.errors)
+
+    def test_skeleton_rejects_missing_site_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_complete_skeleton(root)
+            (root / "references" / "site-planning-contract.md").unlink()
+            report = validate_resources(root, "skeleton", None)
+            self.assertFalse(report.ok)
+            self.assertIn(
+                "missing_contract: site-planning-contract",
+                report.errors,
+            )
 
     def test_runtime_accepts_catalog_only_media_direction_when_reference_library_is_empty(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SiteImplementationPlan",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "design_spec_id",
+    "strategy",
+    "multi_agent_authorized",
+    "multi_agent_plan",
+    "tasks",
+    "rollback_baseline",
+    "snapshot_target"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "design_spec_id": {"type": "string", "minLength": 1},
+    "strategy": {
+      "enum": ["single-agent", "fresh-agent-sequential", "parallel-wave"]
+    },
+    "multi_agent_authorized": {"type": "boolean"},
+    "tasks": {"type": "array", "minItems": 1},
+    "rollback_baseline": {"type": "string", "minLength": 1},
+    "snapshot_target": {"type": "string", "minLength": 1}
+  }
+}

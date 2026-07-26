@@ -32,7 +32,24 @@ PROMPT_SPECS = {
     ),
 }
 
+CONTRACT_SPECS = {
+    "site-brainstorming-contract": "references/site-brainstorming-contract.md",
+    "site-design-spec-schema": "references/site-design-spec-schema.json",
+    "site-planning-contract": "references/site-planning-contract.md",
+    "site-implementation-plan-schema": (
+        "references/site-implementation-plan-schema.json"
+    ),
+}
+
 STAGE_RESOURCES = {
+    "discovery": (
+        "site-brainstorming-contract",
+        "site-design-spec-schema",
+    ),
+    "planning": (
+        "site-planning-contract",
+        "site-implementation-plan-schema",
+    ),
     "prototype": ("generate-prototype", "design-catalog"),
     "media-direction": (
         "analyze-reference",
@@ -179,6 +196,25 @@ def validate_reference_manifest(path: Path, require_ready: bool) -> tuple[list[s
     return [], ready
 
 
+def _validate_contract_resource(
+    root: Path, resource_id: str
+) -> tuple[list[str], bool]:
+    path = root / CONTRACT_SPECS[resource_id]
+    if not path.is_file():
+        return [f"missing_contract: {resource_id}"], False
+    try:
+        text = path.read_text(encoding="utf-8").strip()
+        if not text:
+            return [f"empty_contract: {resource_id}"], False
+        if path.suffix == ".json":
+            data = json.loads(text)
+            if not isinstance(data, dict):
+                return [f"invalid_contract: {resource_id}"], False
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        return [f"invalid_contract: {resource_id}: {error}"], False
+    return [], True
+
+
 def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace_root: Path | None = None) -> ResourceReport:
     if mode not in {"skeleton", "runtime"}:
         return ResourceReport(False, mode, stage, False, (f"invalid_mode: {mode}",))
@@ -187,7 +223,9 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
 
     workspace_root = workspace_root.resolve() if workspace_root is not None else None
     resources = (
-        tuple(PROMPT_SPECS) + ("reference-library", "motion-catalog", "design-catalog")
+        tuple(PROMPT_SPECS)
+        + tuple(CONTRACT_SPECS)
+        + ("reference-library", "motion-catalog", "design-catalog")
         if mode == "skeleton"
         else STAGE_RESOURCES[stage]
     )
@@ -195,7 +233,11 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
     readiness: list[bool] = []
     require_ready = mode == "runtime"
     for resource_id in resources:
-        if resource_id == "reference-library":
+        if resource_id in CONTRACT_SPECS:
+            resource_errors, resource_ready = _validate_contract_resource(
+                skill_root, resource_id
+            )
+        elif resource_id == "reference-library":
             workspace_manifest = (
                 workspace_root / ".resume-site-work" / "reference-library" / "manifest.json"
                 if workspace_root is not None and mode == "runtime" and stage == "media-direction"

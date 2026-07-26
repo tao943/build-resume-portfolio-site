@@ -47,11 +47,10 @@ class CatalogReport(NamedTuple):
 
 
 def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    payload = path.read_bytes()
+    if path.name in {"LICENSE", "UPSTREAM.md"}:
+        payload = payload.replace(b"\r\n", b"\n")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _read_manifest(path: Path) -> tuple[dict[str, str], list[str]]:

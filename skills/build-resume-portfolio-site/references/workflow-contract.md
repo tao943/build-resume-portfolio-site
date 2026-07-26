@@ -71,6 +71,26 @@ Every generating or repair transition is one transaction:
 
 If validation or build fails, keep the previous valid preview and confirmed snapshot active.
 
+## Discovery and planning transaction
+
+Before a new site or any structural, strategic, visual-direction,
+interaction-family, or implementation-strategy change:
+
+```text
+inspect -> one question at a time -> compare 2-3 families ->
+site-design-spec approval -> site-implementation-plan validation -> implement
+```
+
+The full workflow does not edit React source before explicit design approval
+and plan validation. `site-design-spec.json` is the user-approved product and
+experience decision. `creative-direction.json` is its implementation-ready
+visual translation.
+
+An existing confirmed site may use `site-fast-change` only with a validated
+workflow route containing exact files, verification, and rollback baseline.
+Any expansion in facts, audience, structure, visual thesis, or interaction
+architecture returns to full discovery before further edits.
+
 ## Multi-agent execution transaction
 
 Multi-agent work is an implementation strategy inside a generating or repair

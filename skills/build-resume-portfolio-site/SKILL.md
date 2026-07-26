@@ -10,7 +10,7 @@ Build one directly runnable React + Vite portfolio through four controlled stage
 ## Start or resume
 
 1. Resolve `SKILL_ROOT` as this Skill directory.
-2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
+2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/site-brainstorming-contract.md`, `references/site-planning-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
 3. Create `.resume-site-work/` in the active user workspace or load `build-state.json`. The only supported state schema is version `3`; reject unsupported old state schemas rather than guessing a migration.
 4. Apply content preflight before a new Stage 1 build, when a new resume/JD/claim is supplied, or when the user requests factual/copy changes. Skip it only to resume an existing confirmed site for visual, media, motion, responsive, accessibility, or frontend-only work.
 5. For content preflight, run:
@@ -25,6 +25,37 @@ python "$SKILL_ROOT\scripts\validate_content_handoff.py" --workspace-root "."
 6. Normalize only authorized links and local media that are outside the content package. Do not silently rewrite approved copy, renormalize approved facts, or promote draft/inferred claims.
 7. Use `.resume-site-work\site` as the only editable React + Vite project. Do not create a parallel standalone HTML page.
 8. Resume the recorded stage. Load only the resources required by that stage.
+
+## Discovery and implementation-plan gate
+
+For a new site or structural, strategic, visual-direction, interaction-family,
+or implementation-strategy change:
+
+1. Validate `discovery` resources.
+2. Inspect approved content, authorized media, references, and existing state.
+3. Ask one decision-bearing question at a time.
+4. Compare two or three materially different layout or experience families.
+5. Write `.resume-site-work\reports\site-design-spec.json`, validate it with
+   `scripts\validate_site_design_spec.py`, show the recommendation and
+   trade-offs, and wait for explicit user approval.
+6. Validate `planning` resources.
+7. Write `.resume-site-work\reports\site-implementation-plan.json` with exact
+   files, dependencies, interfaces, acceptance, verification, rollback, and
+   snapshot target. Validate it with
+   `scripts\validate_site_implementation_plan.py`.
+8. Select the implementation strategy, then enter Stage 1 or the relevant
+   confirmed-stage transaction.
+
+Do not edit React source before the site design specification is explicitly
+approved and the site implementation plan validates.
+
+For a bounded existing-site change, require a validated
+`reports/workflow-route.json` with route `site-fast-change`, exact affected
+files, verification, confirmed artifact, and rollback baseline. Preserve the
+approved content, structure, visual thesis, and interaction architecture. If
+scope expands, stop edits and return to the full discovery gate.
+
+No external Superpowers skill is required at runtime.
 
 ## Resource and project checks
 
@@ -54,7 +85,7 @@ Keep the previous valid preview active when validation or build fails. For repea
 ## Select the implementation strategy
 
 Choose the implementation strategy after scope and design intent are approved,
-and before editing source:
+the site implementation plan validates, and before editing source:
 
 - use `single-agent` for local or tightly coupled changes;
 - use `fresh-agent-sequential` when fresh contexts help but tasks form a
