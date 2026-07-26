@@ -11,7 +11,7 @@ Build one directly runnable React + Vite portfolio through four controlled stage
 
 1. Resolve `SKILL_ROOT` as this Skill directory.
 2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/site-brainstorming-contract.md`, `references/site-planning-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
-3. Create `.resume-site-work/` in the active user workspace or load `build-state.json`. The only supported state schema is version `3`; reject unsupported old state schemas rather than guessing a migration.
+3. Create `.resume-site-work/` in the active user workspace or load `build-state.json`. The active state schema is version `4`. A version-3 state may be migrated only with `scripts/migrate_build_state.py` into a distinct output file; reject every other old schema and never infer a migration.
 4. Apply content preflight before a new Stage 1 build, when a new resume/JD/claim is supplied, or when the user requests factual/copy changes. Skip it only to resume an existing confirmed site for visual, media, motion, responsive, accessibility, or frontend-only work.
 5. For content preflight, run:
 
@@ -54,6 +54,11 @@ For a bounded existing-site change, require a validated
 files, verification, confirmed artifact, and rollback baseline. Preserve the
 approved content, structure, visual thesis, and interaction architecture. If
 scope expands, stop edits and return to the full discovery gate.
+
+An explicitly migrated version-3 state with a valid confirmed snapshot may
+enter `fast-change-eligible` mode without retroactively inventing discovery or
+planning approval. It still uses the fast-change route only when the requested
+edit satisfies every bounded-change condition above.
 
 No external Superpowers skill is required at runtime.
 

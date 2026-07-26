@@ -146,7 +146,17 @@ Run screenshot audit and local repair without routine confirmation. Stop after t
 
 ## State compatibility
 
-`build-state.json` has schema version `3`. Systems reject unsupported old state schemas rather than guessing a migration. Set `confirmations.media_direction` only after explicit user confirmation; its confirmation keys are `prototype`, `media_direction`, and `motion`. Do not create a separate confirmation for a StyleBrief.
+`build-state.json` has active schema version `4` and records `workflow_mode`
+plus the discovery flags `site_design_approved` and `site_plan_validated`.
+Version 3 has one explicit, one-way migration path through
+`scripts/migrate_build_state.py`; the source and output paths must differ, the
+output must not exist, and no prior confirmation may be changed. A valid
+confirmed version-3 snapshot migrates to `fast-change-eligible` while both new
+discovery flags remain false. This preserves completed work without fabricating
+historical approval. Systems reject every other old schema. Set
+`confirmations.media_direction` only after explicit user confirmation; its
+confirmation keys are `prototype`, `media_direction`, and `motion`. Do not
+create a separate confirmation for a StyleBrief.
 
 ## Design-intelligence and media-direction transaction
 

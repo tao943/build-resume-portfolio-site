@@ -75,8 +75,13 @@ Initialize `build-state.json` with this minimum shape:
 
 ```json
 {
-  "schema_version": 3,
-  "skill_version": "1.1.0-react-vite",
+  "schema_version": 4,
+  "skill_version": "1.2.0-react-vite",
+  "workflow_mode": "full",
+  "discovery": {
+    "site_design_approved": false,
+    "site_plan_validated": false
+  },
   "stage": "prototype_generating",
   "editable_project": "site",
   "current_artifact": null,
@@ -94,7 +99,15 @@ Initialize `build-state.json` with this minimum shape:
 }
 ```
 
-Systems reject unsupported old state schemas rather than guessing a migration. Append user feedback with its stage and timestamp. Update `current_artifact` and `current_preview` only after validation and build succeed. Update `last_confirmed_artifact` only after explicit confirmation. Before retrying a rejected stage, restore the previous confirmed source snapshot into `site/`.
+Schema version `4` is the only active shape. A schema-version-3 state may be
+migrated with `scripts/migrate_build_state.py <source> <distinct-output>`;
+the tool preserves prior confirmations and confirmed snapshots, derives no new
+approval, and refuses in-place or overwrite migrations. Systems reject every
+other unsupported schema rather than guessing. Append user feedback with its
+stage and timestamp. Update `current_artifact` and `current_preview` only after
+validation and build succeed. Update `last_confirmed_artifact` only after
+explicit confirmation. Before retrying a rejected stage, restore the previous
+confirmed source snapshot into `site/`.
 
 ## Optional external media
 
