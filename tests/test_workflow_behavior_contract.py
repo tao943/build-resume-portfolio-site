@@ -212,46 +212,52 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
             "build-resume-portfolio-site",
             "validate_site_design_spec.py",
             "site-design-spec-valid.json",
-            lambda payload: payload.update(
-                {"alternatives": payload["alternatives"][:1]}
+            lambda payload: payload["decisions"]["structure"].update(
+                {
+                    "candidates": payload["decisions"]["structure"][
+                        "candidates"
+                    ][:1]
+                }
             ),
         )
         self.assertNotEqual(result.returncode, 0)
 
-    def test_full_site_requires_visual_preview(self) -> None:
+    def test_full_site_requires_a_preview_record_per_enabled_category(self) -> None:
         result = self.run_validator(
             "build-resume-portfolio-site",
             "validate_site_design_spec.py",
             "site-design-spec-valid.json",
-            lambda payload: payload.pop("visual_preview"),
+            lambda payload: payload["decisions"]["structure"].pop("preview"),
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("full mode requires visual_preview", result.stdout)
+        self.assertIn("structure requires a preview record", result.stdout)
 
     def test_browser_activity_cannot_approve_site_design(self) -> None:
         result = self.run_validator(
             "build-resume-portfolio-site",
             "validate_site_design_spec.py",
             "site-design-spec-valid.json",
-            lambda payload: payload["visual_preview"].update(
-                {"approval_channel": "browser"}
+            lambda payload: payload["decisions"]["structure"][
+                "approval"
+            ].update(
+                {"channel": "browser"}
             ),
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
-            "visual_preview approval_channel must be conversation",
+            "structure approval must be explicit and conversational",
             result.stdout,
         )
 
-    def test_version_one_site_design_is_rejected(self) -> None:
+    def test_version_two_site_design_is_rejected(self) -> None:
         result = self.run_validator(
             "build-resume-portfolio-site",
             "validate_site_design_spec.py",
             "site-design-spec-valid.json",
-            lambda payload: payload.update({"schema_version": 1}),
+            lambda payload: payload.update({"schema_version": 2}),
         )
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("schema_version must be 2", result.stdout)
+        self.assertIn("schema_version must be 3", result.stdout)
 
     def test_unsupported_claim_cannot_enter_content_plan(self) -> None:
         def remove_evidence(payload: dict) -> None:
