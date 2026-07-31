@@ -23,6 +23,16 @@ def valid_plan() -> dict:
             "channel": "conversation",
         },
         "generation_mode": "one-integrated-site",
+        "strategy_selection": {
+            "status": "user_selected",
+            "source": "explicit_user",
+            "channel": "conversation",
+            "selected": "single-agent",
+            "recommended": "single-agent",
+            "reasons": [
+                "Shared React and global-style files make coordination slower."
+            ],
+        },
         "strategy": "single-agent",
         "multi_agent_authorized": False,
         "multi_agent_plan": None,
@@ -79,6 +89,7 @@ class SiteImplementationPlanValidatorTests(unittest.TestCase):
     def test_rejects_unauthorized_multi_agent_plan(self) -> None:
         payload = valid_plan()
         payload["strategy"] = "parallel-wave"
+        payload["strategy_selection"]["selected"] = "parallel-wave"
         payload["multi_agent_plan"] = (
             ".resume-site-work/reports/multi-agent-implementation.json"
         )
@@ -87,6 +98,7 @@ class SiteImplementationPlanValidatorTests(unittest.TestCase):
     def test_rejects_parallel_file_overlap(self) -> None:
         payload = valid_plan()
         payload["strategy"] = "parallel-wave"
+        payload["strategy_selection"]["selected"] = "parallel-wave"
         payload["multi_agent_authorized"] = True
         payload["multi_agent_plan"] = (
             ".resume-site-work/reports/multi-agent-implementation.json"
@@ -138,6 +150,42 @@ class SiteImplementationPlanValidatorTests(unittest.TestCase):
         result = self.run_validator(payload)
         self.assertEqual(result.returncode, 1)
         self.assertIn("schema_version must be 2", result.stdout)
+
+    def test_rejects_missing_explicit_strategy_selection(self) -> None:
+        payload = valid_plan()
+        payload.pop("strategy_selection")
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("strategy_selection", result.stdout)
+
+    def test_rejects_browser_strategy_selection(self) -> None:
+        payload = valid_plan()
+        payload["strategy_selection"]["channel"] = "browser"
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("explicit and conversational", result.stdout)
+
+    def test_rejects_strategy_that_differs_from_selection(self) -> None:
+        payload = valid_plan()
+        payload["strategy"] = "parallel-wave"
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("must match", result.stdout)
+
+    def test_rejects_retired_sequential_strategy(self) -> None:
+        payload = valid_plan()
+        payload["strategy"] = "fresh-agent-sequential"
+        payload["strategy_selection"]["selected"] = "fresh-agent-sequential"
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("unsupported strategy", result.stdout)
+
+    def test_rejects_recommendation_without_reasons(self) -> None:
+        payload = valid_plan()
+        payload["strategy_selection"]["reasons"] = []
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("recommendation reasons", result.stdout)
 
 
 if __name__ == "__main__":

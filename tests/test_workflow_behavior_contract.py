@@ -318,6 +318,7 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
     def test_overlapping_parallel_ownership_is_rejected(self) -> None:
         def overlap(payload: dict) -> None:
             payload["strategy"] = "parallel-wave"
+            payload["strategy_selection"]["selected"] = "parallel-wave"
             payload["multi_agent_authorized"] = True
             payload["multi_agent_plan"] = "reports/multi-agent-plan.json"
             duplicate = dict(payload["tasks"][0])

@@ -8,6 +8,14 @@
     "channel": "conversation"
   },
   "generation_mode": "one-integrated-site",
+  "strategy_selection": {
+    "status": "user_selected",
+    "source": "explicit_user",
+    "channel": "conversation",
+    "selected": "single-agent",
+    "recommended": "single-agent",
+    "reasons": ["Shared React and global-style files make coordination slower."]
+  },
   "strategy": "single-agent",
   "multi_agent_authorized": false,
   "multi_agent_plan": null,
