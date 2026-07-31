@@ -1,25 +1,21 @@
 # Multi-Agent Implementation Contract
 
-Use this contract only after the user has explicitly authorized multi-agent
-implementation. It is an implementation strategy inside the existing workflow,
-not a new portfolio stage or confirmation gate.
+Use this contract only after the user explicitly selects `多 Agent 并行`. It is
+an implementation strategy inside the existing workflow, not a new portfolio
+stage or confirmation gate.
 
 ## Strategy selection
 
-Classify the approved implementation before dispatch:
+The only multi-Agent strategy is `parallel-wave`. Use it only after the user
+explicitly selects `多 Agent 并行` and both the site implementation plan and
+multi-Agent plan validate. Require at least two independently useful tasks in a
+parallel wave with disjoint write ownership and independent acceptance checks.
 
-- `single-agent`: default for a local edit, a tightly coupled fix, or work whose
-  coordination cost is greater than its implementation cost. Do not create a
-  multi-agent report.
-- `fresh-agent-sequential`: use for a dependency chain where a fresh context
-  reduces design inertia, but later tasks depend on earlier contracts or files.
-- `parallel-wave`: use only when at least two tasks are independently useful,
-  have disjoint write ownership, and can be verified without racing on shared
-  state.
-
-Never split work by page or section merely to increase agent count. Prefer a
-single agent when the change is small. Prefer sequential fresh agents when the
-design, data, component, and integration decisions form a chain.
+Sequential waves may be used only for integration and dependent review inside
+the selected parallel strategy; they are not a separate user-facing mode.
+Never split work by page or section merely to increase agent count. If the
+parallel criteria cannot be met, return to the strategy gate and ask the user
+to approve a revised disjoint plan or select `当前会话单 Agent`.
 
 ## Controller and ownership
 
@@ -45,8 +41,8 @@ Treat `App.jsx`, global CSS or design tokens, central data contracts,
 `package.json`, `build-state.json`, reports, preview output, and version
 snapshots as shared files unless the project proves otherwise. Only a task with
 role `integration` may write shared files. If a supposedly independent task
-needs a shared file, convert that wave to sequential or submit a handoff request
-to the integration owner.
+needs a shared file, submit a handoff request to the integration owner. Do not
+silently change the user's selected execution mode.
 
 ## Task packet
 
