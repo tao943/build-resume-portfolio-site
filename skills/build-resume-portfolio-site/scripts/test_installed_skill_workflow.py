@@ -71,6 +71,17 @@ class InstalledSkillWorkflowTests(unittest.TestCase):
         self.assertIn("motion_enhancing", workflow)
         self.assertNotIn("motion_waiting_confirmation", workflow)
 
+    def test_workflow_requires_an_explicit_two_choice_strategy_gate(self) -> None:
+        text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "当前会话单 Agent",
+            "多 Agent 并行",
+            "implementation_strategy_waiting_confirmation",
+            "请明确选择 1 或 2",
+        ):
+            self.assertIn(marker, text)
+        self.assertNotIn("fresh-agent-sequential", text)
+
 
 if __name__ == "__main__":
     unittest.main()
