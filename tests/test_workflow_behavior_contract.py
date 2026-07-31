@@ -72,6 +72,48 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         self.assertIn("Do not edit React source before", text)
         self.assertIn("site-design-spec.json", text)
 
+    def test_site_discovery_requires_display_only_visual_gallery(self) -> None:
+        text = self.read_skill("build-resume-portfolio-site").lower()
+        self.assertIn("visual-style-preview-contract.md", text)
+        self.assertIn("approval remains in the conversation", text)
+        self.assertIn("launch.cjs", text)
+        self.assertIn("complete authenticated url", text)
+        self.assertIn("static html fallback", text)
+        self.assertIn("do not edit react source", text)
+
+    def test_browser_activity_never_counts_as_approval(self) -> None:
+        contract = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "references"
+            / "site-brainstorming-contract.md"
+        ).read_text(encoding="utf-8").lower()
+        self.assertIn("browser activity never counts as approval", contract)
+        self.assertIn("two or three", contract)
+        self.assertIn("gallery.html", contract)
+
+    def test_artifact_layout_owns_style_preview_sessions(self) -> None:
+        layout = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "references"
+            / "artifact-layout.md"
+        ).read_text(encoding="utf-8").lower()
+        self.assertIn("style-preview", layout)
+        self.assertIn("discovery evidence", layout)
+        self.assertIn("not react source", layout)
+
+    def test_readme_documents_cross_agent_visual_preview(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        self.assertIn("visual companion", readme)
+        self.assertIn("codex", readme)
+        self.assertIn("claude code", readme)
+        self.assertIn("cursor", readme)
+        self.assertIn("copilot cli", readme)
+        self.assertIn("conversation", readme)
+
     def test_valid_full_workflow_artifacts_pass(self) -> None:
         cases = (
             (
