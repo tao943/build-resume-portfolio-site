@@ -1,76 +1,78 @@
 # Visual Style Preview Contract
 
-Use this transaction during full site discovery after defining two or three
-materially different alternatives and before writing an approved site design
-specification.
+Use this display-only transaction after the user tentatively selects a
+candidate for one enabled discovery category. Ask separately for every enabled category. The six supported category IDs are `structure`, `typography`,
+`color`, `media`, `primary-motion`, and `secondary-motion`.
+
+Previews are independent, not cumulative. Each preview isolates its category
+against a neutral demonstration baseline. It is decision evidence, not reusable
+React source and not a fragment to concatenate into the final website.
+
+Declining one category does not suppress later preview offers. Record the
+decline as `response: declined`, `delivery: not-requested`, and `artifact: null`,
+then obtain the category confirmation in the conversation.
+
+## Offer
+
+After tentative selection, ask in a separate message whether the user wants to
+open a browser for this category. Do not create the Gallery or launch a browser
+before the user accepts. Consent applies only to the current category.
 
 ## Output
 
-Create one complete, standalone UTF-8 document at a new path:
+On acceptance, create one standalone UTF-8 document at:
 
 ```text
-.resume-site-work/style-preview/drafts/<draft-id>/gallery.html
+.resume-site-work/style-preview/drafts/<category>/<draft-id>/gallery.html
 ```
 
-Use `assets/visual-companion/gallery-shell.html` as structural guidance. The
-gallery contains:
+Use `assets/visual-companion/gallery-shell.html` as structural guidance. Show:
 
-- two or three directions with IDs matching `alternatives`;
+- the category name and question;
+- all candidates, with IDs matching the design-decision candidates;
+- a visual mark on the tentative selection that has no interaction semantics;
 - approved resume copy and only authorized local media;
-- visual protagonist, composition, typography, color, density, and hierarchy;
-- representative interaction state shown visually without executable control;
-- desktop framing and a compact/mobile frame when responsive behavior differs;
-- fit, risk, and responsive trade-offs for each direction;
-- a visible instruction to return to the conversation to select and approve.
+- the exact visual properties needed to judge this category;
+- relevant fit, risk, mobile, accessibility, fallback, and reduced-motion notes;
+- a visible instruction to return to the conversation to confirm or revise.
 
-The page is display-only. Do not add forms, buttons, `data-choice`, WebSockets,
-event collection, uploads, analytics, or approval controls. Browser activity
-never counts as selection or approval.
+Structure previews compare composition and hierarchy. Typography previews
+compare type and rhythm. Color previews compare color relationships. Media
+previews compare media treatment. Primary- and secondary-motion previews use
+small runnable samples, but contain no approval controls.
 
-Do not create or modify `.resume-site-work/site` while producing the gallery.
+The page is display-only. Do not add forms, buttons, `data-choice`, click or
+change handlers, WebSockets, event collection, uploads, analytics, or approval
+controls. Browser activity never counts as selection or approval.
+
+Do not create or modify `.resume-site-work/site` while producing a Gallery.
 
 ## Present
 
-Resolve `SKILL_ROOT` to this Skill directory, then run:
+Resolve `SKILL_ROOT`, then run only after the user accepted the current offer:
 
 ```powershell
 node "$SKILL_ROOT\scripts\visual_companion\launch.cjs" `
   --workspace-root "." `
-  --gallery ".resume-site-work\style-preview\drafts\<draft-id>\gallery.html" `
+  --gallery ".resume-site-work\style-preview\drafts\<category>\<draft-id>\gallery.html" `
   --open
 ```
 
-Read the single startup JSON object. Give the user both:
+Read the startup JSON. Give the user the complete authenticated `url` and the
+absolute `gallery.html` static fallback. Automatic-open failure is non-blocking.
+If Node, process lifetime, or loopback availability prevents the server, show
+the standalone HTML path. Never upload or publicly expose the Gallery.
 
-- the complete authenticated `url`, including its query string;
-- the absolute generated `gallery.html` path as the static fallback.
+## Confirm
 
-Automatic opening is best effort. `open_warning: "OPEN_FAILED"` leaves the
-server valid; show the URL. If Node is unavailable, launch fails, the process
-is reaped, or loopback is unreachable, show the standalone HTML path. In a
-remote environment, use only an existing user-authorized port-forwarding
-mechanism; do not publish or upload the gallery.
-
-Process lifetime differs by host. Keep `launch.cjs --foreground` alive through
-the host's asynchronous shell facility when detached processes are reaped.
-
-## Approve
-
-Ask the user to name a candidate in the conversation. After the reply:
-
-1. Record the chosen candidate in `selected_alternative_id` and
-   `visual_preview.selected_candidate_id`.
-2. Set `approval_channel` to `conversation`.
-3. Set `explicitly_approved` to `true` only after an explicit conversational
-   approval.
-4. Write schema-version-2 `reports/site-design-spec.json`.
-5. Validate it before writing the implementation plan.
-
-A browser visit, reload, screenshot, or system-browser launch is not approval.
+After display, ask the user to return to the conversation and confirm, revise,
+or reject. Record the decision-level `preview` and `approval` fields in the
+schema-version-3 design specification. A visit, reload, screenshot, or system
+browser launch is never approval.
 
 ## Stop
 
-Stop only the exact verified session from the returned `server_info`:
+Stop only the exact verified session returned by the launcher:
 
 ```powershell
 node "$SKILL_ROOT\scripts\visual_companion\stop.cjs" `
@@ -78,6 +80,4 @@ node "$SKILL_ROOT\scripts\visual_companion\stop.cjs" `
   --server-info "<returned-server-info-path>"
 ```
 
-Stopping preserves the session gallery. Draft and session artifacts are
-discovery evidence, not React source, confirmed snapshots, or publishable
-output.
+Stopping preserves the Gallery as discovery evidence.

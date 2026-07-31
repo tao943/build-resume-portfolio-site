@@ -1,39 +1,80 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "spec_id": "site-spec-1",
   "workflow_mode": "full",
   "content_revision": 1,
-  "visual_protagonist": "project outcomes",
-  "fixed_constraints": ["preserve approved copy"],
-  "open_ceiling": ["composition", "motion language"],
-  "avoid": ["generic card grid"],
-  "alternatives": [
-    {
-      "id": "editorial",
-      "family": "radical editorial",
-      "tradeoffs": ["denser reading rhythm"]
-    },
-    {
-      "id": "cinematic",
-      "family": "cinematic portfolio",
-      "tradeoffs": ["higher media dependency"]
-    }
+  "decision_order": [
+    "structure",
+    "typography",
+    "color",
+    "media",
+    "primary_motion",
+    "secondary_motion"
   ],
-  "selected_alternative_id": "editorial",
-  "composition_commitment": "asymmetric editorial stage",
-  "type_color_character": "high-contrast serif and restrained yellow",
-  "representative_interaction": "project selection updates one detail panel",
-  "visual_preview": {
-    "mode": "local-gallery",
-    "artifact": ".resume-site-work/style-preview/sessions/style-1/gallery.html",
-    "candidate_ids": ["editorial", "cinematic"],
-    "recommended_candidate_id": "editorial",
-    "selected_candidate_id": "editorial",
-    "approval_channel": "conversation",
-    "explicitly_approved": true
+  "decisions": {
+    "structure": {
+      "status": "confirmed",
+      "candidates": [
+        {"id": "editorial", "label": "Editorial", "tradeoffs": ["dense rhythm"]},
+        {"id": "cinematic", "label": "Cinematic", "tradeoffs": ["media dependent"]}
+      ],
+      "recommended_candidate_id": "editorial",
+      "tentative_selection_ids": ["editorial"],
+      "selected_candidate_ids": ["editorial"],
+      "preview": {"offered": true, "response": "declined", "delivery": "not-requested", "artifact": null},
+      "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
+    },
+    "typography": {
+      "status": "confirmed",
+      "candidates": [
+        {"id": "serif", "label": "Editorial serif", "tradeoffs": ["formal"]},
+        {"id": "sans", "label": "Technical sans", "tradeoffs": ["less expressive"]}
+      ],
+      "recommended_candidate_id": "serif",
+      "tentative_selection_ids": ["serif"],
+      "selected_candidate_ids": ["serif"],
+      "preview": {"offered": true, "response": "accepted", "delivery": "local-gallery", "artifact": ".resume-site-work/style-preview/sessions/typography-1/gallery.html"},
+      "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
+    },
+    "color": {
+      "status": "confirmed",
+      "candidates": [
+        {"id": "ink-yellow", "label": "Ink and yellow", "tradeoffs": ["strong contrast"]},
+        {"id": "paper-red", "label": "Paper and red", "tradeoffs": ["warmer"]}
+      ],
+      "recommended_candidate_id": "ink-yellow",
+      "tentative_selection_ids": ["ink-yellow"],
+      "selected_candidate_ids": ["ink-yellow"],
+      "preview": {"offered": true, "response": "declined", "delivery": "not-requested", "artifact": null},
+      "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
+    },
+    "media": {"status": "skipped", "skip_reason": "no authorized media"},
+    "primary_motion": {
+      "status": "confirmed",
+      "candidates": [
+        {"id": "section-reveal", "label": "Section reveal", "tradeoffs": ["restrained"]},
+        {"id": "scroll-narrative", "label": "Scroll narrative", "tradeoffs": ["more controller ownership"]}
+      ],
+      "recommended_candidate_id": "section-reveal",
+      "tentative_selection_ids": ["section-reveal"],
+      "selected_candidate_ids": ["section-reveal"],
+      "preview": {"offered": true, "response": "declined", "delivery": "not-requested", "artifact": null},
+      "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
+    },
+    "secondary_motion": {
+      "status": "confirmed",
+      "candidates": [
+        {"id": "card-feedback", "label": "Card feedback", "tradeoffs": ["pointer specific"]},
+        {"id": "text-reveal", "label": "Text reveal", "tradeoffs": ["timing coordination"]},
+        {"id": "media-parallax", "label": "Media parallax", "tradeoffs": ["mobile fallback"]}
+      ],
+      "recommended_candidate_id": "card-feedback",
+      "tentative_selection_ids": ["card-feedback"],
+      "selected_candidate_ids": ["card-feedback", "text-reveal"],
+      "preview": {"offered": true, "response": "declined", "delivery": "not-requested", "artifact": null},
+      "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
+    }
   },
-  "approval": {
-    "status": "user_approved",
-    "source": "explicit_user"
-  }
+  "engineering_constraints": ["responsive", "accessible", "coarse-pointer", "reduced-motion", "media-fallbacks"],
+  "requirements_approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
 }

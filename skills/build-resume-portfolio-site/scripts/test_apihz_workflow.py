@@ -52,11 +52,12 @@ class APIHzWorkflowTests(unittest.TestCase):
         workflow = (SKILL_ROOT / "references" / "workflow-contract.md").read_text(
             encoding="utf-8"
         )
+        normalized_workflow = " ".join(workflow.split())
         self.assertIn("media-search/", artifact)
         self.assertIn("media-selection.json", artifact)
-        self.assertIn("optional APIHz media transaction", workflow)
-        self.assertIn("does not change the current portfolio stage", workflow)
-        self.assertIn("normal workflow remains available", workflow)
+        self.assertIn("Optional APIHz media transaction", workflow)
+        self.assertIn("do not change the current portfolio stage", normalized_workflow)
+        self.assertIn("normal workflow remains available", normalized_workflow)
         self.assertNotIn("<prototype|style|screenshot|motion|apihz>", skill_text())
 
 

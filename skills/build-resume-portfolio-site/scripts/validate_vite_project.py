@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Sequence
 
 
-STAGES = ("prototype", "styled", "media-direction", "refined", "motion", "motion-enhanced", "video-upgrade")
-MOTION_STAGES = {"media-direction", "motion", "motion-enhanced", "video-upgrade"}
+STAGES = ("prototype", "styled", "media-direction", "refined", "integrated", "motion", "motion-enhanced", "video-upgrade")
+MOTION_STAGES = {"media-direction", "integrated", "motion", "motion-enhanced", "video-upgrade"}
 SOURCE_SUFFIXES = {".js", ".jsx", ".ts", ".tsx", ".css", ".scss", ".sass"}
 SKIPPED_DIRS = {"node_modules", "dist", ".git", ".resume-site-work"}
 REGION_PATTERNS = {

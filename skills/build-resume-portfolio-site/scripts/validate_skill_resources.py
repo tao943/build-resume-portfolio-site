@@ -11,6 +11,10 @@ from validate_motion_catalog import validate_catalog as validate_motion_catalog
 
 
 PROMPT_SPECS = {
+    "generate-integrated-site": (
+        "01-generate-integrated-site.md",
+        "react-vite-integrated-site",
+    ),
     "generate-prototype": ("01-generate-prototype.md", "react-vite-project"),
     "analyze-reference": ("02-analyze-reference.md", "style-brief-json"),
     "direct-media-art": (
@@ -61,6 +65,11 @@ STAGE_RESOURCES = {
     "planning": (
         "site-planning-contract",
         "site-implementation-plan-schema",
+    ),
+    "integrated": (
+        "generate-integrated-site",
+        "design-catalog",
+        "audit-screenshot",
     ),
     "prototype": ("generate-prototype", "design-catalog"),
     "media-direction": (

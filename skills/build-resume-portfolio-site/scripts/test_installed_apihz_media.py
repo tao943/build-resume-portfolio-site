@@ -41,6 +41,8 @@ class MemoryResponse:
 
 class InstalledAPIHzMediaTests(unittest.TestCase):
     def test_plugin_metadata_advertises_optional_media(self) -> None:
+        if not PLUGIN_MANIFEST.is_file():
+            self.skipTest("repository plugin metadata is outside a standalone Skill install")
         manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], "1.2.0")
         self.assertIn("optional-media", manifest["keywords"])

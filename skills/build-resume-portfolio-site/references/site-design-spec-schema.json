@@ -2,75 +2,187 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SiteDesignSpec",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "schema_version",
     "spec_id",
     "workflow_mode",
     "content_revision",
-    "visual_protagonist",
-    "fixed_constraints",
-    "open_ceiling",
-    "avoid",
-    "alternatives",
-    "selected_alternative_id",
-    "composition_commitment",
-    "type_color_character",
-    "representative_interaction",
-    "approval"
+    "decision_order",
+    "decisions",
+    "engineering_constraints",
+    "requirements_approval"
   ],
   "properties": {
-    "schema_version": {"const": 2},
+    "schema_version": {"const": 3},
     "spec_id": {"type": "string", "minLength": 1},
     "workflow_mode": {"enum": ["full", "fast-change"]},
     "content_revision": {"type": "integer", "minimum": 1},
-    "visual_protagonist": {"type": "string", "minLength": 1},
-    "fixed_constraints": {"type": "array", "minItems": 1},
-    "open_ceiling": {"type": "array", "minItems": 1},
-    "avoid": {"type": "array", "minItems": 1},
-    "alternatives": {"type": "array", "minItems": 1, "maxItems": 3},
-    "selected_alternative_id": {"type": "string", "minLength": 1},
-    "composition_commitment": {"type": "string", "minLength": 1},
-    "type_color_character": {"type": "string", "minLength": 1},
-    "representative_interaction": {"type": "string", "minLength": 1},
-    "visual_preview": {
+    "decision_order": {
+      "const": [
+        "structure",
+        "typography",
+        "color",
+        "media",
+        "primary_motion",
+        "secondary_motion"
+      ]
+    },
+    "decisions": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
-        "mode",
-        "artifact",
-        "candidate_ids",
-        "recommended_candidate_id",
-        "selected_candidate_id",
-        "approval_channel",
-        "explicitly_approved"
+        "structure",
+        "typography",
+        "color",
+        "media",
+        "primary_motion",
+        "secondary_motion"
       ],
       "properties": {
-        "mode": {"const": "local-gallery"},
-        "artifact": {
-          "type": "string",
-          "pattern": "^\\.resume-site-work/style-preview/sessions/[^/]+/gallery\\.html$"
+        "structure": {"$ref": "#/$defs/singleDecision"},
+        "typography": {"$ref": "#/$defs/singleDecision"},
+        "color": {"$ref": "#/$defs/singleDecision"},
+        "media": {
+          "oneOf": [
+            {"$ref": "#/$defs/singleDecision"},
+            {"$ref": "#/$defs/skippedMedia"}
+          ]
         },
-        "candidate_ids": {
+        "primary_motion": {"$ref": "#/$defs/singleDecision"},
+        "secondary_motion": {"$ref": "#/$defs/multipleDecision"}
+      }
+    },
+    "engineering_constraints": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "allOf": [
+        {"contains": {"const": "responsive"}},
+        {"contains": {"const": "accessible"}},
+        {"contains": {"const": "coarse-pointer"}},
+        {"contains": {"const": "reduced-motion"}},
+        {"contains": {"const": "media-fallbacks"}}
+      ]
+    },
+    "requirements_approval": {"$ref": "#/$defs/approval"}
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "tradeoffs"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "tradeoffs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "source", "channel"],
+      "properties": {
+        "status": {"const": "user_approved"},
+        "source": {"const": "explicit_user"},
+        "channel": {"const": "conversation"}
+      }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offered", "response", "delivery", "artifact"],
+      "properties": {
+        "offered": {"const": true},
+        "response": {"enum": ["accepted", "declined"]},
+        "delivery": {
+          "enum": ["local-gallery", "static-fallback", "not-requested"]
+        },
+        "artifact": {
+          "type": ["string", "null"],
+          "pattern": "^\\.resume-site-work/style-preview/sessions/[^/]+/gallery\\.html$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"response": {"const": "declined"}}},
+          "then": {
+            "properties": {
+              "delivery": {"const": "not-requested"},
+              "artifact": {"type": "null"}
+            }
+          },
+          "else": {
+            "properties": {
+              "delivery": {"enum": ["local-gallery", "static-fallback"]},
+              "artifact": {"type": "string"}
+            }
+          }
+        }
+      ]
+    },
+    "decisionBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "candidates",
+        "recommended_candidate_id",
+        "tentative_selection_ids",
+        "selected_candidate_ids",
+        "preview",
+        "approval"
+      ],
+      "properties": {
+        "status": {"const": "confirmed"},
+        "candidates": {
           "type": "array",
           "minItems": 2,
-          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/candidate"}
+        },
+        "recommended_candidate_id": {"type": "string", "minLength": 1},
+        "tentative_selection_ids": {
+          "type": "array",
+          "minItems": 1,
           "uniqueItems": true,
           "items": {"type": "string", "minLength": 1}
         },
-        "recommended_candidate_id": {"type": "string", "minLength": 1},
-        "selected_candidate_id": {"type": "string", "minLength": 1},
-        "approval_channel": {"const": "conversation"},
-        "explicitly_approved": {"const": true}
+        "selected_candidate_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "preview": {"$ref": "#/$defs/preview"},
+        "approval": {"$ref": "#/$defs/approval"}
       }
     },
-    "approval": {"type": "object"}
-  },
-  "allOf": [
-    {
-      "if": {
-        "properties": {"workflow_mode": {"const": "full"}},
-        "required": ["workflow_mode"]
-      },
-      "then": {"required": ["visual_preview"]}
+    "singleDecision": {
+      "allOf": [
+        {"$ref": "#/$defs/decisionBase"},
+        {
+          "properties": {
+            "tentative_selection_ids": {"maxItems": 1},
+            "selected_candidate_ids": {"maxItems": 1}
+          }
+        }
+      ]
+    },
+    "multipleDecision": {"$ref": "#/$defs/decisionBase"},
+    "skippedMedia": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "skip_reason"],
+      "properties": {
+        "status": {"const": "skipped"},
+        "skip_reason": {"type": "string", "minLength": 1}
+      }
     }
-  ]
+  }
 }

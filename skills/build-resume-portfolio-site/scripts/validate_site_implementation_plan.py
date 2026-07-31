@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -11,6 +11,9 @@ STRATEGIES = {"single-agent", "fresh-agent-sequential", "parallel-wave"}
 REQUIRED = {
     "schema_version",
     "design_spec_id",
+    "todo_plan",
+    "todo_plan_approval",
+    "generation_mode",
     "strategy",
     "multi_agent_authorized",
     "multi_agent_plan",
@@ -57,8 +60,30 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
-    if payload["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if payload["schema_version"] != 2:
+        errors.append("schema_version must be 2")
+    todo_plan = str(payload["todo_plan"]).replace("\\", "/")
+    if PurePosixPath(todo_plan) != PurePosixPath(
+        ".resume-site-work/reports/site-todo-plan.md"
+    ):
+        errors.append(
+            "todo_plan must reference "
+            ".resume-site-work/reports/site-todo-plan.md"
+        )
+    approval = payload["todo_plan_approval"]
+    if not isinstance(approval, dict):
+        errors.append("todo plan requires user approval")
+    elif approval.get("status") != "user_approved":
+        errors.append("todo plan requires user approval")
+    elif (
+        approval.get("source") != "explicit_user"
+        or approval.get("channel") != "conversation"
+    ):
+        errors.append(
+            "todo plan approval must be explicit and conversational"
+        )
+    if payload["generation_mode"] != "one-integrated-site":
+        errors.append("generation_mode must be one-integrated-site")
     if payload["strategy"] not in STRATEGIES:
         errors.append("unsupported strategy")
     if not isinstance(payload["multi_agent_authorized"], bool):

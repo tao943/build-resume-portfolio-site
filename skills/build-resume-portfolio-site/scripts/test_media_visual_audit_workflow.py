@@ -60,10 +60,10 @@ class MediaVisualAuditWorkflowTests(unittest.TestCase):
             "loading, error, and Poster fallback",
             "last valid preview",
             "visual_repair_round < 2",
-            "Do not request routine confirmation",
+            "do not request\n   routine confirmation",
         ):
             with self.subTest(marker=marker):
-                self.assertIn(marker, skill)
+                self.assertIn(marker.lower(), skill.lower())
 
 
 if __name__ == "__main__":

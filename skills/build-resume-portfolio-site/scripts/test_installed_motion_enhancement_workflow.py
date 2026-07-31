@@ -8,21 +8,16 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 
 
 class InstalledMotionEnhancementWorkflowTests(unittest.TestCase):
-    def test_optional_motion_and_video_continuations_add_no_confirmation_gate(self) -> None:
+    def test_motion_enhancement_and_video_stay_in_final_acceptance_loop(self) -> None:
         text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         required = (
-            "## Stage 5: Add the optional recipe-based motion layer",
-            "motion_enhancement_selecting",
-            "motion_poster_generating",
-            "ordinary feedback",
-            "motion_enhancement_generating",
-            "motion_waiting_confirmation",
-            "video_upgrade_available",
-            "versions\\v5-motion-enhanced-poster",
-            "## Stage 6: Upgrade a confirmed Poster to video",
-            "video_upgrade_validating",
+            "On `加强动效`",
+            "motion_enhancing",
+            "ordinary\n  feedback",
+            "integrated_waiting_confirmation",
+            "user-supplied local MP4/WebM",
             "atomically",
-            "versions\\v6-video-upgrade",
+            "never another confirmation\n  gate",
         )
         for marker in required:
             with self.subTest(marker=marker):

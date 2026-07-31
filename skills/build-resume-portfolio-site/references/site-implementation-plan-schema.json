@@ -5,6 +5,9 @@
   "required": [
     "schema_version",
     "design_spec_id",
+    "todo_plan",
+    "todo_plan_approval",
+    "generation_mode",
     "strategy",
     "multi_agent_authorized",
     "multi_agent_plan",
@@ -13,13 +16,43 @@
     "snapshot_target"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "design_spec_id": {"type": "string", "minLength": 1},
+    "todo_plan": {
+      "const": ".resume-site-work/reports/site-todo-plan.md"
+    },
+    "todo_plan_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "source", "channel"],
+      "properties": {
+        "status": {"const": "user_approved"},
+        "source": {"const": "explicit_user"},
+        "channel": {"const": "conversation"}
+      }
+    },
+    "generation_mode": {"const": "one-integrated-site"},
     "strategy": {
       "enum": ["single-agent", "fresh-agent-sequential", "parallel-wave"]
     },
     "multi_agent_authorized": {"type": "boolean"},
-    "tasks": {"type": "array", "minItems": 1},
+    "multi_agent_plan": {"type": ["string", "null"]},
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "depends_on",
+          "files",
+          "consumes",
+          "produces",
+          "acceptance",
+          "verification"
+        ]
+      }
+    },
     "rollback_baseline": {"type": "string", "minLength": 1},
     "snapshot_target": {"type": "string", "minLength": 1}
   }

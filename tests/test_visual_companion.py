@@ -344,8 +344,11 @@ class VisualCompanionPackageTests(unittest.TestCase):
         self.assertNotIn("<form", text)
         self.assertNotIn("data-choice", text)
         self.assertNotIn("<button", text)
-        self.assertIn("approve in the conversation", text)
-        self.assertIn("<!-- visual-directions -->", text)
+        self.assertIn("return to the conversation", text)
+        self.assertIn("<!-- preview-category -->", text)
+        self.assertIn("<!-- visual-candidates -->", text)
+        self.assertNotIn("onclick=", text)
+        self.assertNotIn("onchange=", text)
 
     def test_visual_companion_resources_are_packaged(self) -> None:
         skill_root = ROOT / "skills" / "build-resume-portfolio-site"

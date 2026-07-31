@@ -27,6 +27,18 @@ class SyncedWorkflowBaselineTests(unittest.TestCase):
         self.assertIn("parallel-wave", text)
         self.assertIn("creative-direction.json", text)
 
+    def test_skill_uses_upfront_design_and_todo_approval(self) -> None:
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "schema-version-3",
+            "site-todo-plan.md",
+            "one integrated website",
+            "当前效果满意，完成",
+            "加强动效",
+            "提出修改",
+        ):
+            self.assertIn(marker, text)
+
 
 if __name__ == "__main__":
     unittest.main()

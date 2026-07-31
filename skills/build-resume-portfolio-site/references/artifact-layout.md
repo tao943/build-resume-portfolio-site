@@ -11,17 +11,15 @@ Create all generated material under `.resume-site-work/` in the active user work
 |-- site/                         # only editable React + Vite source project
 |-- style-preview/                # display-only discovery evidence
 |   |-- drafts/
-|   |   `-- <draft-id>/gallery.html
+|   |   `-- <category>/<draft-id>/gallery.html
 |   `-- sessions/
 |       `-- <session-id>/
 |           |-- gallery.html
 |           |-- assets/
 |           `-- state/server-info.json
 |-- versions/
-|   |-- v1-prototype/             # confirmed-source candidates; excludes dist/node_modules
-|   |-- v2-media-direction/
-|   |-- v3-refined/
-|   `-- v4-motion/
+|   |-- v1-integrated/            # first complete site; excludes dist/node_modules
+|   `-- v1-integrated-motion-rN/  # optional motion-only enhancement retries
 |-- preview/
 |   `-- dist/                     # latest successful npm run build output
 |-- screenshots/
@@ -31,6 +29,7 @@ Create all generated material under `.resume-site-work/` in the active user work
 |-- reports/
 |   |-- workflow-route.json
 |   |-- site-design-spec.json     # explicit product/experience approval
+|   |-- site-todo-plan.md         # readable plan shown and approved in conversation
 |   |-- site-implementation-plan.json # files, dependencies, checks, rollback
 |   |-- content-map.json
 |   |-- content-provenance.json
@@ -52,7 +51,8 @@ Create all generated material under `.resume-site-work/` in the active user work
 `style-preview/` contains display-only discovery evidence. Its galleries are
 not React source, production previews, confirmed snapshots, or publishable
 site output. Browser activity has no approval semantics; only an explicit
-conversation reply may be recorded in the version-2 site design specification.
+conversation reply may be recorded in the schema-version-3 site design
+specification. Category Galleries are independent rather than cumulative.
 Stopping a local session preserves its gallery for review.
 
 The three content files under `input/` plus
@@ -69,12 +69,14 @@ edit. It carries the creative thesis,
 review questions. It is not source code, a component tree, a new stage, or a
 confirmation artifact.
 
-`reports/site-design-spec.json` records the explicit website product and
-experience decision. `reports/site-implementation-plan.json` records exact
-files, task boundaries, interfaces, verification, rollback, and snapshot
-targets. Both validate before React source edits. The creative-direction report
-translates the approved design spec into an implementation-ready visual
-contract; it may not contradict it.
+`reports/site-design-spec.json` records all six category decisions and the
+final requirements approval. `reports/site-todo-plan.md` is the readable plan
+shown and explicitly approved in the conversation.
+`reports/site-implementation-plan.json` records that approval plus exact files,
+task boundaries, interfaces, verification, rollback, and the integrated
+snapshot target. All three gates complete before React source edits. The
+creative-direction report may translate the approved design spec into
+implementation detail but may not contradict it.
 
 `reports/multi-agent-implementation.json` exists only when the user explicitly
 authorizes multi-agent implementation. It records strategy, dependencies,

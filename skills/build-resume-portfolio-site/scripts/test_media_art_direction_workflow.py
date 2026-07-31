@@ -162,36 +162,31 @@ class MediaArtDirectionWorkflowTests(unittest.TestCase):
             .issubset(invalid_controller)
         )
 
-    def test_workflow_persists_the_media_direction_gate_and_artifacts(self):
+    def test_workflow_integrates_media_direction_without_a_late_gate(self):
         workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
         layout = ARTIFACT_LAYOUT_PATH.read_text(encoding="utf-8")
 
         for marker in (
-            "prototype_waiting_confirmation --confirm--> media_direction_generating",
-            "media_direction_generating -> media_direction_waiting_confirmation",
-            "media_direction_waiting_confirmation --confirm--> screenshot_auditing",
-            "media_direction_waiting_confirmation --reject--> media_direction_generating",
-            "confirmations.media_direction",
-            "selected_media_direction_id",
-            "attempted_media_direction_ids",
-            "versions/v2-media-direction",
-            "reports/media-art-direction.json",
+            "design_media_selecting OR design_media_skipped",
+            "integrated_generating",
+            "versions/v1-integrated",
+            "media-art-direction.json",
             "reports/media-inventory.json",
             '"schema_version": 4',
-            "reject every other old schema",
+            "Never fabricate migrated approvals",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, workflow + layout)
 
-        self.assertNotIn("style_waiting_confirmation", workflow + layout)
-        self.assertNotIn("v2-styled", workflow + layout)
+        self.assertNotIn("media_direction_waiting_confirmation", workflow + layout)
+        self.assertNotIn("versions/v2-media-direction", workflow + layout)
 
     def test_optional_motion_enhancement_is_not_a_fourth_gate(self):
         workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
-        self.assertIn("## Confirmation gates", workflow)
-        self.assertIn("optional branch", workflow)
-        self.assertNotIn("a deliberate gate", workflow)
+        self.assertIn("## Final acceptance state machine", workflow)
+        self.assertIn("--加强动效--> motion_enhancing", workflow)
+        self.assertNotIn("motion_enhancement_waiting_confirmation", workflow)
 
     def test_prompt_and_skill_require_an_explicit_empty_or_populated_inventory(self):
         prompt = PROMPT_PATH.read_text(encoding="utf-8")

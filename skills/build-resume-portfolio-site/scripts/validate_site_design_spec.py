@@ -7,95 +7,32 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 
+DECISION_ORDER = (
+    "structure",
+    "typography",
+    "color",
+    "media",
+    "primary_motion",
+    "secondary_motion",
+)
 REQUIRED = {
     "schema_version",
     "spec_id",
     "workflow_mode",
     "content_revision",
-    "visual_protagonist",
-    "fixed_constraints",
-    "open_ceiling",
-    "avoid",
-    "alternatives",
-    "selected_alternative_id",
-    "composition_commitment",
-    "type_color_character",
-    "representative_interaction",
-    "approval",
+    "decision_order",
+    "decisions",
+    "engineering_constraints",
+    "requirements_approval",
+}
+REQUIRED_ENGINEERING_CONSTRAINTS = {
+    "responsive",
+    "accessible",
+    "coarse-pointer",
+    "reduced-motion",
+    "media-fallbacks",
 }
 PLACEHOLDERS = {"todo", "tbd", "implement later", "fill in details"}
-
-
-def _validate_visual_preview(
-    preview: Any,
-    alternative_ids: list[str],
-) -> list[str]:
-    if not isinstance(preview, dict):
-        return ["full mode requires visual_preview"]
-
-    required = {
-        "mode",
-        "artifact",
-        "candidate_ids",
-        "recommended_candidate_id",
-        "selected_candidate_id",
-        "approval_channel",
-        "explicitly_approved",
-    }
-    errors = [
-        f"visual_preview missing field: {name}"
-        for name in sorted(required - set(preview))
-    ]
-    if errors:
-        return errors
-
-    candidate_ids = preview["candidate_ids"]
-    if (
-        not isinstance(candidate_ids, list)
-        or not 2 <= len(candidate_ids) <= 3
-        or not all(
-            isinstance(item, str) and item.strip()
-            for item in candidate_ids
-        )
-        or len(candidate_ids) != len(set(candidate_ids))
-    ):
-        errors.append(
-            "visual_preview candidate_ids must contain "
-            "two or three unique IDs"
-        )
-        candidate_ids = []
-
-    if set(candidate_ids) != set(alternative_ids):
-        errors.append("visual_preview candidate_ids must match alternatives")
-    if preview["mode"] != "local-gallery":
-        errors.append("visual_preview mode must be local-gallery")
-
-    artifact = str(preview["artifact"]).replace("\\", "/")
-    artifact_path = PurePosixPath(artifact)
-    expected_prefix = (
-        ".resume-site-work",
-        "style-preview",
-        "sessions",
-    )
-    if (
-        artifact_path.is_absolute()
-        or ".." in artifact_path.parts
-        or artifact_path.parts[:3] != expected_prefix
-        or len(artifact_path.parts) != 5
-        or artifact_path.parts[-1] != "gallery.html"
-    ):
-        errors.append("visual_preview artifact must be a session gallery")
-
-    for key in ("recommended_candidate_id", "selected_candidate_id"):
-        if preview[key] not in candidate_ids:
-            errors.append(f"visual_preview {key} must reference a candidate")
-    if preview["approval_channel"] != "conversation":
-        errors.append(
-            "visual_preview approval_channel must be conversation"
-        )
-    if preview["explicitly_approved"] is not True:
-        errors.append("visual_preview must be explicitly approved")
-    return errors
 
 
 def _strings(value: Any, *, non_empty: bool = False) -> bool:
@@ -116,6 +53,135 @@ def _contains_placeholder(value: Any) -> bool:
     return False
 
 
+def _validate_approval(approval: Any, subject: str) -> list[str]:
+    verb = "require" if subject == "final requirements" else "requires"
+    if not isinstance(approval, dict):
+        return [f"{subject} {verb} explicit approval"]
+    if approval.get("status") != "user_approved":
+        return [f"{subject} {verb} user approval"]
+    if (
+        approval.get("source") != "explicit_user"
+        or approval.get("channel") != "conversation"
+    ):
+        return [f"{subject} approval must be explicit and conversational"]
+    return []
+
+
+def _validate_preview(preview: Any, category: str) -> list[str]:
+    if not isinstance(preview, dict):
+        return [f"{category} requires a preview record"]
+    errors: list[str] = []
+    if preview.get("offered") is not True:
+        errors.append(f"{category} preview must be offered")
+    response = preview.get("response")
+    delivery = preview.get("delivery")
+    artifact = preview.get("artifact")
+    if response not in {"accepted", "declined"}:
+        errors.append(f"{category} preview response is invalid")
+    if delivery not in {
+        "local-gallery",
+        "static-fallback",
+        "not-requested",
+    }:
+        errors.append(f"{category} preview delivery is invalid")
+    if response == "declined":
+        if delivery != "not-requested" or artifact is not None:
+            errors.append(
+                f"{category} declined preview must not have an artifact"
+            )
+        return errors
+    if delivery == "not-requested":
+        errors.append(f"{category} accepted preview requires delivery")
+    normalized = str(artifact or "").replace("\\", "/")
+    artifact_path = PurePosixPath(normalized)
+    expected_prefix = (
+        ".resume-site-work",
+        "style-preview",
+        "sessions",
+    )
+    if (
+        artifact_path.is_absolute()
+        or ".." in artifact_path.parts
+        or artifact_path.parts[:3] != expected_prefix
+        or len(artifact_path.parts) != 5
+        or artifact_path.parts[-1] != "gallery.html"
+    ):
+        errors.append(
+            f"{category} preview artifact must be a session gallery"
+        )
+    return errors
+
+
+def _validate_candidates(candidates: Any, category: str) -> tuple[list[str], list[str]]:
+    if not isinstance(candidates, list) or len(candidates) < 2:
+        return [], [f"{category} requires at least two candidates"]
+    errors: list[str] = []
+    ids: list[str] = []
+    for index, candidate in enumerate(candidates):
+        if not isinstance(candidate, dict):
+            errors.append(f"{category} candidate[{index}] must be an object")
+            continue
+        candidate_id = candidate.get("id")
+        label = candidate.get("label")
+        tradeoffs = candidate.get("tradeoffs")
+        if not isinstance(candidate_id, str) or not candidate_id.strip():
+            errors.append(f"{category} candidate[{index}] requires an ID")
+            continue
+        ids.append(candidate_id)
+        if not isinstance(label, str) or not label.strip():
+            errors.append(f"{category} candidate[{index}] requires a label")
+        if not _strings(tradeoffs, non_empty=True):
+            errors.append(
+                f"{category} candidate[{index}] requires tradeoffs"
+            )
+    if len(ids) != len(set(ids)):
+        errors.append(f"{category} candidate IDs must be unique")
+    return ids, errors
+
+
+def _validate_confirmed_decision(
+    category: str,
+    decision: Any,
+    *,
+    allow_multiple: bool,
+) -> list[str]:
+    if not isinstance(decision, dict) or decision.get("status") != "confirmed":
+        return [f"{category} must be confirmed"]
+    candidate_ids, errors = _validate_candidates(
+        decision.get("candidates"), category
+    )
+    known = set(candidate_ids)
+    if decision.get("recommended_candidate_id") not in known:
+        errors.append(f"{category} recommendation must reference a candidate")
+    for field in ("tentative_selection_ids", "selected_candidate_ids"):
+        selected = decision.get(field)
+        if not _strings(selected, non_empty=True):
+            errors.append(f"{category} {field} must be non-empty")
+            continue
+        if len(selected) != len(set(selected)):
+            errors.append(f"{category} {field} must be unique")
+        if not allow_multiple and len(selected) != 1:
+            errors.append(
+                f"{category} requires exactly one selected candidate"
+            )
+        if not set(selected) <= known:
+            errors.append(f"{category} {field} must reference candidates")
+    errors.extend(_validate_preview(decision.get("preview"), category))
+    errors.extend(_validate_approval(decision.get("approval"), category))
+    return errors
+
+
+def _validate_media_decision(decision: Any) -> list[str]:
+    if isinstance(decision, dict) and decision.get("status") == "skipped":
+        reason = decision.get("skip_reason")
+        if not isinstance(reason, str) or not reason.strip():
+            return ["media skip requires a reason"]
+        return []
+    return _validate_confirmed_decision(
+        "media", decision, allow_multiple=False
+    )
+
+
 def validate(payload: Any) -> list[str]:
     if not isinstance(payload, dict):
         return ["site design spec must be a JSON object"]
@@ -125,74 +191,69 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
-    if payload["schema_version"] != 2:
-        errors.append("schema_version must be 2")
+    if payload["schema_version"] != 3:
+        errors.append("schema_version must be 3")
     if payload["workflow_mode"] not in {"full", "fast-change"}:
         errors.append("workflow_mode must be full or fast-change")
-    if not isinstance(payload["content_revision"], int) or payload[
-        "content_revision"
-    ] < 1:
-        errors.append("content_revision must be a positive integer")
-    for name in (
-        "spec_id",
-        "visual_protagonist",
-        "composition_commitment",
-        "type_color_character",
-        "representative_interaction",
+    if (
+        not isinstance(payload["spec_id"], str)
+        or not payload["spec_id"].strip()
     ):
-        if not isinstance(payload[name], str) or not payload[name].strip():
-            errors.append(f"{name} must be a non-empty string")
-    for name in ("fixed_constraints", "open_ceiling", "avoid"):
-        if not _strings(payload[name], non_empty=True):
-            errors.append(f"{name} must be a non-empty string list")
-    fixed = set(payload["fixed_constraints"])
-    avoid = set(payload["avoid"])
-    if fixed & avoid:
-        errors.append("fixed_constraints and avoid must not overlap")
+        errors.append("spec_id must be a non-empty string")
+    if (
+        not isinstance(payload["content_revision"], int)
+        or isinstance(payload["content_revision"], bool)
+        or payload["content_revision"] < 1
+    ):
+        errors.append("content_revision must be a positive integer")
+    if tuple(payload["decision_order"]) != DECISION_ORDER:
+        errors.append("decision_order must match the required workflow order")
 
-    alternatives = payload["alternatives"]
-    if not isinstance(alternatives, list):
-        errors.append("alternatives must be a list")
-        alternatives = []
-    if payload["workflow_mode"] == "full" and not 2 <= len(alternatives) <= 3:
-        errors.append("full mode requires two or three alternatives")
-    ids: list[str] = []
-    families: list[str] = []
-    for index, alternative in enumerate(alternatives):
-        if not isinstance(alternative, dict):
-            errors.append(f"alternative[{index}] must be an object")
-            continue
-        if not {"id", "family", "tradeoffs"} <= set(alternative):
-            errors.append(f"alternative[{index}] is incomplete")
-            continue
-        if not all(
-            isinstance(alternative[name], str) and alternative[name].strip()
-            for name in ("id", "family")
-        ):
-            errors.append(f"alternative[{index}] id and family are required")
-        if not _strings(alternative["tradeoffs"], non_empty=True):
-            errors.append(f"alternative[{index}] requires tradeoffs")
-        ids.append(alternative["id"])
-        families.append(alternative["family"].strip().lower())
-    if len(ids) != len(set(ids)):
-        errors.append("alternative IDs must be unique")
-    if len(families) != len(set(families)):
-        errors.append("layout families must be materially different")
-    if payload["selected_alternative_id"] not in ids:
-        errors.append("selected_alternative_id must reference an alternative")
-    if payload["workflow_mode"] == "full":
-        errors.extend(
-            _validate_visual_preview(payload.get("visual_preview"), ids)
-        )
-
-    approval = payload["approval"]
-    if not isinstance(approval, dict):
-        errors.append("approval must be an object")
+    decisions = payload["decisions"]
+    if not isinstance(decisions, dict):
+        errors.append("decisions must be an object")
     else:
-        if approval.get("status") != "user_approved":
-            errors.append("site design requires user approval")
-        if approval.get("source") != "explicit_user":
-            errors.append("approval source must be explicit_user")
+        missing = set(DECISION_ORDER) - set(decisions)
+        for category in sorted(missing):
+            errors.append(f"decisions missing category: {category}")
+        for category in ("structure", "typography", "color"):
+            if category in decisions:
+                errors.extend(
+                    _validate_confirmed_decision(
+                        category,
+                        decisions[category],
+                        allow_multiple=False,
+                    )
+                )
+        if "media" in decisions:
+            errors.extend(_validate_media_decision(decisions["media"]))
+        if "primary_motion" in decisions:
+            errors.extend(
+                _validate_confirmed_decision(
+                    "primary_motion",
+                    decisions["primary_motion"],
+                    allow_multiple=False,
+                )
+            )
+        if "secondary_motion" in decisions:
+            errors.extend(
+                _validate_confirmed_decision(
+                    "secondary_motion",
+                    decisions["secondary_motion"],
+                    allow_multiple=True,
+                )
+            )
+
+    constraints = payload["engineering_constraints"]
+    if not _strings(constraints, non_empty=True):
+        errors.append("engineering_constraints must be a non-empty string list")
+    elif not REQUIRED_ENGINEERING_CONSTRAINTS <= set(constraints):
+        errors.append("engineering_constraints omit mandatory constraints")
+    errors.extend(
+        _validate_approval(
+            payload["requirements_approval"], "final requirements"
+        )
+    )
     if _contains_placeholder(payload):
         errors.append("placeholder text is not allowed")
     return errors
