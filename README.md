@@ -31,6 +31,7 @@
 - 基于证据的简历内容核验，禁止虚构指标、经历和技能。
 - Taste 风格的创意版式词汇与开放视觉探索。
 - 离线 UI/UX 设计目录、媒体艺术指导和参考图工作流。
+- 内置 Visual Companion：无需 Codex Browser 插件或 npm 安装，在系统浏览器中并排展示 2–3 个视觉方向，最终选择与批准只在 conversation 中完成。
 - 经用户明确授权后使用多 Agent，并通过文件所有权避免并行冲突。
 - 截图审查、响应式修复、可访问性检查和安全动效。
 - 可选 APIHz 媒体搜索、本地 Poster 和视频升级。
@@ -47,6 +48,24 @@ $resume-portfolio-workflow
 也可以在边界明确时单独调用内容或网站 Skill。网站 Skill 检测到内容包缺失或需要事实修改时，会要求先执行内容核验流程。
 
 插件清单位于 `.codex-plugin/plugin.json`。
+
+## 跨 Agent 视觉预览
+
+网站 Skill 自带纯 Node.js Visual Companion，只使用 Node 内置模块。它生成
+display-only 本地画廊，默认监听 `127.0.0.1`，并返回带随机会话密钥的完整
+URL。浏览器不会提交选择；用户必须回到 conversation 明确批准。
+
+支持具备 Node.js、Shell、文件系统和浏览器访问路径的本地 coding agent：
+
+- Codex：使用可持续运行或异步终端命令；
+- Claude Code：使用后台 Shell 任务；
+- Cursor：使用其终端后台任务；
+- Copilot CLI：使用异步 Shell；
+- 其他本地 Agent：保持前台服务器进程，或直接展示静态 HTML。
+
+自动打开浏览器失败时继续提供 URL；服务器不能存活或远程 loopback
+不可访问时，保留并展示静态 `gallery.html`。远程场景只使用用户已授权的
+端口转发，不上传简历或视觉稿。
 
 ## 安全边界
 

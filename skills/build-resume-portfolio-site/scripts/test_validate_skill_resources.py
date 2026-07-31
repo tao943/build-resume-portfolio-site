@@ -44,6 +44,13 @@ CONTRACTS = (
     "site-design-spec-schema.json",
     "site-planning-contract.md",
     "site-implementation-plan-schema.json",
+    "visual-style-preview-contract.md",
+)
+VISUAL_COMPANION_FILES = (
+    "assets/visual-companion/gallery-shell.html",
+    "scripts/visual_companion/server.cjs",
+    "scripts/visual_companion/launch.cjs",
+    "scripts/visual_companion/stop.cjs",
 )
 
 
@@ -126,6 +133,11 @@ def write_complete_skeleton(root: Path) -> None:
         SKILL_ROOT / "vendor" / "ui-ux-pro-max",
         root / "vendor" / "ui-ux-pro-max",
     )
+    for relative in VISUAL_COMPANION_FILES:
+        source = SKILL_ROOT / relative
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
 
 
 
@@ -194,6 +206,19 @@ class ValidateSkillResourcesTests(unittest.TestCase):
             self.assertFalse(report.ok)
             self.assertIn(
                 "missing_contract: site-planning-contract",
+                report.errors,
+            )
+
+    def test_discovery_rejects_missing_visual_companion_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_complete_skeleton(root)
+            missing = "scripts/visual_companion/launch.cjs"
+            (root / missing).unlink()
+            report = validate_resources(root, "runtime", "discovery")
+            self.assertFalse(report.ok)
+            self.assertIn(
+                f"missing_visual_companion: {missing}",
                 report.errors,
             )
 

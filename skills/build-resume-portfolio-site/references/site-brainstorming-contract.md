@@ -12,10 +12,20 @@ strategy.
 5. Define the visual protagonist, composition commitment, type/color
    character, representative interaction, fixed constraints, open ceiling,
    and avoid rules.
-6. Write `.resume-site-work/reports/site-design-spec.json`.
-7. Validate it and wait for explicit user approval.
+6. Read `visual-style-preview-contract.md` and create one display-only
+   `gallery.html` that shows all two or three alternatives with approved
+   content. Keep it outside the React source project.
+7. Start the local companion when possible. Always provide the complete
+   authenticated URL and the standalone HTML fallback.
+8. Receive the candidate selection and explicit approval in the conversation.
+   Browser activity never counts as approval and never advances state.
+9. Write schema-version-2
+   `.resume-site-work/reports/site-design-spec.json`.
+10. Validate it before creating the implementation plan.
 
 Do not edit React source before the approved site design specification exists.
+Do not infer approval from a browser visit, screenshot, automatic launch, or
+silence.
 
 Fast change is allowed only with a validated workflow route, a confirmed
 artifact, exact affected files, verification, and rollback baseline. If scope

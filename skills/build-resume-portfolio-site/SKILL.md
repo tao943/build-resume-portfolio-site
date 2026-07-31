@@ -10,7 +10,7 @@ Build one directly runnable React + Vite portfolio through four controlled stage
 ## Start or resume
 
 1. Resolve `SKILL_ROOT` as this Skill directory.
-2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/site-brainstorming-contract.md`, `references/site-planning-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
+2. Read `references/workflow-contract.md`, `references/artifact-layout.md`, `references/content-preflight-routing-contract.md`, `references/site-brainstorming-contract.md`, `references/visual-style-preview-contract.md`, `references/site-planning-contract.md`, `references/react-vite-output-contract.md`, `references/reference-library-contract.md`, `references/design-intelligence-contract.md`, `references/creative-direction-contract.md`, and `references/apihz-media-contract.md` completely. When the user explicitly authorizes multi-agent implementation, also read `references/multi-agent-implementation-contract.md` completely before dispatch.
 3. Create `.resume-site-work/` in the active user workspace or load `build-state.json`. The active state schema is version `4`. A version-3 state may be migrated only with `scripts/migrate_build_state.py` into a distinct output file; reject every other old schema and never infer a migration.
 4. Apply content preflight before a new Stage 1 build, when a new resume/JD/claim is supplied, or when the user requests factual/copy changes. Skip it only to resume an existing confirmed site for visual, media, motion, responsive, accessibility, or frontend-only work.
 5. For content preflight, run:
@@ -35,15 +35,27 @@ or implementation-strategy change:
 2. Inspect approved content, authorized media, references, and existing state.
 3. Ask one question at a time; each question must be decision-bearing.
 4. Compare two or three materially different layout or experience families.
-5. Write `.resume-site-work\reports\site-design-spec.json`, validate it with
+5. Follow `references/visual-style-preview-contract.md`. Create one
+   display-only `gallery.html` outside `.resume-site-work\site`; use approved
+   content to show every alternative at the fidelity needed for the decision.
+6. Run `scripts\visual_companion\launch.cjs` with the workspace root and
+   gallery path. Give the user the complete authenticated URL and the absolute
+   static HTML fallback. Automatic-open failure is non-blocking; when the
+   server cannot remain alive, continue with the static file.
+7. Ask the user to select and explicitly approve a candidate in the
+   conversation. Approval remains in the conversation: browser activity,
+   opening the URL, reloads, and screenshots never select a candidate or
+   advance workflow state.
+8. Write schema-version-2
+   `.resume-site-work\reports\site-design-spec.json`, validate it with
    `scripts\validate_site_design_spec.py`, show the recommendation and
-   trade-offs, and wait for explicit user approval.
-6. Validate `planning` resources.
-7. Write `.resume-site-work\reports\site-implementation-plan.json` with exact
+   trade-offs, and preserve the conversational approval evidence.
+9. Validate `planning` resources.
+10. Write `.resume-site-work\reports\site-implementation-plan.json` with exact
    files, dependencies, interfaces, acceptance, verification, rollback, and
    snapshot target. Validate it with
    `scripts\validate_site_implementation_plan.py`.
-8. Select the implementation strategy, then enter Stage 1 or the relevant
+11. Select the implementation strategy, then enter Stage 1 or the relevant
    confirmed-stage transaction.
 
 Do not edit React source before the site design specification is explicitly
@@ -67,7 +79,7 @@ No external Superpowers skill is required at runtime.
 Before each stage, run:
 
 ```powershell
-python "$SKILL_ROOT\scripts\validate_skill_resources.py" --mode runtime --stage <prototype|media-direction|screenshot|motion>
+python "$SKILL_ROOT\scripts\validate_skill_resources.py" --mode runtime --stage <discovery|planning|prototype|media-direction|screenshot|motion>
 ```
 
 Continue only on exit `0`. Exit `2` means approved stage material is unavailable; exit `1` means malformed or missing resources. Report the exact resource and stop instead of substituting a generic prompt, template, or style.

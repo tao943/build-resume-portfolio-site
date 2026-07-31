@@ -48,6 +48,18 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / "skills" / name / "SKILL.md").is_file())
 
+    def test_visual_companion_is_packaged_with_website_skill(self) -> None:
+        root = ROOT / "skills" / "build-resume-portfolio-site"
+        for relative in (
+            "assets/visual-companion/gallery-shell.html",
+            "references/visual-style-preview-contract.md",
+            "scripts/visual_companion/server.cjs",
+            "scripts/visual_companion/launch.cjs",
+            "scripts/visual_companion/stop.cjs",
+        ):
+            with self.subTest(relative=relative):
+                self.assertTrue((root / relative).is_file(), relative)
+
     def test_domain_skills_internalize_discovery_and_planning(self) -> None:
         for name in ("resume-content-intelligence", "build-resume-portfolio-site"):
             text = self.read_skill(name)
@@ -59,6 +71,48 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         text = self.read_skill("build-resume-portfolio-site")
         self.assertIn("Do not edit React source before", text)
         self.assertIn("site-design-spec.json", text)
+
+    def test_site_discovery_requires_display_only_visual_gallery(self) -> None:
+        text = self.read_skill("build-resume-portfolio-site").lower()
+        self.assertIn("visual-style-preview-contract.md", text)
+        self.assertIn("approval remains in the conversation", text)
+        self.assertIn("launch.cjs", text)
+        self.assertIn("complete authenticated url", text)
+        self.assertIn("static html fallback", text)
+        self.assertIn("do not edit react source", text)
+
+    def test_browser_activity_never_counts_as_approval(self) -> None:
+        contract = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "references"
+            / "site-brainstorming-contract.md"
+        ).read_text(encoding="utf-8").lower()
+        self.assertIn("browser activity never counts as approval", contract)
+        self.assertIn("two or three", contract)
+        self.assertIn("gallery.html", contract)
+
+    def test_artifact_layout_owns_style_preview_sessions(self) -> None:
+        layout = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "references"
+            / "artifact-layout.md"
+        ).read_text(encoding="utf-8").lower()
+        self.assertIn("style-preview", layout)
+        self.assertIn("discovery evidence", layout)
+        self.assertIn("not react source", layout)
+
+    def test_readme_documents_cross_agent_visual_preview(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        self.assertIn("visual companion", readme)
+        self.assertIn("codex", readme)
+        self.assertIn("claude code", readme)
+        self.assertIn("cursor", readme)
+        self.assertIn("copilot cli", readme)
+        self.assertIn("conversation", readme)
 
     def test_valid_full_workflow_artifacts_pass(self) -> None:
         cases = (
@@ -103,6 +157,41 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
             ),
         )
         self.assertNotEqual(result.returncode, 0)
+
+    def test_full_site_requires_visual_preview(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload.pop("visual_preview"),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("full mode requires visual_preview", result.stdout)
+
+    def test_browser_activity_cannot_approve_site_design(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload["visual_preview"].update(
+                {"approval_channel": "browser"}
+            ),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "visual_preview approval_channel must be conversation",
+            result.stdout,
+        )
+
+    def test_version_one_site_design_is_rejected(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload.update({"schema_version": 1}),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("schema_version must be 2", result.stdout)
 
     def test_unsupported_claim_cannot_enter_content_plan(self) -> None:
         def remove_evidence(payload: dict) -> None:

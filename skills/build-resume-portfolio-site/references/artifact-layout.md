@@ -9,6 +9,14 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- normalized-resume.json
 |   `-- approved-copy.json
 |-- site/                         # only editable React + Vite source project
+|-- style-preview/                # display-only discovery evidence
+|   |-- drafts/
+|   |   `-- <draft-id>/gallery.html
+|   `-- sessions/
+|       `-- <session-id>/
+|           |-- gallery.html
+|           |-- assets/
+|           `-- state/server-info.json
 |-- versions/
 |   |-- v1-prototype/             # confirmed-source candidates; excludes dist/node_modules
 |   |-- v2-media-direction/
@@ -40,6 +48,12 @@ Create all generated material under `.resume-site-work/` in the active user work
 ```
 
 `site/` is the sole source of truth. Do not maintain a separate HTML version. `preview/dist/` is disposable build output and must be replaced only after source validation and `npm run build` succeed.
+
+`style-preview/` contains display-only discovery evidence. Its galleries are
+not React source, production previews, confirmed snapshots, or publishable
+site output. Browser activity has no approval semantics; only an explicit
+conversation reply may be recorded in the version-2 site design specification.
+Stopping a local session preserves its gallery for review.
 
 The three content files under `input/` plus
 `reports/content-provenance.json` are owned by
