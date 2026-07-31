@@ -1,23 +1,30 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "design_spec_id": "site-spec-1",
+  "todo_plan": ".resume-site-work/reports/site-todo-plan.md",
+  "todo_plan_approval": {
+    "status": "user_approved",
+    "source": "explicit_user",
+    "channel": "conversation"
+  },
+  "generation_mode": "one-integrated-site",
   "strategy": "single-agent",
   "multi_agent_authorized": false,
   "multi_agent_plan": null,
   "tasks": [
     {
-      "id": "prototype-shell",
+      "id": "integrated-site",
       "depends_on": [],
       "files": ["src/App.jsx", "src/styles.css"],
-      "consumes": ["approved-copy.json", "site-design-spec.json"],
-      "produces": ["five-region prototype"],
-      "acceptance": ["Representative interaction is rendered."],
+      "consumes": ["approved-copy.json", "site-design-spec.json", "site-todo-plan.md"],
+      "produces": ["complete integrated portfolio"],
+      "acceptance": ["All six confirmed design decisions are integrated."],
       "verification": [
-        "python validate_vite_project.py .resume-site-work/site --stage prototype",
+        "python validate_vite_project.py .resume-site-work/site --stage integrated",
         "npm run build"
       ]
     }
   ],
   "rollback_baseline": "empty/new site",
-  "snapshot_target": "versions/v1-prototype"
+  "snapshot_target": "versions/v1-integrated"
 }
