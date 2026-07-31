@@ -16,19 +16,33 @@ content_preflight
 -> requirements_waiting_confirmation
 -> todo_plan_generating
 -> todo_plan_waiting_confirmation
+-> implementation_strategy_waiting_confirmation
+-> implementation_plan_generating
 -> integrated_generating
 -> integrated_auditing
 -> integrated_waiting_confirmation
 ```
 
-Every enabled design state contains tentative selection, a separate browser
-preview offer, optional independent Gallery presentation, and explicit
-conversational confirmation. A decline affects only that category.
+Every enabled design state compares candidates and offers its separate browser
+comparison before user selection. An optional independent Gallery supports the
+decision; selection and confirmation happen afterward in the conversation. A
+decline affects only that category.
 
 `requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
-the schema-v3 design specification. `todo_plan_waiting_confirmation --approve-->
-integrated_generating` is allowed only after the readable Markdown plan is shown
-and schema-v2 JSON plan validates.
+the schema-v3 design specification. Then:
+
+```text
+todo_plan_waiting_confirmation --approve--> implementation_strategy_waiting_confirmation
+implementation_strategy_waiting_confirmation --choose 1--> implementation_plan_generating
+implementation_strategy_waiting_confirmation --choose 2--> implementation_plan_generating
+implementation_strategy_waiting_confirmation --choose 2 and unsafe--> implementation_strategy_waiting_confirmation
+implementation_plan_generating --plan validates--> integrated_generating
+```
+
+Silence, browser activity, inferred preference, or prior approval cannot select
+the strategy. Do not write the machine plan or edit React source while waiting.
+Do not spawn agents while waiting. Parallel choice requires a validated disjoint plan; failure
+returns to the strategy gate without automatic fallback.
 
 ## Integrated transaction
 
@@ -78,9 +92,9 @@ handoff; `CONTENT_INVALID` freezes all website artifacts until repaired.
 conversation. `site-implementation-plan.json` schema v2 is the validated
 machine plan. All three precede React edits.
 
-Use `single-agent`, or an explicitly authorized and validated
-`fresh-agent-sequential`/`parallel-wave` plan. The main agent owns integration,
-shared files, state, preview promotion, snapshots, and publication.
+Use `single-agent`, or an explicitly authorized and validated `parallel-wave`
+plan. The main agent owns integration, shared files, state, preview promotion,
+snapshots, and publication.
 
 ## Fast change
 

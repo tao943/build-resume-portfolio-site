@@ -72,14 +72,17 @@ confirmation artifact.
 `reports/site-design-spec.json` records all six category decisions and the
 final requirements approval. `reports/site-todo-plan.md` is the readable plan
 shown and explicitly approved in the conversation.
-`reports/site-implementation-plan.json` records that approval plus exact files,
-task boundaries, interfaces, verification, rollback, and the integrated
-snapshot target. All three gates complete before React source edits. The
+`reports/site-implementation-plan.json` records that approval plus the
+plan-based recommendation, reasons, explicit conversational strategy selection,
+selected strategy, exact files, task boundaries, interfaces, verification,
+rollback, and the integrated snapshot target. All three gates complete before
+React source edits. The
 creative-direction report may translate the approved design spec into
 implementation detail but may not contradict it.
 
 `reports/multi-agent-implementation.json` exists only when the user explicitly
-authorizes multi-agent implementation. It records strategy, dependencies,
+selects parallel multi-Agent implementation. It records the parallel-wave
+strategy, dependencies,
 waves, shared files, bounded write ownership, acceptance criteria, and
 verification. Validate it before dispatch. Task handoffs go to
 `agent-reports/<task-id>.md`; neither artifact creates a new confirmation gate

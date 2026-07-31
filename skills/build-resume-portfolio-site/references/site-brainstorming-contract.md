@@ -34,17 +34,22 @@ For each enabled category:
 1. Compare two or three materially different candidates, except secondary
    motion may offer more compatible effects without a fixed numeric cap.
 2. Recommend one candidate or compatible set and state fit, risk, and trade-offs.
-3. Receive a tentative selection in the conversation.
-4. Ask in a separate message whether to open the browser for this category.
-5. If accepted, follow `visual-style-preview-contract.md`; if declined, record
+3. Ask whether to open the browser comparison in a separate message before
+   requesting a choice for this category.
+4. If accepted, follow `visual-style-preview-contract.md`; if declined, record
    `not-requested` and continue text-only.
+5. Receive the user's selection in the conversation after the preview or
+   decline.
 6. Receive explicit confirmation, revision, or rejection in the conversation.
 7. Lock the decision before entering the next category.
 
 An accepted preview produces a display-only `gallery.html` outside the React
 source project.
 
-Prior browser consent does not apply to later categories. Browser activity never counts as approval and never advances state. Do not repeatedly offer a category after the user declines its preview.
+Prior browser consent does not apply to later categories. Browser activity never counts as approval
+and never advances state. It also never counts as selection. Do not repeatedly
+offer a category after the user declines its preview. When media is explicitly
+skipped, record the reason and do not offer a media preview.
 
 After final requirements confirmation, write schema-version-3
 `.resume-site-work/reports/site-design-spec.json` and validate it before
