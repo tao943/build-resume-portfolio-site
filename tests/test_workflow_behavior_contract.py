@@ -104,6 +104,41 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0)
 
+    def test_full_site_requires_visual_preview(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload.pop("visual_preview"),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("full mode requires visual_preview", result.stdout)
+
+    def test_browser_activity_cannot_approve_site_design(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload["visual_preview"].update(
+                {"approval_channel": "browser"}
+            ),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "visual_preview approval_channel must be conversation",
+            result.stdout,
+        )
+
+    def test_version_one_site_design_is_rejected(self) -> None:
+        result = self.run_validator(
+            "build-resume-portfolio-site",
+            "validate_site_design_spec.py",
+            "site-design-spec-valid.json",
+            lambda payload: payload.update({"schema_version": 1}),
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("schema_version must be 2", result.stdout)
+
     def test_unsupported_claim_cannot_enter_content_plan(self) -> None:
         def remove_evidence(payload: dict) -> None:
             task = payload["tasks"][0]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -24,6 +24,78 @@ REQUIRED = {
     "approval",
 }
 PLACEHOLDERS = {"todo", "tbd", "implement later", "fill in details"}
+
+
+def _validate_visual_preview(
+    preview: Any,
+    alternative_ids: list[str],
+) -> list[str]:
+    if not isinstance(preview, dict):
+        return ["full mode requires visual_preview"]
+
+    required = {
+        "mode",
+        "artifact",
+        "candidate_ids",
+        "recommended_candidate_id",
+        "selected_candidate_id",
+        "approval_channel",
+        "explicitly_approved",
+    }
+    errors = [
+        f"visual_preview missing field: {name}"
+        for name in sorted(required - set(preview))
+    ]
+    if errors:
+        return errors
+
+    candidate_ids = preview["candidate_ids"]
+    if (
+        not isinstance(candidate_ids, list)
+        or not 2 <= len(candidate_ids) <= 3
+        or not all(
+            isinstance(item, str) and item.strip()
+            for item in candidate_ids
+        )
+        or len(candidate_ids) != len(set(candidate_ids))
+    ):
+        errors.append(
+            "visual_preview candidate_ids must contain "
+            "two or three unique IDs"
+        )
+        candidate_ids = []
+
+    if set(candidate_ids) != set(alternative_ids):
+        errors.append("visual_preview candidate_ids must match alternatives")
+    if preview["mode"] != "local-gallery":
+        errors.append("visual_preview mode must be local-gallery")
+
+    artifact = str(preview["artifact"]).replace("\\", "/")
+    artifact_path = PurePosixPath(artifact)
+    expected_prefix = (
+        ".resume-site-work",
+        "style-preview",
+        "sessions",
+    )
+    if (
+        artifact_path.is_absolute()
+        or ".." in artifact_path.parts
+        or artifact_path.parts[:3] != expected_prefix
+        or len(artifact_path.parts) != 5
+        or artifact_path.parts[-1] != "gallery.html"
+    ):
+        errors.append("visual_preview artifact must be a session gallery")
+
+    for key in ("recommended_candidate_id", "selected_candidate_id"):
+        if preview[key] not in candidate_ids:
+            errors.append(f"visual_preview {key} must reference a candidate")
+    if preview["approval_channel"] != "conversation":
+        errors.append(
+            "visual_preview approval_channel must be conversation"
+        )
+    if preview["explicitly_approved"] is not True:
+        errors.append("visual_preview must be explicitly approved")
+    return errors
 
 
 def _strings(value: Any, *, non_empty: bool = False) -> bool:
@@ -53,8 +125,8 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
-    if payload["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if payload["schema_version"] != 2:
+        errors.append("schema_version must be 2")
     if payload["workflow_mode"] not in {"full", "fast-change"}:
         errors.append("workflow_mode must be full or fast-change")
     if not isinstance(payload["content_revision"], int) or payload[
@@ -108,6 +180,10 @@ def validate(payload: Any) -> list[str]:
         errors.append("layout families must be materially different")
     if payload["selected_alternative_id"] not in ids:
         errors.append("selected_alternative_id must reference an alternative")
+    if payload["workflow_mode"] == "full":
+        errors.extend(
+            _validate_visual_preview(payload.get("visual_preview"), ids)
+        )
 
     approval = payload["approval"]
     if not isinstance(approval, dict):

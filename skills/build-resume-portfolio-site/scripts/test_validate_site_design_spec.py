@@ -14,7 +14,7 @@ VALIDATOR = ROOT / "scripts" / "validate_site_design_spec.py"
 
 def valid_spec() -> dict:
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "spec_id": "site-spec-1",
         "workflow_mode": "full",
         "content_revision": 1,
@@ -40,6 +40,17 @@ def valid_spec() -> dict:
         "representative_interaction": (
             "project selection updates one detail panel"
         ),
+        "visual_preview": {
+            "mode": "local-gallery",
+            "artifact": (
+                ".resume-site-work/style-preview/sessions/style-1/gallery.html"
+            ),
+            "candidate_ids": ["editorial", "cinematic"],
+            "recommended_candidate_id": "editorial",
+            "selected_candidate_id": "editorial",
+            "approval_channel": "conversation",
+            "explicitly_approved": True,
+        },
         "approval": {"status": "user_approved", "source": "explicit_user"},
     }
 
@@ -78,6 +89,30 @@ class SiteDesignSpecValidatorTests(unittest.TestCase):
         payload = valid_spec()
         payload["approval"]["source"] = "inferred"
         self.assertEqual(self.run_validator(payload).returncode, 1)
+
+    def test_rejects_missing_visual_preview(self) -> None:
+        payload = valid_spec()
+        payload.pop("visual_preview")
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("full mode requires visual_preview", result.stdout)
+
+    def test_rejects_browser_approval_channel(self) -> None:
+        payload = valid_spec()
+        payload["visual_preview"]["approval_channel"] = "browser"
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "visual_preview approval_channel must be conversation",
+            result.stdout,
+        )
+
+    def test_rejects_version_one(self) -> None:
+        payload = valid_spec()
+        payload["schema_version"] = 1
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("schema_version must be 2", result.stdout)
 
 
 if __name__ == "__main__":

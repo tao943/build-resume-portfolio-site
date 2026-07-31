@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "spec_id": "site-spec-1",
   "workflow_mode": "full",
   "content_revision": 1,
@@ -23,6 +23,15 @@
   "composition_commitment": "asymmetric editorial stage",
   "type_color_character": "high-contrast serif and restrained yellow",
   "representative_interaction": "project selection updates one detail panel",
+  "visual_preview": {
+    "mode": "local-gallery",
+    "artifact": ".resume-site-work/style-preview/sessions/style-1/gallery.html",
+    "candidate_ids": ["editorial", "cinematic"],
+    "recommended_candidate_id": "editorial",
+    "selected_candidate_id": "editorial",
+    "approval_channel": "conversation",
+    "explicitly_approved": true
+  },
   "approval": {
     "status": "user_approved",
     "source": "explicit_user"

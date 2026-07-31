@@ -19,7 +19,7 @@
     "approval"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "spec_id": {"type": "string", "minLength": 1},
     "workflow_mode": {"enum": ["full", "fast-change"]},
     "content_revision": {"type": "integer", "minimum": 1},
@@ -32,6 +32,45 @@
     "composition_commitment": {"type": "string", "minLength": 1},
     "type_color_character": {"type": "string", "minLength": 1},
     "representative_interaction": {"type": "string", "minLength": 1},
+    "visual_preview": {
+      "type": "object",
+      "required": [
+        "mode",
+        "artifact",
+        "candidate_ids",
+        "recommended_candidate_id",
+        "selected_candidate_id",
+        "approval_channel",
+        "explicitly_approved"
+      ],
+      "properties": {
+        "mode": {"const": "local-gallery"},
+        "artifact": {
+          "type": "string",
+          "pattern": "^\\.resume-site-work/style-preview/sessions/[^/]+/gallery\\.html$"
+        },
+        "candidate_ids": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "recommended_candidate_id": {"type": "string", "minLength": 1},
+        "selected_candidate_id": {"type": "string", "minLength": 1},
+        "approval_channel": {"const": "conversation"},
+        "explicitly_approved": {"const": true}
+      }
+    },
     "approval": {"type": "object"}
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"workflow_mode": {"const": "full"}},
+        "required": ["workflow_mode"]
+      },
+      "then": {"required": ["visual_preview"]}
+    }
+  ]
 }
