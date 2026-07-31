@@ -11,6 +11,8 @@
 ## Global Constraints
 
 - Present exactly two user-facing choices: `当前会话单 Agent` and `多 Agent 并行`.
+- For every enabled visual category, ask whether to open its independent browser comparison before requesting the user's candidate selection.
+- A pre-selection Gallery may mark the Agent recommendation but never a user selection that has not occurred.
 - Recommend from approved TODO tasks, exact file scope, dependencies, coupling, and expected coordination cost.
 - When parallel speedup cannot be demonstrated, recommend `当前会话单 Agent`.
 - Silence, prior approvals, browser activity, or inferred preference never select a strategy.
@@ -64,6 +66,18 @@ def test_strategy_selection_cannot_be_inferred_from_prior_approval(self) -> None
     self.assertIn("silence", workflow.lower())
     self.assertIn("prior approval", workflow.lower())
     self.assertIn("do not spawn", workflow.lower())
+
+def test_category_preview_offer_precedes_user_selection(self) -> None:
+    contract = self.read_site_reference("site-brainstorming-contract.md").lower()
+    preview_offer = contract.index("ask whether to open the browser comparison")
+    user_selection = contract.index("receive the user's selection")
+    self.assertLess(preview_offer, user_selection)
+
+    preview = self.read_site_reference("visual-style-preview-contract.md").lower()
+    self.assertIn("before the user selects", preview)
+    self.assertIn("agent's recommendation", preview)
+    self.assertNotIn("after tentative selection", preview)
+    self.assertNotIn("visual mark on the tentative selection", preview)
 ```
 
 - [ ] **Step 2: Replace the packaged-workflow strategy assertion**
@@ -101,10 +115,13 @@ Run:
 python -m unittest tests.test_workflow_behavior_contract.WorkflowBehaviorContractTests.test_strategy_gate_offers_exactly_two_explicit_choices -v
 python -m unittest tests.test_workflow_behavior_contract.WorkflowBehaviorContractTests.test_strategy_recommendation_uses_actual_plan_characteristics -v
 python -m unittest tests.test_workflow_behavior_contract.WorkflowBehaviorContractTests.test_strategy_selection_cannot_be_inferred_from_prior_approval -v
+python -m unittest tests.test_workflow_behavior_contract.WorkflowBehaviorContractTests.test_category_preview_offer_precedes_user_selection -v
 python -m unittest discover -s skills/build-resume-portfolio-site/scripts -p "test_installed_skill_workflow.py" -v
 ```
 
-Expected: the new assertions FAIL because the current Skill still lists three strategies, does not show the two Chinese choices, and has no explicit strategy waiting gate.
+Expected: the new assertions FAIL because the current Skill still lists three
+strategies, has no explicit strategy waiting gate, and offers browser preview
+after tentative selection.
 
 - [ ] **Step 4: Commit the red tests**
 
@@ -399,13 +416,34 @@ git commit -m "feat: restrict portfolio multi-agent work to parallel waves"
 - Modify: `skills/build-resume-portfolio-site/references/workflow-contract.md`
 - Modify: `skills/build-resume-portfolio-site/references/site-planning-contract.md`
 - Modify: `skills/build-resume-portfolio-site/references/artifact-layout.md`
+- Modify: `skills/build-resume-portfolio-site/references/site-brainstorming-contract.md`
+- Modify: `skills/build-resume-portfolio-site/references/visual-style-preview-contract.md`
 - Modify if stale: `skills/build-resume-portfolio-site/agents/openai.yaml`
 
 **Interfaces:**
-- Consumes: approved schema-v3 design specification and explicitly approved readable TODO plan.
-- Produces: `implementation_strategy_waiting_confirmation`, exact recommendation output, explicit selection evidence, then a validated schema-v2 machine plan.
+- Consumes: approved content and candidates during discovery, then an approved schema-v3 design specification and explicitly approved readable TODO plan.
+- Produces: preview-before-selection category transactions, `implementation_strategy_waiting_confirmation`, exact recommendation output, explicit selection evidence, then a validated schema-v2 machine plan.
 
-- [ ] **Step 1: Rewrite the TODO-to-machine-plan sequence in `SKILL.md`**
+- [ ] **Step 1: Move every category preview offer before user selection**
+
+In `SKILL.md`, `site-brainstorming-contract.md`, and
+`visual-style-preview-contract.md`, use this order:
+
+```markdown
+1. Compare candidates and recommend one with fit, risk, and trade-offs.
+2. Ask separately whether to open the browser comparison for this category.
+3. On acceptance, show all candidates in an independent display-only Gallery;
+   on decline, record the decline and continue text-only.
+4. Receive the user's selection in the conversation.
+5. Receive explicit confirmation, revision, or rejection, then lock the category.
+```
+
+Change Gallery output from “a visual mark on the tentative selection” to “a
+visual mark on the Agent's recommendation with no interaction semantics.” Keep
+browser activity non-authoritative and consent category-specific. For explicitly
+skipped media, record the reason and do not offer a media preview.
+
+- [ ] **Step 2: Rewrite the TODO-to-machine-plan sequence in `SKILL.md`**
 
 After TODO approval, require the Agent to:
 
@@ -437,7 +475,7 @@ separate parallel plan and its validator. For an unsafe parallel choice, show
 the exact conflicting files/dependencies and wait for a revised plan or a new
 explicit selection; do not silently fall back.
 
-- [ ] **Step 2: Update the workflow state machine**
+- [ ] **Step 3: Update the workflow state machine**
 
 Use these transitions in `workflow-contract.md`:
 
@@ -452,7 +490,7 @@ implementation_plan_generating --plan validates--> integrated_generating
 State that no earlier approval supplies strategy authorization and no Agent is
 spawned while waiting.
 
-- [ ] **Step 3: Update planning and artifact contracts**
+- [ ] **Step 4: Update planning and artifact contracts**
 
 In `site-planning-contract.md`, place strategy recommendation and explicit
 selection after readable TODO approval and before machine-plan creation. Include
@@ -464,14 +502,14 @@ the recommendation, reasons, explicit conversational selection, selected
 strategy, exact tasks, and validation evidence. Describe
 `multi-agent-implementation.json` as parallel-only.
 
-- [ ] **Step 4: Check UI metadata for staleness**
+- [ ] **Step 5: Check UI metadata for staleness**
 
 Read `agents/openai.yaml`. If its short description still accurately describes
 the Skill without promising a different strategy flow, leave it unchanged. If
 it describes automatic or three-mode execution, regenerate only
 `short_description` to mention explicit execution-mode choice.
 
-- [ ] **Step 5: Run the behavior tests and verify GREEN**
+- [ ] **Step 6: Run the behavior tests and verify GREEN**
 
 Run:
 
@@ -483,24 +521,24 @@ python -m unittest discover -s skills/build-resume-portfolio-site/scripts -p "te
 
 Expected: all strategy-gate behavior tests PASS.
 
-- [ ] **Step 6: Search active package resources for stale strategy vocabulary**
+- [ ] **Step 7: Search active package resources for stale strategy vocabulary and preview ordering**
 
 Run:
 
 ```powershell
 Get-ChildItem skills/build-resume-portfolio-site -Recurse -File -Exclude *.pyc |
-  Select-String -Pattern "fresh-agent-sequential|three strateg|three execution|自动启动多 Agent"
+  Select-String -Pattern "fresh-agent-sequential|after tentative selection|visual mark on the tentative selection|three strateg|three execution|自动启动多 Agent"
 ```
 
 Expected: active runtime contracts, schemas, validators, and fixtures contain no
-`fresh-agent-sequential`. Test files may contain only negative rejection or
-absence assertions. Historical repository specs/plans outside the Skill package
-may retain it as history.
+`fresh-agent-sequential` or post-selection preview instructions. Test files may
+contain only negative rejection or absence assertions. Historical repository
+specs/plans outside the Skill package may retain them as history.
 
-- [ ] **Step 7: Commit the runtime gate**
+- [ ] **Step 8: Commit the runtime gate**
 
 ```powershell
-git add -- skills/build-resume-portfolio-site/SKILL.md skills/build-resume-portfolio-site/references/workflow-contract.md skills/build-resume-portfolio-site/references/site-planning-contract.md skills/build-resume-portfolio-site/references/artifact-layout.md skills/build-resume-portfolio-site/agents/openai.yaml
+git add -- skills/build-resume-portfolio-site/SKILL.md skills/build-resume-portfolio-site/references/workflow-contract.md skills/build-resume-portfolio-site/references/site-planning-contract.md skills/build-resume-portfolio-site/references/artifact-layout.md skills/build-resume-portfolio-site/references/site-brainstorming-contract.md skills/build-resume-portfolio-site/references/visual-style-preview-contract.md skills/build-resume-portfolio-site/agents/openai.yaml
 git commit -m "feat: ask users to choose portfolio execution mode"
 ```
 
@@ -584,6 +622,8 @@ Draft, based on `master`, and points to the local HEAD.
 
 ## Final verification checklist
 
+- [ ] Every enabled visual category offers its independent browser comparison before user selection.
+- [ ] A pre-selection Gallery marks only the Agent recommendation, never a nonexistent user selection.
 - [ ] Exactly two execution modes are presented after TODO approval.
 - [ ] The recommendation cites observable task, file, dependency, and coordination facts.
 - [ ] Missing or ambiguous selection blocks machine-plan creation and implementation.

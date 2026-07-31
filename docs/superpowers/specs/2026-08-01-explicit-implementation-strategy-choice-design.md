@@ -10,10 +10,10 @@ chooses.
 
 ## Scope
 
-This change affects implementation-strategy selection only. It does not change
-the six design decisions, independent browser-preview offers, requirements
-approval, TODO-plan approval, integrated site generation, or final acceptance
-loop.
+This change affects implementation-strategy selection and corrects when each
+independent browser-preview offer occurs. It does not change the six design
+categories, requirements approval, TODO-plan approval, integrated site
+generation, or final acceptance loop.
 
 The user-facing choices are exactly:
 
@@ -22,6 +22,28 @@ The user-facing choices are exactly:
 
 `fresh-agent-sequential` is removed as both a user-facing choice and an
 implementation strategy for this Skill.
+
+## Preview-before-selection correction
+
+For every enabled visual category, browser preview is decision support and must
+be offered before the user selects a candidate. Use this exact order:
+
+1. compare candidates and recommend one with trade-offs;
+2. separately ask whether to open an independent browser comparison;
+3. on acceptance, show all candidates in a display-only Gallery; on decline,
+   continue text-only;
+4. ask the user to select a candidate or compatible secondary-motion set;
+5. obtain explicit conversational confirmation; and
+6. lock the category before continuing.
+
+The Gallery may identify the Agent's recommendation but cannot mark a user
+selection that has not happened. Browser visits, clicks, reloads, and launch
+events still have no selection or approval semantics. Consent remains specific
+to one category, including when the user declined or accepted a previous offer.
+
+This ordering applies to structure, typography, color, conditional media,
+primary motion, and secondary motion. A media category that is explicitly
+skipped because no media strategy is applicable has no preview offer.
 
 ## Decision flow
 
@@ -140,6 +162,8 @@ execution modes.
 
 Behavior tests must prove that the Skill:
 
+- offers each enabled category's browser comparison before requesting a choice;
+- never describes the Gallery as showing a tentative user selection;
 - presents exactly the two user-facing choices;
 - recommends from observable plan characteristics;
 - waits for explicit conversational selection;
