@@ -1,4 +1,4 @@
 interface:
   display_name: "Resume Portfolio Site Builder"
-  short_description: "分阶段生成、检查并打磨可运行的简历与作品集单页网站"
+  short_description: "先确认六项设计与 TODO，再一次性生成可运行的简历作品集网站"
   default_prompt: "Use $build-resume-portfolio-site to create a runnable resume and portfolio website from my materials."

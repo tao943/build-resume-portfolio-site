@@ -106,8 +106,11 @@ a validated bounded fast-change route. Schema-version-2 design reports remain
 readable evidence but do not satisfy new full discovery; schema-version-1 plans
 do not satisfy TODO plan approval. Never fabricate migrated approvals.
 
-## Optional side transactions
+## Optional APIHz media transaction
 
-APIHz search and later local-video upgrades do not change the discovery or
-planning gates. Provider or video failure restores the confirmed integrated
-artifact and leaves approvals unchanged.
+APIHz search and later local-video upgrades do not change the current portfolio
+stage, discovery or planning gates, approvals, or snapshot baseline. Candidate
+search remains outside the React project; selected-only import is explicit.
+Provider failure is isolated and the normal workflow remains available. Video
+failure restores the confirmed integrated artifact and leaves approvals
+unchanged.

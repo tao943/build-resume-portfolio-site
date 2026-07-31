@@ -47,10 +47,10 @@ class InstalledMotionWorkflowTests(unittest.TestCase):
         text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         required = (
             "references/motion-production-contract.md",
-            "confirmed media direction",
-            "refined audit",
-            "no numeric effect cap",
-            "motion_enhancement_selecting",
+            "primary-motion system",
+            "compatible secondary effects",
+            "numeric effect cap",
+            "motion_enhancing",
         )
         for marker in required:
             with self.subTest(marker=marker):

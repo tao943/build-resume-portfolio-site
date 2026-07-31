@@ -46,6 +46,11 @@ visual thesis, interaction architecture, or implementation strategy.
 
 1. Validate `discovery` resources.
 2. Inspect approved content, authorized media, references, and confirmed state.
+   When a reference library is present, build or refresh its catalog with
+   `scripts\index_reference_library.py --workspace-root .`, inspect the
+   generated `reference-library/contact-sheets`, record chosen evidence in
+   `reports/reference-selection.json`, respect `style_only` usage, and render
+   local evidence with absolute Markdown image paths.
 3. Ask one question at a time and complete these categories in exact order:
    overall structure, typography, color system, conditional media treatment,
    primary motion, and secondary motion.
@@ -114,13 +119,27 @@ integration, preview promotion, snapshots, and publication.
 1. Set `stage=integrated_generating` and validate `integrated` resources.
 2. Read `prompts/01-generate-integrated-site.md`.
 3. Generate `reports/content-map.json` only from normalized facts and approved
-   copy. Create or refresh `reports/design-intelligence.json` as soft guidance.
+   copy. Before React generation, run:
+
+```powershell
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
+  --input ".resume-site-work\reports\content-map.json" `
+  --output ".resume-site-work\reports\design-intelligence.json"
+```
+
+   Treat `reports\design-intelligence.json` as soft guidance. Translate the
+   approved decisions into `reports/creative-direction.json` and validate it;
+   the report may add implementation detail but cannot reopen user choices.
 4. Translate the approved six decisions into implementation detail without
    changing them. Create supporting media-direction, creative-direction, and
    motion reports when applicable.
 5. Create or replace the complete source at `.resume-site-work/site` in one
    integrated transaction. Apply structure, typography, color, media treatment,
    one primary-motion system, and all selected compatible secondary effects.
+   Create the explicit empty or populated `reports/media-inventory.json`, pass
+   it with `--media-inventory` when media validation applies, and follow
+   `references/motion-production-contract.md`. Motion has no numeric effect cap;
+   compatibility and controller ownership are the limits.
 6. Validate and build:
 
 ```powershell
@@ -130,10 +149,12 @@ npm run build
 ```
 
 7. On success, atomically promote `site/dist` to `preview/dist`, capture desktop,
-   tablet, mobile, representative interaction, coarse-pointer, and reduced-motion
-   states, and inspect console/layout/media safety.
-8. Perform at most two bounded local repair rounds. Do not silently change a
-   confirmed design decision. Keep the previous valid preview on failure.
+   tablet, mobile, and `interaction_states_checked` evidence for initial and
+   representative active states. Inspect coarse-pointer/touch, reduced-motion,
+   loading, error, and Poster fallback behavior plus console/layout/media safety.
+8. Perform bounded local repair while `visual_repair_round < 2`. Do not request
+   routine confirmation during audit or silently change a confirmed design
+   decision. Keep the last valid preview on failure.
 9. Snapshot successful source to `versions/v1-integrated` or a retry suffix,
    set `stage=integrated_waiting_confirmation`, and show the complete website.
 
@@ -153,9 +174,11 @@ On `当前效果满意，完成`, set the integrated snapshot as
 
 On `加强动效`, restore the last valid integrated snapshot and change only the
 motion layer. Preserve content, structure, typography, color, and media
-treatment. Re-plan controller ownership, mobile/coarse-pointer behavior,
-cleanup, fallback, and reduced motion; validate/build/capture, snapshot a retry,
-then return to `integrated_waiting_confirmation`.
+treatment. Enter `motion_enhancing`, read
+`references/motion-production-contract.md`, and re-plan controller ownership,
+mobile/coarse-pointer behavior, cleanup, fallback, and reduced motion. Apply all
+compatible selected effects without a numeric effect cap, validate/build/capture,
+snapshot an integrated retry, then return to `integrated_waiting_confirmation`.
 
 On `提出修改`, route bounded feedback to local repair. If feedback reverses a
 core decision, return to that decision category, invalidate its downstream
@@ -171,12 +194,19 @@ architecture. If scope expands, stop and return to full discovery.
 
 ## Optional media and video paths
 
-- APIHz search begins only on an explicit user request. Keep candidates local,
-  rights-unverified, and outside React until the user names IDs. Provider
-  failure leaves site, preview, approvals, snapshots, and state unchanged.
+- The optional APIHz media transaction begins only on an explicit user request.
+  Require `APIHZ_ID` and `APIHZ_KEY`, then run
+  `python "$SKILL_ROOT\scripts\apihz_media.py" search` into
+  `.resume-site-work\media-search`. Show the local `preview.html`, including GIF
+  candidates, as rights-unverified evidence. Wait for candidate IDs, then use
+  `scripts\import_media_selection.py` for selected-only import. This is
+  provider-failure isolation: failure changes no site, preview, approval,
+  snapshot, or workflow state.
 - A later user-supplied local MP4/WebM may replace only an approved Poster/media
   slot. Keep the Poster as loading, error, mobile-budget, and reduced-motion
-  fallback; validate/build/capture before promoting.
+  fallback; validate/build/capture before atomically promoting. This is ordinary
+  feedback inside the existing final acceptance loop, never another confirmation
+  gate.
 
 ## Invariants
 
