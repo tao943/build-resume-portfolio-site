@@ -23,6 +23,14 @@ VISUAL_ROOT = (
 SERVER = VISUAL_ROOT / "server.cjs"
 LAUNCH = VISUAL_ROOT / "launch.cjs"
 STOP = VISUAL_ROOT / "stop.cjs"
+GALLERY_SHELL = (
+    ROOT
+    / "skills"
+    / "build-resume-portfolio-site"
+    / "assets"
+    / "visual-companion"
+    / "gallery-shell.html"
+)
 NODE = shutil.which("node")
 
 
@@ -328,6 +336,29 @@ class VisualCompanionLifecycleTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("INVALID_SESSION_PATH", result.stderr)
+
+
+class VisualCompanionPackageTests(unittest.TestCase):
+    def test_gallery_shell_is_display_only(self) -> None:
+        text = GALLERY_SHELL.read_text(encoding="utf-8").lower()
+        self.assertNotIn("<form", text)
+        self.assertNotIn("data-choice", text)
+        self.assertNotIn("<button", text)
+        self.assertIn("approve in the conversation", text)
+        self.assertIn("<!-- visual-directions -->", text)
+
+    def test_visual_companion_resources_are_packaged(self) -> None:
+        skill_root = ROOT / "skills" / "build-resume-portfolio-site"
+        required = (
+            "assets/visual-companion/gallery-shell.html",
+            "references/visual-style-preview-contract.md",
+            "scripts/visual_companion/server.cjs",
+            "scripts/visual_companion/launch.cjs",
+            "scripts/visual_companion/stop.cjs",
+        )
+        for relative in required:
+            with self.subTest(relative=relative):
+                self.assertTrue((skill_root / relative).is_file(), relative)
 
 
 if __name__ == "__main__":

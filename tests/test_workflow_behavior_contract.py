@@ -48,6 +48,18 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / "skills" / name / "SKILL.md").is_file())
 
+    def test_visual_companion_is_packaged_with_website_skill(self) -> None:
+        root = ROOT / "skills" / "build-resume-portfolio-site"
+        for relative in (
+            "assets/visual-companion/gallery-shell.html",
+            "references/visual-style-preview-contract.md",
+            "scripts/visual_companion/server.cjs",
+            "scripts/visual_companion/launch.cjs",
+            "scripts/visual_companion/stop.cjs",
+        ):
+            with self.subTest(relative=relative):
+                self.assertTrue((root / relative).is_file(), relative)
+
     def test_domain_skills_internalize_discovery_and_planning(self) -> None:
         for name in ("resume-content-intelligence", "build-resume-portfolio-site"):
             text = self.read_skill(name)

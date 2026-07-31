@@ -39,12 +39,24 @@ CONTRACT_SPECS = {
     "site-implementation-plan-schema": (
         "references/site-implementation-plan-schema.json"
     ),
+    "visual-style-preview-contract": (
+        "references/visual-style-preview-contract.md"
+    ),
 }
+
+VISUAL_COMPANION_FILES = (
+    "assets/visual-companion/gallery-shell.html",
+    "scripts/visual_companion/server.cjs",
+    "scripts/visual_companion/launch.cjs",
+    "scripts/visual_companion/stop.cjs",
+)
 
 STAGE_RESOURCES = {
     "discovery": (
         "site-brainstorming-contract",
         "site-design-spec-schema",
+        "visual-style-preview-contract",
+        "visual-companion",
     ),
     "planning": (
         "site-planning-contract",
@@ -225,7 +237,12 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
     resources = (
         tuple(PROMPT_SPECS)
         + tuple(CONTRACT_SPECS)
-        + ("reference-library", "motion-catalog", "design-catalog")
+        + (
+            "reference-library",
+            "motion-catalog",
+            "design-catalog",
+            "visual-companion",
+        )
         if mode == "skeleton"
         else STAGE_RESOURCES[stage]
     )
@@ -277,6 +294,13 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                 else:
                     resource_errors.append(f"invalid_motion_catalog: {error}")
             resource_ready = catalog_report.ready
+        elif resource_id == "visual-companion":
+            resource_errors = [
+                f"missing_visual_companion: {relative}"
+                for relative in VISUAL_COMPANION_FILES
+                if not (skill_root / relative).is_file()
+            ]
+            resource_ready = not resource_errors
         else:
             resource_errors, resource_ready = _validate_prompt(
                 skill_root, resource_id, require_ready
