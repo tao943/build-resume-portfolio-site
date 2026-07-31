@@ -15,6 +15,8 @@ PLUGIN_MANIFEST = REPOSITORY_ROOT / ".codex-plugin" / "plugin.json"
 
 class InstalledDesignCatalogTests(unittest.TestCase):
     def test_plugin_metadata_advertises_offline_design_intelligence(self) -> None:
+        if not PLUGIN_MANIFEST.is_file():
+            self.skipTest("repository plugin metadata is outside a standalone Skill install")
         manifest = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], "1.2.0")
         self.assertIn("design-intelligence", manifest["keywords"])

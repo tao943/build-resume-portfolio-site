@@ -47,6 +47,8 @@ def included_file_inventory(root: Path) -> dict[str, str]:
 
 class InstalledMediaArtDirectionTests(unittest.TestCase):
     def test_plugin_metadata_describes_the_internal_winner_workflow(self) -> None:
+        if not PLUGIN_MANIFEST.is_file():
+            self.skipTest("repository plugin metadata is outside a standalone Skill install")
         plugin = json.loads(PLUGIN_MANIFEST.read_text(encoding="utf-8"))
 
         self.assertEqual(plugin["version"], "1.2.0")
