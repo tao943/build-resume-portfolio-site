@@ -16,6 +16,15 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
     def read_skill(self, name: str) -> str:
         return (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
 
+    def read_site_reference(self, name: str) -> str:
+        return (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "references"
+            / name
+        ).read_text(encoding="utf-8")
+
     def run_validator(
         self,
         skill: str,
@@ -104,6 +113,57 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         self.assertIn("style-preview", layout)
         self.assertIn("discovery evidence", layout)
         self.assertIn("not react source", layout)
+
+    def test_full_discovery_orders_six_independent_decisions(self) -> None:
+        contract = self.read_site_reference(
+            "site-brainstorming-contract.md"
+        ).lower()
+        markers = (
+            "overall structure",
+            "typography",
+            "color system",
+            "media treatment",
+            "primary motion",
+            "secondary motion",
+            "final requirements confirmation",
+            "todo plan approval",
+        )
+        positions = [contract.index(marker) for marker in markers]
+        self.assertEqual(positions, sorted(positions))
+
+    def test_each_enabled_decision_gets_a_separate_preview_offer(self) -> None:
+        contract = self.read_site_reference(
+            "visual-style-preview-contract.md"
+        ).lower()
+        self.assertIn("ask separately for every enabled category", contract)
+        self.assertIn("independent, not cumulative", contract)
+        self.assertIn("declining one category", contract)
+
+    def test_site_skill_requires_readable_plan_approval_before_source_edits(
+        self,
+    ) -> None:
+        text = self.read_skill("build-resume-portfolio-site").lower()
+        self.assertIn("site-todo-plan.md", text)
+        self.assertIn("todo plan approval", text)
+        self.assertIn("do not edit react source", text)
+        self.assertIn("one integrated", text)
+
+    def test_final_acceptance_has_three_explicit_outcomes(self) -> None:
+        skill = self.read_skill("build-resume-portfolio-site")
+        for choice in (
+            "当前效果满意，完成",
+            "加强动效",
+            "提出修改",
+        ):
+            self.assertIn(choice, skill)
+        workflow = self.read_site_reference("workflow-contract.md").lower()
+        for preserved in (
+            "structure",
+            "typography",
+            "color",
+            "media treatment",
+        ):
+            self.assertIn(preserved, workflow)
 
     def test_readme_documents_cross_agent_visual_preview(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
