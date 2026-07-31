@@ -129,6 +129,18 @@ class ValidateViteProjectTests(unittest.TestCase):
             report = validate_vite_project(root, "media-direction")
             self.assertIn("missing_reduced_motion_rule", report.errors)
 
+    def test_integrated_requires_reduced_motion_rule(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_project(root)
+            (root / "src" / "styles.css").write_text(
+                ":root { --content-max: 1700px; } "
+                ":focus-visible { outline: 2px solid; }",
+                encoding="utf-8",
+            )
+            report = validate_vite_project(root, "integrated")
+            self.assertIn("missing_reduced_motion_rule", report.errors)
+
     def test_motion_enhanced_accepts_poster_only_media_component(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

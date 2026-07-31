@@ -14,6 +14,10 @@ from validate_skill_resources import validate_resources
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 PROMPTS = {
+    "generate-integrated-site": (
+        "01-generate-integrated-site.md",
+        "react-vite-integrated-site",
+    ),
     "generate-prototype": ("01-generate-prototype.md", "react-vite-project"),
     "analyze-reference": ("02-analyze-reference.md", "style-brief-json"),
     "direct-media-art": (
@@ -194,6 +198,11 @@ class ValidateSkillResourcesTests(unittest.TestCase):
 
     def test_runtime_accepts_planning_contracts(self) -> None:
         report = validate_resources(SKILL_ROOT, "runtime", "planning")
+        self.assertTrue(report.ok, report.errors)
+        self.assertTrue(report.ready, report.errors)
+
+    def test_runtime_accepts_integrated_generation_resources(self) -> None:
+        report = validate_resources(SKILL_ROOT, "runtime", "integrated")
         self.assertTrue(report.ok, report.errors)
         self.assertTrue(report.ready, report.errors)
 
