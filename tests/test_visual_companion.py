@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -20,6 +21,8 @@ VISUAL_ROOT = (
     / "visual_companion"
 )
 SERVER = VISUAL_ROOT / "server.cjs"
+LAUNCH = VISUAL_ROOT / "launch.cjs"
+STOP = VISUAL_ROOT / "stop.cjs"
 NODE = shutil.which("node")
 
 
@@ -164,6 +167,167 @@ class VisualCompanionServerTests(unittest.TestCase):
     def test_server_defaults_to_loopback(self) -> None:
         self.assertEqual(self.info["host"], "127.0.0.1")
         self.assertTrue(self.info["url"].startswith("http://127.0.0.1:"))
+
+    def test_health_identifies_the_exact_server_instance(self) -> None:
+        with self.open("/health") as response:
+            payload = json.loads(response.read())
+        self.assertEqual(payload["pid"], self.info["pid"])
+        self.assertEqual(
+            Path(payload["session_dir"]).resolve(),
+            self.session,
+        )
+
+
+@unittest.skipUnless(NODE, "Node.js is required for visual companion tests")
+class VisualCompanionLifecycleTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.workspace = (Path(self.temp.name) / "workspace").resolve()
+        self.workspace.mkdir()
+        self.source = Path(self.temp.name) / "source"
+        self.source.mkdir()
+        self.gallery = self.source / "gallery.html"
+        self.gallery.write_text(
+            "<!doctype html><h1>Portable directions</h1>",
+            encoding="utf-8",
+        )
+        assets = self.source / "assets"
+        assets.mkdir()
+        (assets / "mark.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+            encoding="utf-8",
+        )
+        self.sessions: list[dict] = []
+
+    def tearDown(self) -> None:
+        for info in self.sessions:
+            subprocess.run(
+                [
+                    NODE,
+                    str(STOP),
+                    "--workspace-root",
+                    str(self.workspace),
+                    "--server-info",
+                    info["server_info"],
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
+            )
+        self.temp.cleanup()
+
+    def launch(
+        self,
+        *,
+        open_browser: bool = False,
+        extra_env: dict[str, str] | None = None,
+    ) -> tuple[subprocess.CompletedProcess[str], dict]:
+        command = [
+            NODE,
+            str(LAUNCH),
+            "--workspace-root",
+            str(self.workspace),
+            "--gallery",
+            str(self.gallery),
+        ]
+        if open_browser:
+            command.append("--open")
+        environment = os.environ.copy()
+        environment.update(extra_env or {})
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+            env=environment,
+        )
+        info = json.loads(result.stdout.splitlines()[0]) if result.stdout else {}
+        if info.get("server_info"):
+            self.sessions.append(info)
+        return result, info
+
+    def test_launch_creates_contained_session_and_server_info(self) -> None:
+        result, info = self.launch()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        session = Path(info["session_dir"]).resolve()
+        expected = (
+            self.workspace
+            / ".resume-site-work"
+            / "style-preview"
+            / "sessions"
+        ).resolve()
+        self.assertTrue(session.is_relative_to(expected))
+        self.assertEqual(
+            Path(info["server_info"]).resolve(),
+            session / "state" / "server-info.json",
+        )
+        self.assertTrue(Path(info["server_info"]).is_file())
+        self.assertTrue((session / "gallery.html").is_file())
+        self.assertTrue((session / "assets" / "mark.svg").is_file())
+        with urllib.request.urlopen(info["url"], timeout=3) as response:
+            self.assertIn(b"Portable directions", response.read())
+
+    def test_open_failure_does_not_stop_server(self) -> None:
+        result, info = self.launch(
+            open_browser=True,
+            extra_env={
+                "VISUAL_COMPANION_OPEN_COMMAND":
+                    "__missing_visual_open_command__"
+            },
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(info["open_warning"], "OPEN_FAILED")
+        with urllib.request.urlopen(info["url"], timeout=3) as response:
+            self.assertEqual(response.status, 200)
+
+    def test_stop_terminates_verified_session_and_keeps_gallery(self) -> None:
+        _, info = self.launch()
+        session = Path(info["session_dir"])
+        result = subprocess.run(
+            [
+                NODE,
+                str(STOP),
+                "--workspace-root",
+                str(self.workspace),
+                "--server-info",
+                info["server_info"],
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5,
+        )
+        self.sessions.remove(info)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["type"], "server-stopped")
+        self.assertTrue((session / "gallery.html").is_file())
+        with self.assertRaises((urllib.error.URLError, TimeoutError)):
+            urllib.request.urlopen(info["url"], timeout=1)
+
+    def test_stop_rejects_server_info_outside_workspace(self) -> None:
+        outside = Path(self.temp.name) / "outside.json"
+        outside.write_text(
+            json.dumps({"pid": os.getpid()}),
+            encoding="utf-8",
+        )
+        result = subprocess.run(
+            [
+                NODE,
+                str(STOP),
+                "--workspace-root",
+                str(self.workspace),
+                "--server-info",
+                str(outside),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("INVALID_SESSION_PATH", result.stderr)
 
 
 if __name__ == "__main__":

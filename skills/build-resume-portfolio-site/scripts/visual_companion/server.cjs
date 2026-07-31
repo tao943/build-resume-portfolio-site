@@ -216,6 +216,20 @@ const server = http.createServer((request, response) => {
     responseFile(request, response, galleryPath);
     return;
   }
+  if (requestUrl.pathname === "/health") {
+    const data = Buffer.from(JSON.stringify({
+      type: "visual-companion-health",
+      pid: process.pid,
+      session_dir: sessionRoot,
+    }));
+    response.writeHead(200, securityHeaders({
+      "Content-Length": String(data.length),
+      "Content-Type": "application/json; charset=utf-8",
+    }));
+    if (request.method === "HEAD") response.end();
+    else response.end(data);
+    return;
+  }
   if (requestUrl.pathname.startsWith("/files/")) {
     let relative;
     try {
