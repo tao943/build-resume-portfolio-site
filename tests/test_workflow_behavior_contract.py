@@ -148,6 +148,47 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         self.assertIn("do not edit react source", text)
         self.assertIn("one integrated", text)
 
+    def test_strategy_gate_offers_exactly_two_explicit_choices(self) -> None:
+        skill = self.read_skill("build-resume-portfolio-site")
+        self.assertIn("当前会话单 Agent", skill)
+        self.assertIn("多 Agent 并行", skill)
+        self.assertIn("请明确选择 1 或 2", skill)
+        self.assertIn("implementation_strategy_waiting_confirmation", skill)
+        self.assertNotIn("fresh-agent-sequential", skill)
+
+    def test_strategy_recommendation_uses_actual_plan_characteristics(self) -> None:
+        contract = self.read_site_reference("site-planning-contract.md")
+        for marker in (
+            "exact file scope",
+            "dependencies",
+            "coordination cost",
+            "parallel speedup cannot be demonstrated",
+            "recommend `当前会话单 Agent`",
+        ):
+            self.assertIn(marker, contract)
+
+    def test_strategy_selection_cannot_be_inferred_from_prior_approval(self) -> None:
+        workflow = self.read_site_reference("workflow-contract.md")
+        self.assertIn("todo_plan_waiting_confirmation --approve-->", workflow)
+        self.assertIn("implementation_strategy_waiting_confirmation", workflow)
+        self.assertIn("silence", workflow.lower())
+        self.assertIn("prior approval", workflow.lower())
+        self.assertIn("do not spawn", workflow.lower())
+
+    def test_category_preview_offer_precedes_user_selection(self) -> None:
+        contract = self.read_site_reference("site-brainstorming-contract.md").lower()
+        self.assertIn("ask whether to open the browser comparison", contract)
+        self.assertIn("receive the user's selection", contract)
+        preview_offer = contract.index("ask whether to open the browser comparison")
+        user_selection = contract.index("receive the user's selection")
+        self.assertLess(preview_offer, user_selection)
+
+        preview = self.read_site_reference("visual-style-preview-contract.md").lower()
+        self.assertIn("before the user selects", preview)
+        self.assertIn("agent's recommendation", preview)
+        self.assertNotIn("after tentative selection", preview)
+        self.assertNotIn("visual mark on the tentative selection", preview)
+
     def test_final_acceptance_has_three_explicit_outcomes(self) -> None:
         skill = self.read_skill("build-resume-portfolio-site")
         for choice in (
@@ -277,6 +318,7 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
     def test_overlapping_parallel_ownership_is_rejected(self) -> None:
         def overlap(payload: dict) -> None:
             payload["strategy"] = "parallel-wave"
+            payload["strategy_selection"]["selected"] = "parallel-wave"
             payload["multi_agent_authorized"] = True
             payload["multi_agent_plan"] = "reports/multi-agent-plan.json"
             duplicate = dict(payload["tasks"][0])

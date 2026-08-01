@@ -8,6 +8,7 @@
     "todo_plan",
     "todo_plan_approval",
     "generation_mode",
+    "strategy_selection",
     "strategy",
     "multi_agent_authorized",
     "multi_agent_plan",
@@ -32,8 +33,32 @@
       }
     },
     "generation_mode": {"const": "one-integrated-site"},
+    "strategy_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source",
+        "channel",
+        "selected",
+        "recommended",
+        "reasons"
+      ],
+      "properties": {
+        "status": {"const": "user_selected"},
+        "source": {"const": "explicit_user"},
+        "channel": {"const": "conversation"},
+        "selected": {"enum": ["single-agent", "parallel-wave"]},
+        "recommended": {"enum": ["single-agent", "parallel-wave"]},
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
     "strategy": {
-      "enum": ["single-agent", "fresh-agent-sequential", "parallel-wave"]
+      "enum": ["single-agent", "parallel-wave"]
     },
     "multi_agent_authorized": {"type": "boolean"},
     "multi_agent_plan": {"type": ["string", "null"]},
