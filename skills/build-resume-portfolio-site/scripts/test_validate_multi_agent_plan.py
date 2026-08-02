@@ -117,6 +117,32 @@ class MultiAgentPlanValidatorTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("must be read-only", result.stdout)
 
+    def test_rejects_retired_fresh_agent_sequential_strategy(self) -> None:
+        plan = valid_plan()
+        plan["strategy"] = "fresh-agent-sequential"
+        plan["waves"] = [
+            {"id": "wave-1", "mode": "sequential", "task_ids": ["hero"]},
+            {"id": "wave-2", "mode": "sequential", "task_ids": ["gallery"]},
+            {
+                "id": "wave-3",
+                "mode": "sequential",
+                "task_ids": ["integration"],
+            },
+            {
+                "id": "wave-4",
+                "mode": "sequential",
+                "task_ids": ["spec-review"],
+            },
+            {
+                "id": "wave-5",
+                "mode": "sequential",
+                "task_ids": ["quality-review"],
+            },
+        ]
+        result = self.run_validator(plan)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("strategy must be parallel-wave", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

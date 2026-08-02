@@ -1,8 +1,9 @@
 # Visual Style Preview Contract
 
-Use this display-only transaction after the user tentatively selects a
-candidate for one enabled discovery category. Ask separately for every enabled category. The six supported category IDs are `structure`, `typography`,
-`color`, `media`, `primary-motion`, and `secondary-motion`.
+Use this display-only transaction before the user selects a candidate for one
+enabled discovery category. Ask separately for every enabled category. The six
+supported category IDs are `structure`, `typography`, `color`, `media`,
+`primary-motion`, and `secondary-motion`.
 
 Previews are independent, not cumulative. Each preview isolates its category
 against a neutral demonstration baseline. It is decision evidence, not reusable
@@ -14,9 +15,10 @@ then obtain the category confirmation in the conversation.
 
 ## Offer
 
-After tentative selection, ask in a separate message whether the user wants to
-open a browser for this category. Do not create the Gallery or launch a browser
-before the user accepts. Consent applies only to the current category.
+After presenting candidates and the Agent's recommendation, ask in a separate
+message whether the user wants to open a browser comparison for this category.
+Do not request the user's selection, create the Gallery, or launch a browser
+before the user answers the offer. Consent applies only to the current category.
 
 ## Output
 
@@ -30,7 +32,7 @@ Use `assets/visual-companion/gallery-shell.html` as structural guidance. Show:
 
 - the category name and question;
 - all candidates, with IDs matching the design-decision candidates;
-- a visual mark on the tentative selection that has no interaction semantics;
+- a visual mark on the Agent's recommendation that has no interaction semantics;
 - approved resume copy and only authorized local media;
 - the exact visual properties needed to judge this category;
 - relevant fit, risk, mobile, accessibility, fallback, and reduced-motion notes;
@@ -65,10 +67,10 @@ the standalone HTML path. Never upload or publicly expose the Gallery.
 
 ## Confirm
 
-After display, ask the user to return to the conversation and confirm, revise,
-or reject. Record the decision-level `preview` and `approval` fields in the
-schema-version-3 design specification. A visit, reload, screenshot, or system
-browser launch is never approval.
+After display, ask the user to return to the conversation, select a candidate,
+and confirm, revise, or reject it. Record the decision-level `preview` and
+`approval` fields in the schema-version-3 design specification. A visit, reload,
+screenshot, or system browser launch is never selection or approval.
 
 ## Stop
 

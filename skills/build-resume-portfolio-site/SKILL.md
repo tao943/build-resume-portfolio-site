@@ -54,14 +54,18 @@ visual thesis, interaction architecture, or implementation strategy.
 3. Ask one question at a time and complete these categories in exact order:
    overall structure, typography, color system, conditional media treatment,
    primary motion, and secondary motion.
-4. For every enabled category, compare candidates, recommend one, receive a
-   tentative choice, then separately ask whether to open a browser preview.
+4. For every enabled category, compare candidates and recommend one with fit,
+   risk, and trade-offs. Then separately ask whether to open the browser
+   comparison before requesting the user's choice.
 5. On acceptance, follow `visual-style-preview-contract.md`, create an
    independent display-only `gallery.html`, run `launch.cjs --open`, and give
-   the user the complete authenticated URL plus the absolute static HTML fallback. On decline, continue text-only. Previous consent never applies to
-   the next category.
-6. Receive final category confirmation in the conversation. Approval remains in the conversation: browser visits, reloads, screenshots, and launch events
-   do not select, approve, or advance state.
+   the user the complete authenticated URL plus the absolute static HTML fallback.
+   On decline, record the decline and continue text-only. Previous
+   consent never applies to the next category.
+6. After the preview or decline, receive the user's selection and final category
+   confirmation in the conversation. Approval remains in the conversation:
+   browser visits, reloads, screenshots, and launch events do not select,
+   approve, or advance state.
 7. Media may be skipped only with an explicit reason. Select exactly one
    primary-motion system. Secondary motion may contain multiple compatible
    effects without a fixed numeric cap.
@@ -87,31 +91,47 @@ After final requirements approval:
    screenshots, rollback, and delivery.
 3. Show the TODO plan, exact file scope, verification, and expected artifacts.
 4. Wait for explicit TODO plan approval in the conversation.
-5. Write schema-version-2
-   `.resume-site-work/reports/site-implementation-plan.json` with
-   `generation_mode: one-integrated-site`, exact tasks, dependencies, files,
-   interfaces, acceptance, verification, rollback, and `versions/v1-integrated`.
-6. Validate the plan:
+5. Evaluate the approved TODO tasks, exact file scope, dependencies, shared-file
+   coupling, independently useful tasks, and expected coordination cost.
+6. Recommend one mode. If parallel speedup cannot be demonstrated, recommend
+   `当前会话单 Agent`.
+7. Present exactly this shape with plan-specific reasons:
+
+   > 执行方式推荐：<当前会话单 Agent | 多 Agent 并行>
+   >
+   > 原因：<actual file, dependency, speed, and coordination evidence>
+   >
+   > 1. 当前会话单 Agent
+   > 2. 多 Agent 并行
+   >
+   > 请明确选择 1 或 2。
+
+8. Set `stage=implementation_strategy_waiting_confirmation`. Wait for an
+   explicit conversational `1` or `2`. Prior approvals, silence, browser
+   activity, or inferred preference cannot select an execution mode.
+9. For choice `1`, use `single-agent`. For choice `2`, use `parallel-wave` and
+   require a validated `multi-agent-implementation.json`. If parallel tasks
+   overlap or cannot demonstrate a net speed benefit, show the exact conflict
+   and wait for a revised disjoint plan or a new explicit choice. Do not spawn
+   agents or silently fall back.
+10. Write schema-version-2
+    `.resume-site-work/reports/site-implementation-plan.json` with
+    `generation_mode: one-integrated-site`, the `strategy_selection` evidence,
+    exact tasks, dependencies, files, interfaces, acceptance, verification,
+    rollback, and `versions/v1-integrated`.
+11. Validate the plan:
 
 ```powershell
 python "$SKILL_ROOT\scripts\validate_site_implementation_plan.py" `
   ".resume-site-work\reports\site-implementation-plan.json"
 ```
 
-Do not edit React source before final requirements approval, explicit TODO plan
-approval, and successful JSON plan validation. A changed core decision
-invalidates final requirements approval and both planning artifacts.
-
-## Select the implementation strategy
-
-Choose only after the plan gate:
-
-- `single-agent` for local or tightly coupled work;
-- `fresh-agent-sequential` for an authorized dependency chain;
-- `parallel-wave` only for authorized independent tasks with disjoint files.
-
-Multi-agent execution requires explicit user authorization and a validated
-`multi-agent-implementation.json`. The main agent owns shared files, state,
+Do not write the machine plan before final requirements approval, explicit TODO
+plan approval, and explicit strategy selection. Do not edit React source before those
+three approvals and successful JSON plan validation. Do not spawn agents
+before explicit choice `2` and successful validation of both required plans. A
+changed core decision invalidates final requirements approval and both planning
+artifacts. The main agent always owns shared files, state,
 integration, preview promotion, snapshots, and publication.
 
 ## Generate one integrated website

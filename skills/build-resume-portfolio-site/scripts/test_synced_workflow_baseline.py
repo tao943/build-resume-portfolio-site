@@ -23,7 +23,9 @@ class SyncedWorkflowBaselineTests(unittest.TestCase):
     def test_skill_routes_content_and_selects_agent_strategy(self) -> None:
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("resume-content-intelligence", text)
-        self.assertIn("fresh-agent-sequential", text)
+        self.assertIn("当前会话单 Agent", text)
+        self.assertIn("多 Agent 并行", text)
+        self.assertNotIn("fresh-agent-sequential", text)
         self.assertIn("parallel-wave", text)
         self.assertIn("creative-direction.json", text)
 

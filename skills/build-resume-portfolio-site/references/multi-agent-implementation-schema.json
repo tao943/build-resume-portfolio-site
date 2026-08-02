@@ -13,9 +13,7 @@
   ],
   "properties": {
     "schema_version": {"const": 1},
-    "strategy": {
-      "enum": ["fresh-agent-sequential", "parallel-wave"]
-    },
+    "strategy": {"const": "parallel-wave"},
     "integration_owner": {"const": "main-agent"},
     "shared_files": {
       "type": "array",

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 
-STRATEGIES = {"fresh-agent-sequential", "parallel-wave"}
+STRATEGIES = {"parallel-wave"}
 ROLES = {"implementation", "review", "integration", "audit"}
 MODES = {"write", "read-only"}
 WAVE_MODES = {"sequential", "parallel"}
@@ -67,8 +67,8 @@ def validate(plan: Any) -> list[str]:
 
     if plan["schema_version"] != 1:
         errors.append("schema_version must be 1")
-    if plan["strategy"] not in STRATEGIES:
-        errors.append("strategy must be fresh-agent-sequential or parallel-wave")
+    if plan["strategy"] != "parallel-wave":
+        errors.append("strategy must be parallel-wave")
     if plan["integration_owner"] != "main-agent":
         errors.append("integration_owner must be main-agent")
 
@@ -232,10 +232,6 @@ def validate(plan: Any) -> list[str]:
     ):
         errors.append("plan requires an independent review or audit task")
 
-    if plan["strategy"] == "fresh-agent-sequential" and any(
-        wave.get("mode") == "parallel" for wave in waves if isinstance(wave, dict)
-    ):
-        errors.append("fresh-agent-sequential cannot contain parallel waves")
     if plan["strategy"] == "parallel-wave" and not any(
         wave.get("mode") == "parallel" for wave in waves if isinstance(wave, dict)
     ):

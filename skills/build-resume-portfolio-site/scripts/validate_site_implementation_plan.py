@@ -7,13 +7,14 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 
-STRATEGIES = {"single-agent", "fresh-agent-sequential", "parallel-wave"}
+STRATEGIES = {"single-agent", "parallel-wave"}
 REQUIRED = {
     "schema_version",
     "design_spec_id",
     "todo_plan",
     "todo_plan_approval",
     "generation_mode",
+    "strategy_selection",
     "strategy",
     "multi_agent_authorized",
     "multi_agent_plan",
@@ -84,6 +85,25 @@ def validate(payload: Any) -> list[str]:
         )
     if payload["generation_mode"] != "one-integrated-site":
         errors.append("generation_mode must be one-integrated-site")
+    selection = payload["strategy_selection"]
+    if not isinstance(selection, dict):
+        errors.append("strategy selection must be recorded")
+    else:
+        conversational = (
+            selection.get("status") == "user_selected"
+            and selection.get("source") == "explicit_user"
+            and selection.get("channel") == "conversation"
+        )
+        if not conversational:
+            errors.append(
+                "strategy selection must be explicit and conversational"
+            )
+        if selection.get("selected") != payload["strategy"]:
+            errors.append("strategy must match the explicit strategy selection")
+        if selection.get("recommended") not in STRATEGIES:
+            errors.append("recommended strategy is unsupported")
+        if not _strings(selection.get("reasons"), non_empty=True):
+            errors.append("strategy recommendation reasons must be non-empty")
     if payload["strategy"] not in STRATEGIES:
         errors.append("unsupported strategy")
     if not isinstance(payload["multi_agent_authorized"], bool):
@@ -92,10 +112,7 @@ def validate(payload: Any) -> list[str]:
         if not isinstance(payload[name], str) or not payload[name].strip():
             errors.append(f"{name} must be a non-empty string")
 
-    multi_agent = payload["strategy"] in {
-        "fresh-agent-sequential",
-        "parallel-wave",
-    }
+    multi_agent = payload["strategy"] == "parallel-wave"
     if multi_agent:
         if payload["multi_agent_authorized"] is not True:
             errors.append("multi-agent strategy requires explicit authorization")
