@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/validation.mjs"
+    "check": "node --check src/validation.mjs && node --check src/worker.mjs"
   },
   "engines": {
     "node": ">=20"
