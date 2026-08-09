@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MVP = ROOT / "competition" / "xinghuo-cup-mvp"
 VALIDATOR = MVP / "scripts" / "validate_workflow_spec.py"
+RELEASE_VALIDATOR = MVP / "scripts" / "validate_release.py"
 
 
 def valid_spec() -> dict:
@@ -70,6 +72,21 @@ def load_validate():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.validate
+
+
+def load_release_validator_module():
+    if not RELEASE_VALIDATOR.is_file():
+        raise AssertionError("release validator is missing")
+    spec = importlib.util.spec_from_file_location("validate_release", RELEASE_VALIDATOR)
+    if spec is None or spec.loader is None:
+        raise AssertionError("release validator cannot be imported")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_validate_release():
+    return load_release_validator_module().validate_release
 
 
 class XinghuoWorkflowContractTests(unittest.TestCase):
@@ -141,6 +158,52 @@ class XinghuoWorkflowContractTests(unittest.TestCase):
                 self.assertIn(f"`{node['id']}`", guide)
         self.assertIn("平台导出的 YML", guide)
         self.assertIn("成功调试", guide)
+
+    def test_openapi_matches_the_preview_worker_contract(self) -> None:
+        contract_path = MVP / "openapi" / "preview-plugin.openapi.yaml"
+        self.assertTrue(contract_path.is_file(), "preview OpenAPI contract is missing")
+        contract = contract_path.read_text(encoding="utf-8")
+        for marker in (
+            "/api/v1/competition/previews:",
+            "operationId: createPortfolioPreview",
+            "bearerAuth",
+            "approved_copy",
+            "content_map",
+            "creative_direction",
+            "generated_html",
+            "preview_url",
+            "validation_failed",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, contract)
+
+    def test_release_validator_reports_only_pending_public_docs(self) -> None:
+        self.assertEqual(
+            load_validate_release()(MVP),
+            [
+                "missing release file: README.md",
+                "missing release file: demo/anonymized-student-resume.md",
+                "missing release file: demo/target-jd.md",
+                "missing release file: demo/demo-script.md",
+            ],
+        )
+
+    def test_release_validator_detects_committed_secrets(self) -> None:
+        module = load_release_validator_module()
+        self.assertTrue(
+            hasattr(module, "scan_for_secrets"),
+            "release secret scanner is missing",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "unsafe.md").write_text(
+                "PREVIEW_WRITE_TOKEN=real-secret-value",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                module.scan_for_secrets(root),
+                ["possible committed secret in unsafe.md"],
+            )
 
 
 if __name__ == "__main__":
