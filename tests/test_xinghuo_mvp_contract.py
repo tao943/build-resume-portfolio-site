@@ -177,16 +177,8 @@ class XinghuoWorkflowContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, contract)
 
-    def test_release_validator_reports_only_pending_public_docs(self) -> None:
-        self.assertEqual(
-            load_validate_release()(MVP),
-            [
-                "missing release file: README.md",
-                "missing release file: demo/anonymized-student-resume.md",
-                "missing release file: demo/target-jd.md",
-                "missing release file: demo/demo-script.md",
-            ],
-        )
+    def test_release_bundle_is_complete(self) -> None:
+        self.assertEqual(load_validate_release()(MVP), [])
 
     def test_release_validator_detects_committed_secrets(self) -> None:
         module = load_release_validator_module()
@@ -204,6 +196,32 @@ class XinghuoWorkflowContractTests(unittest.TestCase):
                 module.scan_for_secrets(root),
                 ["possible committed secret in unsafe.md"],
             )
+
+    def test_demo_fixture_contains_no_real_contact_details(self) -> None:
+        demo_path = MVP / "demo" / "anonymized-student-resume.md"
+        self.assertTrue(demo_path.is_file(), "anonymized resume fixture is missing")
+        demo = demo_path.read_text(encoding="utf-8")
+        self.assertNotRegex(demo, r"1[3-9]\d{9}")
+        self.assertNotRegex(
+            demo,
+            r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+        )
+        self.assertIn("候选人 A", demo)
+        self.assertIn("示例大学", demo)
+
+    def test_demo_script_exercises_all_approval_and_delivery_gates(self) -> None:
+        script_path = MVP / "demo" / "demo-script.md"
+        self.assertTrue(script_path.is_file(), "demo script is missing")
+        script = script_path.read_text(encoding="utf-8")
+        for marker in (
+            "内容策略批准",
+            "最终文案批准",
+            "创意方向批准",
+            "在线预览",
+            "unmatched",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, script)
 
 
 if __name__ == "__main__":
