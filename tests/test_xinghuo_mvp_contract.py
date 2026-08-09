@@ -112,6 +112,36 @@ class XinghuoWorkflowContractTests(unittest.TestCase):
         self.assertEqual(fixture, workflow)
         self.assertEqual(load_validate()(workflow), [])
 
+    def test_prompt_pack_enforces_evidence_and_non_template_output(self) -> None:
+        prompt_dir = MVP / "astron" / "prompts"
+        prompts = sorted(prompt_dir.glob("*.md"))
+        self.assertEqual(len(prompts), 7, "prompt pack must contain seven files")
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in prompts)
+        for marker in (
+            "FACT-",
+            "EVID-",
+            "unmatched",
+            "user_confirmed",
+            "approved_copy",
+            "creative_direction",
+            "No JavaScript",
+            "Do not use a fixed portfolio template",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, combined)
+
+    def test_build_guide_maps_every_workflow_node(self) -> None:
+        workflow_path = MVP / "astron" / "workflow-spec.json"
+        guide_path = MVP / "astron" / "workflow-build-guide.md"
+        self.assertTrue(guide_path.is_file(), "workflow build guide is missing")
+        spec = json.loads(workflow_path.read_text(encoding="utf-8"))
+        guide = guide_path.read_text(encoding="utf-8")
+        for node in spec["nodes"]:
+            with self.subTest(node=node["id"]):
+                self.assertIn(f"`{node['id']}`", guide)
+        self.assertIn("平台导出的 YML", guide)
+        self.assertIn("成功调试", guide)
+
 
 if __name__ == "__main__":
     unittest.main()
