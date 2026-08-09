@@ -35,6 +35,16 @@ python "$SKILL_ROOT\scripts\validate_creative_direction.py" `
 
 Continue only on exit `0`.
 
+## Compile boundary
+
+After this report validates, follow `design-contract.md` and compile the
+approved creative direction into `reports/design-contract.json`. Creative
+direction preserves expressive possibility; the design contract converts the
+selected commitments into observable layout, typography, color, surface,
+motion, anti-template, responsive, and acceptance rules. Compilation is not a
+new user gate and cannot contradict or reopen approved choices. The validated
+design contract must exist before the first React source edit.
+
 ## Required decisions
 
 - `creative_thesis`: one emotional and visual proposition.

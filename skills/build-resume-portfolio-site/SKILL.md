@@ -20,6 +20,7 @@ project, and retain the last valid source snapshot.
    `references/react-vite-output-contract.md`,
    `references/design-intelligence-contract.md`,
    `references/creative-direction-contract.md`,
+   `references/design-contract.md`,
    `references/reference-library-contract.md`, and
    `references/apihz-media-contract.md` completely. Read specialized media,
    screenshot, motion, or multi-agent contracts only when entering those paths.
@@ -136,7 +137,7 @@ integration, preview promotion, snapshots, and publication.
 
 ## Generate one integrated website
 
-1. Set `stage=integrated_generating` and validate `integrated` resources.
+1. Validate `integrated` resources and set `stage=design_contract_compiling`.
 2. Read `prompts/01-generate-integrated-site.md`.
 3. Generate `reports/content-map.json` only from normalized facts and approved
    copy. Before React generation, run:
@@ -150,17 +151,32 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
    Treat `reports\design-intelligence.json` as soft guidance. Translate the
    approved decisions into `reports/creative-direction.json` and validate it;
    the report may add implementation detail but cannot reopen user choices.
-4. Translate the approved six decisions into implementation detail without
-   changing them. Create supporting media-direction, creative-direction, and
-   motion reports when applicable.
-5. Create or replace the complete source at `.resume-site-work/site` in one
+4. Compile the approved design specification, design intelligence, and creative
+   direction into a temporary sibling for `reports/design-contract.json`. Follow
+   `references/design-contract.md`, validate the temporary report, and atomically
+   replace the canonical report only on success:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_design_contract.py" `
+  ".resume-site-work\reports\design-contract.json"
+```
+
+   Do not perform the first React source edit before this command exits `0`.
+   The contract refines approved choices into observable commitments but cannot
+   reopen or contradict them. On failure set `artifact_invalid`, preserve the
+   last valid preview and snapshot, and stop source generation.
+5. Set `stage=integrated_generating`. Translate the approved six decisions and
+   validated design contract into implementation detail without changing them.
+   Create supporting media-direction, creative-direction, and motion reports
+   when applicable.
+6. Create or replace the complete source at `.resume-site-work/site` in one
    integrated transaction. Apply structure, typography, color, media treatment,
    one primary-motion system, and all selected compatible secondary effects.
    Create the explicit empty or populated `reports/media-inventory.json`, pass
    it with `--media-inventory` when media validation applies, and follow
    `references/motion-production-contract.md`. Motion has no numeric effect cap;
    compatibility and controller ownership are the limits.
-6. Validate and build:
+7. Validate and build:
 
 ```powershell
 python "$SKILL_ROOT\scripts\validate_vite_project.py" `
@@ -168,14 +184,20 @@ python "$SKILL_ROOT\scripts\validate_vite_project.py" `
 npm run build
 ```
 
-7. On success, atomically promote `site/dist` to `preview/dist`, capture desktop,
+8. On success, atomically promote `site/dist` to `preview/dist`, capture desktop,
    tablet, mobile, and `interaction_states_checked` evidence for initial and
    representative active states. Inspect coarse-pointer/touch, reduced-motion,
    loading, error, and Poster fallback behavior plus console/layout/media safety.
-8. Perform bounded local repair while `visual_repair_round < 2`. Do not request
-   routine confirmation during audit or silently change a confirmed design
-   decision. Keep the last valid preview on failure.
-9. Snapshot successful source to `versions/v1-integrated` or a retry suffix,
+9. Follow `references/screenshot-review-rules.md` and
+   `prompts/04-audit-screenshot.md`. Validate `reports/visual-audit.json` against
+   the design contract before repair. Identity fit and aesthetic quality pass
+   independently; neither can compensate for failure of the other.
+10. Perform evidence-linked bounded local repair with
+   `prompts/05-repair-local-issues.md` while `visual_repair_round < 2`. Change
+   only finding-level `permitted_files` and the smallest affected region. Do not
+   request routine confirmation or silently change a confirmed design decision.
+   Keep the last valid preview on failure.
+11. Snapshot successful source to `versions/v1-integrated` or a retry suffix,
    set `stage=integrated_waiting_confirmation`, and show the complete website.
 
 The first React candidate is one integrated website. Do not return to the old

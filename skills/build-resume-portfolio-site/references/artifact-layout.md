@@ -34,6 +34,7 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- content-map.json
 |   |-- content-provenance.json
 |   |-- creative-direction.json    # fixed floor, open ceiling, and selected layout family
+|   |-- design-contract.json       # compiled observable design and acceptance commitments
 |   |-- multi-agent-implementation.json # only when multi-agent execution is authorized
 |   |-- reference-selection.json
 |   |-- style-brief.json
@@ -68,6 +69,12 @@ edit. It carries the creative thesis,
 `creative_freedom`, layout candidates, responsive and motion freedoms, and
 review questions. It is not source code, a component tree, a new stage, or a
 confirmation artifact.
+
+`reports/design-contract.json` is compiled from the approved site design,
+design intelligence, and creative direction before the first React source
+edit. It contains observable implementation and review rules, not another user
+approval. `reports/visual-audit.json` links browser captures and findings back
+to those rules. Neither report can select, confirm, or revise a design choice.
 
 `reports/site-design-spec.json` records all six category decisions and the
 final requirements approval. `reports/site-todo-plan.md` is the readable plan
