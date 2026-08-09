@@ -81,6 +81,59 @@ class WorkflowBehaviorContractTests(unittest.TestCase):
         self.assertIn("Do not edit React source before", text)
         self.assertIn("site-design-spec.json", text)
 
+    def test_design_contract_is_compiled_before_react_generation(self) -> None:
+        skill = self.read_skill("build-resume-portfolio-site").lower()
+        creative = skill.index("creative-direction.json")
+        contract = skill.index("design-contract.json")
+        source_edit = skill.index("first react source edit")
+        self.assertLess(creative, contract)
+        self.assertLess(contract, source_edit)
+        self.assertIn("validate_design_contract.py", skill)
+
+    def test_content_fit_does_not_count_as_aesthetic_approval(self) -> None:
+        rules = self.read_site_reference("screenshot-review-rules.md").lower()
+        self.assertIn("identity fit", rules)
+        self.assertIn("aesthetic quality", rules)
+        self.assertIn("cannot compensate", rules)
+
+    def test_visual_audit_requires_contract_linked_evidence(self) -> None:
+        prompt = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "prompts"
+            / "04-audit-screenshot.md"
+        ).read_text(encoding="utf-8").lower()
+        for marker in (
+            "evidence_refs",
+            "contract_path",
+            "identity_fit",
+            "aesthetic_quality",
+            "validate_visual_audit.py",
+        ):
+            self.assertIn(marker, prompt)
+
+    def test_repair_prompt_is_ready_and_bounded(self) -> None:
+        prompt = (
+            ROOT
+            / "skills"
+            / "build-resume-portfolio-site"
+            / "prompts"
+            / "05-repair-local-issues.md"
+        ).read_text(encoding="utf-8").lower()
+        self.assertIn("resource_status: ready", prompt)
+        self.assertIn("contract_path", prompt)
+        self.assertIn("permitted_files", prompt)
+        self.assertIn("smallest", prompt)
+        self.assertIn("two completed", prompt)
+        self.assertNotIn("resource_not_ready", prompt)
+
+    def test_anti_template_rules_are_contextual_not_universal_bans(self) -> None:
+        rules = self.read_site_reference("screenshot-review-rules.md").lower()
+        self.assertIn("anti-template", rules)
+        self.assertIn("approved contract", rules)
+        self.assertIn("indiscriminate repetition", rules)
+
     def test_site_discovery_requires_display_only_visual_gallery(self) -> None:
         text = self.read_skill("build-resume-portfolio-site").lower()
         self.assertIn("visual-style-preview-contract.md", text)
