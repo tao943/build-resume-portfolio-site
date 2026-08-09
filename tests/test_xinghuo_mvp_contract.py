@@ -1,0 +1,117 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MVP = ROOT / "competition" / "xinghuo-cup-mvp"
+VALIDATOR = MVP / "scripts" / "validate_workflow_spec.py"
+
+
+def valid_spec() -> dict:
+    return {
+        "schema_version": 1,
+        "platform": "iflytek-astron-agent",
+        "entry_kind": "workflow-agent",
+        "approval_sources": ["explicit_conversation"],
+        "state_variables": [
+            "source_facts",
+            "confirmed_facts",
+            "clarification_queue",
+            "jd_match_matrix",
+            "approved_copy",
+            "content_map",
+            "creative_direction",
+            "preview_artifact",
+        ],
+        "preview_service_capabilities": ["validate", "store", "serve"],
+        "nodes": [
+            {"id": "start", "type": "start"},
+            {"id": "extract_facts", "type": "llm"},
+            {"id": "validate_facts", "type": "code"},
+            {"id": "clarification_decision", "type": "decision"},
+            {"id": "clarification_question", "type": "question"},
+            {"id": "jd_match", "type": "llm"},
+            {"id": "content_strategies", "type": "llm"},
+            {
+                "id": "strategy_approval",
+                "type": "question",
+                "approval_kind": "content_strategy",
+            },
+            {"id": "tailored_copy", "type": "llm"},
+            {
+                "id": "copy_approval",
+                "type": "question",
+                "approval_kind": "final_copy",
+            },
+            {"id": "content_map", "type": "llm"},
+            {"id": "creative_directions", "type": "llm"},
+            {
+                "id": "direction_approval",
+                "type": "question",
+                "approval_kind": "creative_direction",
+            },
+            {"id": "generate_preview_html", "type": "llm"},
+            {"id": "preview_delivery", "type": "tool"},
+            {"id": "preview_review", "type": "question"},
+        ],
+    }
+
+
+def load_validate():
+    if not VALIDATOR.is_file():
+        raise AssertionError("workflow validator is missing")
+    spec = importlib.util.spec_from_file_location("validate_workflow_spec", VALIDATOR)
+    if spec is None or spec.loader is None:
+        raise AssertionError("workflow validator cannot be imported")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.validate
+
+
+class XinghuoWorkflowContractTests(unittest.TestCase):
+    def test_valid_workflow_contract_is_accepted(self) -> None:
+        self.assertEqual(load_validate()(valid_spec()), [])
+
+    def test_browser_activity_cannot_be_an_approval_source(self) -> None:
+        payload = valid_spec()
+        payload["approval_sources"].append("browser_activity")
+        self.assertIn(
+            "approval_sources must equal ['explicit_conversation']",
+            load_validate()(payload),
+        )
+
+    def test_preview_service_cannot_generate_content(self) -> None:
+        payload = valid_spec()
+        payload["preview_service_capabilities"].append("model_inference")
+        self.assertIn(
+            "preview service capability is forbidden: model_inference",
+            load_validate()(payload),
+        )
+
+    def test_approval_gates_cannot_be_merged_or_reordered(self) -> None:
+        payload = valid_spec()
+        payload["nodes"] = [
+            node for node in payload["nodes"] if node["id"] != "copy_approval"
+        ]
+        errors = load_validate()(payload)
+        self.assertIn("workflow nodes are missing or out of order", errors)
+        self.assertIn("approval gates must remain separate and ordered", errors)
+
+    def test_persisted_workflow_and_fixture_match_the_contract(self) -> None:
+        workflow_path = MVP / "astron" / "workflow-spec.json"
+        fixture_path = ROOT / "tests" / "fixtures" / "xinghuo-workflow-valid.json"
+        self.assertTrue(workflow_path.is_file(), "workflow spec is missing")
+        self.assertTrue(fixture_path.is_file(), "workflow fixture is missing")
+        workflow = json.loads(workflow_path.read_text(encoding="utf-8"))
+        fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+        self.assertEqual(workflow, valid_spec())
+        self.assertEqual(fixture, workflow)
+        self.assertEqual(load_validate()(workflow), [])
+
+
+if __name__ == "__main__":
+    unittest.main()
