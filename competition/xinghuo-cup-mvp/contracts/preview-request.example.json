@@ -1,0 +1,23 @@
+{
+  "approved_copy": {
+    "hero": {
+      "text": "Evidence-led product engineer",
+      "approval_status": "user_approved",
+      "fact_ids": [
+        "FACT-001"
+      ]
+    }
+  },
+  "content_map": {
+    "order": [
+      "hero"
+    ],
+    "public_contacts": [],
+    "public_links": []
+  },
+  "creative_direction": {
+    "visual_protagonist": "evidence ledger",
+    "composition_commitment": "asymmetric annotated field notes"
+  },
+  "generated_html": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Evidence-led product engineer</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#f4f0e8;color:#16211f}main{min-height:100vh;display:grid;grid-template-columns:2fr 1fr;gap:3rem;padding:8vw}h1{font-size:clamp(3rem,9vw,8rem);line-height:.9}.ledger{align-self:end;border-top:2px solid;padding-top:1rem}@media(max-width:700px){main{display:block}.ledger{margin-top:4rem}}</style></head><body><main><h1>Evidence-led product engineer</h1><p class=\"ledger\">evidence ledger</p></main></body></html>"
+}

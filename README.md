@@ -78,3 +78,11 @@ $build-resume-portfolio-site
 
 插件清单位于 `.codex-plugin/plugin.json`。用户简历、媒体、构建结果、缓存和
 `.resume-site-work/` 不属于插件发布内容；凭据只能由运行环境变量提供。
+
+## 星火杯初赛 MVP
+
+讯飞星辰 Agent 迁移包位于
+[`competition/xinghuo-cup-mvp/`](competition/xinghuo-cup-mvp/README.md)。它保留
+事实核验、岗位定制、内容批准和创意方向批准，以星辰工作流为核心，并通过无模型
+推理的 Worker 验证和托管单页在线预览。完整 React + Vite 建站继续由原 Skill
+负责，不进入初赛最小范围。
