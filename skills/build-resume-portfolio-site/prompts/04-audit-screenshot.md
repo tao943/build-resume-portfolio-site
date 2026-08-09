@@ -13,6 +13,11 @@ Audit the successful built preview without redesigning it. Read
 desktop, tablet, mobile, interaction, coarse-pointer, reduced-motion, loading,
 error, and Poster capture.
 
+For every controller family, record the initial state and one representative active state.
+Exercise media loading, media ready, and media error behavior;
+verify the Poster fallback remains meaningful. Audit or validation failure must
+preserve the last-valid-preview.
+
 Write schema-version-1 `reports/visual-audit.json` with:
 
 - `captures` containing stable evidence IDs and local capture paths;

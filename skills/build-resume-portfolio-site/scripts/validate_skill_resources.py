@@ -46,6 +46,9 @@ CONTRACT_SPECS = {
     "visual-style-preview-contract": (
         "references/visual-style-preview-contract.md"
     ),
+    "design-contract": "references/design-contract.md",
+    "design-contract-schema": "references/design-contract-schema.json",
+    "visual-audit-schema": "references/visual-audit-schema.json",
 }
 
 VISUAL_COMPANION_FILES = (
@@ -53,6 +56,14 @@ VISUAL_COMPANION_FILES = (
     "scripts/visual_companion/server.cjs",
     "scripts/visual_companion/launch.cjs",
     "scripts/visual_companion/stop.cjs",
+)
+
+AESTHETIC_QUALITY_FILES = (
+    "references/design-contract.md",
+    "references/design-contract-schema.json",
+    "references/visual-audit-schema.json",
+    "scripts/validate_design_contract.py",
+    "scripts/validate_visual_audit.py",
 )
 
 STAGE_RESOURCES = {
@@ -69,7 +80,9 @@ STAGE_RESOURCES = {
     "integrated": (
         "generate-integrated-site",
         "design-catalog",
+        "aesthetic-quality-loop",
         "audit-screenshot",
+        "repair-local-issues",
     ),
     "prototype": ("generate-prototype", "design-catalog"),
     "media-direction": (
@@ -251,6 +264,7 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
             "motion-catalog",
             "design-catalog",
             "visual-companion",
+            "aesthetic-quality-loop",
         )
         if mode == "skeleton"
         else STAGE_RESOURCES[stage]
@@ -307,6 +321,13 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
             resource_errors = [
                 f"missing_visual_companion: {relative}"
                 for relative in VISUAL_COMPANION_FILES
+                if not (skill_root / relative).is_file()
+            ]
+            resource_ready = not resource_errors
+        elif resource_id == "aesthetic-quality-loop":
+            resource_errors = [
+                f"missing_aesthetic_quality_file: {relative}"
+                for relative in AESTHETIC_QUALITY_FILES
                 if not (skill_root / relative).is_file()
             ]
             resource_ready = not resource_errors

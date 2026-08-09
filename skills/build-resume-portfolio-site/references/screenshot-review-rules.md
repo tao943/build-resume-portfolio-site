@@ -72,12 +72,16 @@ pointer/hover, keyboard/focus, click/tap, drag, timed, and media. Record
 - Audit media loading, ready, and error states. Poster fallback remains
   meaningful while loading, on error, for reduced motion, and on constrained
   touch/mobile paths.
-- Check clipping, focus order, readability, image/UI cohesion, controller
-  conflicts, and factual-media integrity in initial and active states.
+- Check clipping, focus order, readability, image/UI cohesion, controller conflicts,
+  and factual-media integrity in initial and active states.
 
 Essential-content loss, scroll traps, factual-media distortion, absent
 fallbacks, and a failed required quality dimension are `blocking`, even when
 another viewport or static state looks correct.
+
+Treat clipping, focus order, readability, image/UI cohesion, controller conflicts,
+essential-content loss, scroll traps, factual-media distortion, and
+absent fallbacks as explicit review markers; the last four are always blocking.
 
 ## Repair policy
 

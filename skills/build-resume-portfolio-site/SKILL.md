@@ -194,8 +194,8 @@ npm run build
    independently; neither can compensate for failure of the other.
 10. Perform evidence-linked bounded local repair with
    `prompts/05-repair-local-issues.md` while `visual_repair_round < 2`. Change
-   only finding-level `permitted_files` and the smallest affected region. Do not
-   request routine confirmation or silently change a confirmed design decision.
+   only finding-level `permitted_files` and the smallest affected region. Do not request
+   routine confirmation or silently change a confirmed design decision.
    Keep the last valid preview on failure.
 11. Snapshot successful source to `versions/v1-integrated` or a retry suffix,
    set `stage=integrated_waiting_confirmation`, and show the complete website.
