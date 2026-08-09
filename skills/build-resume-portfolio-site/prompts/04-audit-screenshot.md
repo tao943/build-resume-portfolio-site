@@ -1,30 +1,76 @@
 ---
 resource_id: audit-screenshot
-resource_version: 1
+resource_version: 2
 resource_status: ready
 output_contract: visual-audit-json
 ---
 
-# Audit screenshots, dynamic interactions, and media fallbacks
+# Audit screenshots against the approved design contract
 
-Audit the successful built preview without redesigning it. Capture desktop, tablet, and mobile as specified by `references/screenshot-review-rules.md`, inspect `capture-report.json`, and write `reports/visual-audit.json` before making any repair.
+Audit the successful built preview without redesigning it. Read
+`references/screenshot-review-rules.md`, validated
+`reports/design-contract.json`, `capture-report.json`, and every required
+desktop, tablet, mobile, interaction, coarse-pointer, reduced-motion, loading,
+error, and Poster capture.
 
-## Required audit evidence
+For every controller family, record the initial state and one representative active state.
+Exercise media loading, media ready, and media error behavior;
+verify the Poster fallback remains meaningful. Audit or validation failure must
+preserve the last-valid-preview.
 
-`visual-audit.json` must record the viewport, selector or region, evidence, severity, and local repair proposal for every finding. It must also include an `interaction_states_checked` array. For each controller family, capture and record:
+Write schema-version-1 `reports/visual-audit.json` with:
 
-- the initial state and one representative active state;
-- the controller family, target, trigger, captured viewport, and state-specific evidence;
-- the coarse-pointer/touch alternative and the reduced-motion state.
+- `captures` containing stable evidence IDs and local capture paths;
+- `deterministic_checks` linked to a known `rule_id`, `evidence_refs`, and
+  `contract_path`;
+- separate `dimension_reviews.identity_fit` and
+  `dimension_reviews.aesthetic_quality` verdicts, strengths, evidence, contract
+  paths, and `pass`, `repairable`, or `blocking` status;
+- `findings` for every observable defect;
+- `interaction_states_checked`; and
+- an `overall_status` at least as severe as every dimension and finding.
 
-Controller families include scroll, pointer/hover, keyboard/focus, click/tap, drag, timed, and media controllers when present. Do not invent an interaction solely for the audit; record `not_present` where the controller family is absent.
+Identity fit and aesthetic quality are independent. Neither can compensate for
+failure of the other. A numerical score is diagnostic only when its rubric and
+evidence are explicit; status and observable findings control repair.
 
-Exercise every media region in its media loading, ready, and media error state. Confirm a Poster fallback remains visible, meaningful, and usable while media loads, after an error, for reduced-motion, and where the coarse-pointer/touch alternative suppresses playback or costly interaction.
+## Finding contract
 
-## Findings and repair decision
+Every finding contains:
 
-Check the visual and behavioral categories in the review rules, including clipping, focus order, readability, image/UI cohesion, controller conflicts, and the rendered source facts. Treat essential-content loss, scroll traps, factual-media distortion, and absent fallbacks as blocking. Record blocking defects even when a static screenshot appears acceptable.
+```json
+{
+  "id": "finding-001",
+  "rule_id": "aesthetic.signature-visible",
+  "dimension": "aesthetic_quality",
+  "severity": "repairable",
+  "viewport_or_state": "mobile-initial",
+  "region": "projects",
+  "evidence_refs": ["mobile-initial"],
+  "contract_path": "signature.structural_device",
+  "permitted_files": [
+    "src/components/ProjectsSection.jsx",
+    "src/styles/projects.css"
+  ],
+  "proposed_local_change": "Restore project-number prominence on mobile.",
+  "intended_result": "The signature index remains immediately recognizable."
+}
+```
 
-For repairable or blocking defects, make only local React/CSS changes. Preserve the confirmed media direction, content, and last-valid-preview: validate, build, promote, and recapture only after a candidate succeeds. A failed repair must leave the last-valid-preview active.
+Use only source-relative permitted files inside `.resume-site-work/site`. Do not
+invent a finding, rule, contract path, capture, interaction, or factual defect.
 
-Keep the existing automatic repair loop and its two completed-round limit. This audit adds no user confirmation step: continue automatically when there are no blocking findings, or retain the last-valid-preview and report unresolved blocking defects after round two.
+## Validation and repair decision
+
+Before any repair, run:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_visual_audit.py" `
+  ".resume-site-work\reports\visual-audit.json" `
+  --design-contract ".resume-site-work\reports\design-contract.json"
+```
+
+Continue only on exit `0`. For `blocking` or `repairable` findings, enter
+`prompts/05-repair-local-issues.md`. Advisory findings do not extend the repair
+loop. Preserve the last valid preview on audit or validation failure. Keep the
+existing maximum of two completed repair rounds and add no user confirmation.

@@ -18,6 +18,7 @@ content_preflight
 -> todo_plan_waiting_confirmation
 -> implementation_strategy_waiting_confirmation
 -> implementation_plan_generating
+-> design_contract_compiling
 -> integrated_generating
 -> integrated_auditing
 -> integrated_waiting_confirmation
@@ -36,7 +37,9 @@ todo_plan_waiting_confirmation --approve--> implementation_strategy_waiting_conf
 implementation_strategy_waiting_confirmation --choose 1--> implementation_plan_generating
 implementation_strategy_waiting_confirmation --choose 2--> implementation_plan_generating
 implementation_strategy_waiting_confirmation --choose 2 and unsafe--> implementation_strategy_waiting_confirmation
-implementation_plan_generating --plan validates--> integrated_generating
+implementation_plan_generating --plan validates--> design_contract_compiling
+design_contract_compiling --contract validates--> integrated_generating
+design_contract_compiling --contract invalid--> artifact_invalid
 ```
 
 Silence, browser activity, inferred preference, or prior approval cannot select
@@ -50,18 +53,24 @@ The integrated transaction is the first React generation:
 
 1. Restore the empty/new baseline or the last confirmed artifact for regeneration.
 2. Consume approved content, six decisions, readable TODO plan, JSON plan,
-   design intelligence, and authorized-media inventory.
-3. Edit only `.resume-site-work/site`.
-4. Apply structure, typography, color, media, primary motion, and compatible
+   design intelligence, creative direction, and authorized-media inventory.
+3. Compile and validate `reports/design-contract.json`; this internal artifact
+   adds no approval gate and must precede the first React source edit.
+4. Edit only `.resume-site-work/site` and obey the validated design contract.
+5. Apply structure, typography, color, media, primary motion, and compatible
    secondary motion together.
-5. Validate with `--stage integrated`, run `npm run build`, then atomically
+6. Validate with `--stage integrated`, run `npm run build`, then atomically
    promote the successful `dist`.
-6. Capture desktop/tablet/mobile, interaction, coarse-pointer, and
-   reduced-motion states; inspect layout, console, accessibility, and fallbacks.
-7. Permit at most two bounded repair rounds.
-8. Snapshot successful source to `versions/v1-integrated` or a retry suffix.
+7. Capture desktop/tablet/mobile, interaction, coarse-pointer, and
+   reduced-motion states; inspect identity fit and aesthetic quality separately
+   plus layout, console, accessibility, anti-template rules, and fallbacks.
+8. Validate `reports/visual-audit.json` against `reports/design-contract.json`.
+9. Permit at most two evidence-linked bounded repair rounds.
+10. Snapshot successful source to `versions/v1-integrated` or a retry suffix.
 
 A failed validation, build, or capture never replaces the last valid preview.
+Identity fit cannot compensate for failed aesthetic quality, and aesthetic
+polish cannot compensate for generic or inaccurate identity fit.
 
 ## Final acceptance state machine
 

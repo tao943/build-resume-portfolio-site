@@ -49,12 +49,22 @@ CONTRACTS = (
     "site-planning-contract.md",
     "site-implementation-plan-schema.json",
     "visual-style-preview-contract.md",
+    "design-contract.md",
+    "design-contract-schema.json",
+    "visual-audit-schema.json",
 )
 VISUAL_COMPANION_FILES = (
     "assets/visual-companion/gallery-shell.html",
     "scripts/visual_companion/server.cjs",
     "scripts/visual_companion/launch.cjs",
     "scripts/visual_companion/stop.cjs",
+)
+AESTHETIC_QUALITY_FILES = (
+    "references/design-contract.md",
+    "references/design-contract-schema.json",
+    "references/visual-audit-schema.json",
+    "scripts/validate_design_contract.py",
+    "scripts/validate_visual_audit.py",
 )
 
 
@@ -142,6 +152,12 @@ def write_complete_skeleton(root: Path) -> None:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
+    for relative in AESTHETIC_QUALITY_FILES:
+        source = SKILL_ROOT / relative
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if not destination.exists():
+            shutil.copy2(source, destination)
 
 
 
@@ -205,6 +221,38 @@ class ValidateSkillResourcesTests(unittest.TestCase):
         report = validate_resources(SKILL_ROOT, "runtime", "integrated")
         self.assertTrue(report.ok, report.errors)
         self.assertTrue(report.ready, report.errors)
+
+    def test_integrated_stage_requires_aesthetic_quality_resources(self) -> None:
+        required = (
+            "references/design-contract.md",
+            "references/design-contract-schema.json",
+            "references/visual-audit-schema.json",
+            "scripts/validate_design_contract.py",
+            "scripts/validate_visual_audit.py",
+        )
+        for relative in required:
+            with self.subTest(
+                relative=relative
+            ), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory) / "skill"
+                shutil.copytree(SKILL_ROOT, root)
+                (root / relative).unlink()
+                report = validate_resources(root, "runtime", "integrated")
+                self.assertFalse(report.ok)
+                self.assertIn(
+                    f"missing_aesthetic_quality_file: {relative}",
+                    report.errors,
+                )
+
+    def test_integrated_stage_rejects_unready_repair_prompt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "skill"
+            shutil.copytree(SKILL_ROOT, root)
+            write_prompt(root, "repair-local-issues", ready=False)
+            report = validate_resources(root, "runtime", "integrated")
+            self.assertTrue(report.ok, report.errors)
+            self.assertFalse(report.ready)
+            self.assertIn("resource_not_ready: repair-local-issues", report.errors)
 
     def test_skeleton_rejects_missing_site_contract(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

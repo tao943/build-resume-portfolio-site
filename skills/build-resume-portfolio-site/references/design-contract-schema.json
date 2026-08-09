@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portfolio executable design contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "identity_strategy", "signature", "layout",
+    "typography", "color", "surface", "motion", "anti_template_rules",
+    "acceptance_checks", "traceability"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "identity_strategy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["audience", "narrative_priorities", "density", "content_form_relationships"],
+      "properties": {
+        "audience": {"$ref": "#/$defs/nonEmptyString"},
+        "narrative_priorities": {"$ref": "#/$defs/nonEmptyStringList"},
+        "density": {"$ref": "#/$defs/nonEmptyString"},
+        "content_form_relationships": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "signature": {
+      "type": "object", "additionalProperties": false,
+      "required": ["visual_protagonist", "composition_commitment", "structural_device", "template_independence_claim"],
+      "properties": {
+        "visual_protagonist": {"$ref": "#/$defs/nonEmptyString"},
+        "composition_commitment": {"$ref": "#/$defs/nonEmptyString"},
+        "structural_device": {"$ref": "#/$defs/nonEmptyString"},
+        "template_independence_claim": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "layout": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hierarchy", "section_rhythm", "alignment_logic", "density_ranges", "responsive_transformations", "prohibited_arrangements"],
+      "properties": {
+        "hierarchy": {"$ref": "#/$defs/nonEmptyStringList"},
+        "section_rhythm": {"$ref": "#/$defs/nonEmptyStringList"},
+        "alignment_logic": {"$ref": "#/$defs/nonEmptyString"},
+        "density_ranges": {"$ref": "#/$defs/nonEmptyStringList"},
+        "responsive_transformations": {"$ref": "#/$defs/nonEmptyStringList"},
+        "prohibited_arrangements": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "typography": {
+      "type": "object", "additionalProperties": false,
+      "required": ["roles", "scale_relationships", "measure", "rhythm", "contrast", "fallbacks"],
+      "properties": {
+        "roles": {"$ref": "#/$defs/nonEmptyStringList"},
+        "scale_relationships": {"$ref": "#/$defs/nonEmptyStringList"},
+        "measure": {"$ref": "#/$defs/nonEmptyStringList"},
+        "rhythm": {"$ref": "#/$defs/nonEmptyStringList"},
+        "contrast": {"$ref": "#/$defs/nonEmptyStringList"},
+        "fallbacks": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "color": {
+      "type": "object", "additionalProperties": false,
+      "required": ["semantic_roles", "proportion_guidance", "contrast_targets", "surface_relationships", "prohibited_effects"],
+      "properties": {
+        "semantic_roles": {"$ref": "#/$defs/nonEmptyStringList"},
+        "proportion_guidance": {"$ref": "#/$defs/nonEmptyStringList"},
+        "contrast_targets": {"$ref": "#/$defs/nonEmptyStringList"},
+        "surface_relationships": {"$ref": "#/$defs/nonEmptyStringList"},
+        "prohibited_effects": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "surface": {
+      "type": "object", "additionalProperties": false,
+      "required": ["container_rules", "border_rules", "radius_rules", "shadow_rules", "texture_rules", "repetition_rules"],
+      "properties": {
+        "container_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "border_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "radius_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "shadow_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "texture_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "repetition_rules": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "motion": {
+      "type": "object", "additionalProperties": false,
+      "required": ["primary_system", "secondary_effects", "purposes", "controller_ownership", "reduced_motion", "coarse_pointer", "fallbacks"],
+      "properties": {
+        "primary_system": {"$ref": "#/$defs/nonEmptyString"},
+        "secondary_effects": {"$ref": "#/$defs/stringList"},
+        "purposes": {"$ref": "#/$defs/nonEmptyStringList"},
+        "controller_ownership": {"$ref": "#/$defs/nonEmptyStringList"},
+        "reduced_motion": {"$ref": "#/$defs/nonEmptyStringList"},
+        "coarse_pointer": {"$ref": "#/$defs/nonEmptyStringList"},
+        "fallbacks": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "anti_template_rules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rule"}},
+    "acceptance_checks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["identity_fit", "aesthetic_quality", "accessibility", "responsive", "runtime_safety"],
+      "properties": {
+        "identity_fit": {"$ref": "#/$defs/ruleList"},
+        "aesthetic_quality": {"$ref": "#/$defs/ruleList"},
+        "accessibility": {"$ref": "#/$defs/ruleList"},
+        "responsive": {"$ref": "#/$defs/ruleList"},
+        "runtime_safety": {"$ref": "#/$defs/ruleList"}
+      }
+    },
+    "traceability": {
+      "type": "array", "minItems": 9,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["contract_path", "source_decision_ids", "creative_direction_paths"],
+        "properties": {
+          "contract_path": {"enum": ["identity_strategy", "signature", "layout", "typography", "color", "surface", "motion", "anti_template_rules", "acceptance_checks"]},
+          "source_decision_ids": {"$ref": "#/$defs/nonEmptyStringList"},
+          "creative_direction_paths": {"$ref": "#/$defs/nonEmptyStringList"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {"type": "string", "minLength": 1},
+    "stringList": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/nonEmptyString"}},
+    "nonEmptyStringList": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/nonEmptyString"}},
+    "ruleList": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rule"}},
+    "rule": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rule_id", "criterion", "evidence_required", "severity"],
+      "properties": {
+        "rule_id": {"$ref": "#/$defs/nonEmptyString"},
+        "criterion": {"$ref": "#/$defs/nonEmptyString"},
+        "evidence_required": {"$ref": "#/$defs/nonEmptyStringList"},
+        "severity": {"enum": ["blocking", "repairable", "advisory"]}
+      }
+    }
+  }
+}

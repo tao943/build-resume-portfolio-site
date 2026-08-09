@@ -20,6 +20,8 @@ Read and preserve:
 - `reports/site-todo-plan.md` as the user-approved readable plan;
 - `reports/site-implementation-plan.json` schema version 2;
 - `reports/design-intelligence.json` as soft design guidance;
+- validated `reports/design-contract.json` as observable implementation and
+  acceptance commitments;
 - `reports/media-inventory.json` when authorized media exists.
 
 Do not implement when final requirements or TODO plan approval is missing.
@@ -34,6 +36,13 @@ Apply all confirmed decisions in the same source transaction:
 - confirmed media treatment and local fallbacks, or the approved no-media path;
 - exactly one primary-motion system;
 - every selected compatible secondary effect.
+
+Implement every applicable `design-contract.json` commitment. Preserve its
+identity strategy and signature device; apply its layout, typography, color,
+surface, primary-motion, compatible-secondary-motion, responsive, and fallback
+rules. Treat `anti_template_rules` and `acceptance_checks` as observable output
+criteria, not optional inspiration. Content fit does not establish aesthetic
+quality, and decorative polish does not establish identity fit.
 
 Keep resume content in a centralized data module. Use semantic sections for
 hero, experience, projects, strengths, and contact, but let the confirmed
@@ -56,7 +65,8 @@ at tablet and 390px mobile widths without horizontal overflow.
 
 ## Output and verification
 
-Generate the complete source plus `reports/content-map.json`, motion planning
+Generate the complete source plus `reports/content-map.json`, validated
+`reports/design-contract.json`, motion planning
 evidence, and media-direction evidence when media is enabled. Then run the Skill
 project validator with `--stage integrated`, `npm run build`, and responsive
 screenshot capture. Repair only bounded observable defects, at most twice,
