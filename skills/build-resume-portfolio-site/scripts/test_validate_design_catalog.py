@@ -71,9 +71,10 @@ class ValidateDesignCatalogTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=SCRIPT_DIR) as directory:
             copy = Path(directory) / "catalog"
             shutil.copytree(CATALOG_ROOT, copy)
-            license_path = copy / "LICENSE"
-            normalized = license_path.read_bytes().replace(b"\r\n", b"\n")
-            license_path.write_bytes(normalized.replace(b"\n", b"\r\n"))
+            for relative in ("LICENSE", "UPSTREAM.md", "src/core.py"):
+                path = copy / relative
+                normalized = path.read_bytes().replace(b"\r\n", b"\n")
+                path.write_bytes(normalized.replace(b"\n", b"\r\n"))
 
             report = validator.validate_catalog(copy)
 

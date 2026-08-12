@@ -48,7 +48,7 @@ class CatalogReport(NamedTuple):
 
 def _sha256(path: Path) -> str:
     payload = path.read_bytes()
-    if path.name in {"LICENSE", "UPSTREAM.md"}:
+    if path.name in {"LICENSE", "UPSTREAM.md", "core.py"}:
         payload = payload.replace(b"\r\n", b"\n")
     return hashlib.sha256(payload).hexdigest()
 
