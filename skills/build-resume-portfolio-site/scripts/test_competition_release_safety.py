@@ -8,6 +8,50 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 
 
 class CompetitionReleaseSafetyTests(unittest.TestCase):
+    def test_external_font_services_and_remote_font_imports_are_absent(self) -> None:
+        forbidden = (
+            "fonts.google.com",
+            "fonts.googleapis.com",
+            "google fonts url",
+            "@import url(",
+        )
+        referenced_by: list[str] = []
+        for path in SKILL_ROOT.rglob("*"):
+            if (
+                not path.is_file()
+                or path.name.startswith("test_")
+                or path.suffix == ".pyc"
+                or "__pycache__" in path.parts
+            ):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8").lower()
+            except UnicodeDecodeError:
+                continue
+            if any(marker in text for marker in forbidden):
+                referenced_by.append(path.relative_to(SKILL_ROOT).as_posix())
+        self.assertEqual(referenced_by, [])
+
+    def test_vpn_proxy_product_templates_and_routes_are_absent(self) -> None:
+        forbidden = (
+            "vpn & privacy tool",
+            '"vpn"',
+            '"proxy"',
+            "server selection by country",
+        )
+        referenced_by: list[str] = []
+        catalog = SKILL_ROOT / "vendor" / "ui-ux-pro-max"
+        for path in catalog.rglob("*"):
+            if not path.is_file() or path.suffix == ".pyc" or "__pycache__" in path.parts:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8").lower()
+            except UnicodeDecodeError:
+                continue
+            if any(marker in text for marker in forbidden):
+                referenced_by.append(path.relative_to(SKILL_ROOT).as_posix())
+        self.assertEqual(referenced_by, [])
+
     def test_platform_branding_and_platform_specific_configuration_are_not_bundled(self) -> None:
         removed_paths = (
             "agents/openai.yaml",

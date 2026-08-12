@@ -14,12 +14,14 @@ used by the resume portfolio workflow.
 
 ## Excluded
 
-The general CLI, design-system persistence code, Google Fonts catalog, font
+The general CLI, design-system persistence code, remote font catalog, font
 files, charts, icons, app-interface guidance, and non-React stack data are not
 included.
 
 ## Local modifications
 
-The vendored CSV files and `src/core.py` are copied without content changes.
-Portfolio-specific query construction, privacy filtering, diversification,
-output contracts, and workflow integration live outside this directory.
+The typography data is distribution-sanitized to system font stacks and has no
+remote font URL or stylesheet-import fields. The prohibited network-privacy
+product template and its discovery route are removed. Portfolio-specific query construction,
+privacy filtering, diversification, output contracts, and workflow integration
+live outside this directory.

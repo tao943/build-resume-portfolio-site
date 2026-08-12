@@ -301,5 +301,8 @@ architecture. If scope expands, stop and return to full discovery.
 - Source validation, build, and built-preview inspection are separate checks.
 - Never publish reference-only media or fabricate facts, metrics, people, or
   project images.
+- Treat typography catalog results as visual direction. Use system font stacks
+  or user-supplied local font assets; do not add a remote font stylesheet,
+  import, or download URL.
 - Preserve the last valid preview and immutable source snapshot on failure.
 - No external Superpowers skill is required at runtime.

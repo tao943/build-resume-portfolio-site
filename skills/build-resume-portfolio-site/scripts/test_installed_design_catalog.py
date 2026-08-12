@@ -14,6 +14,25 @@ PLUGIN_MANIFEST = REPOSITORY_ROOT / ".codex-plugin" / "plugin.json"
 
 
 class InstalledDesignCatalogTests(unittest.TestCase):
+    def test_typography_search_exposes_only_offline_font_guidance(self) -> None:
+        core_path = INSTALLED_SKILL_ROOT / "vendor" / "ui-ux-pro-max" / "src" / "core.py"
+        spec = importlib.util.spec_from_file_location("installed_design_catalog_core", core_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader if spec else None)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        result = module.search("professional portfolio typography", domain="typography")
+
+        self.assertGreater(result["count"], 0)
+        for row in result["results"]:
+            self.assertIn("System Font Stack", row)
+            self.assertNotIn("Google Fonts URL", row)
+            self.assertNotIn("CSS Import", row)
+            serialized = json.dumps(row, ensure_ascii=False).lower()
+            self.assertNotIn("http://", serialized)
+            self.assertNotIn("https://", serialized)
+
     def test_plugin_metadata_advertises_offline_design_intelligence(self) -> None:
         if not PLUGIN_MANIFEST.is_file():
             self.skipTest("repository plugin metadata is outside a standalone Skill install")
