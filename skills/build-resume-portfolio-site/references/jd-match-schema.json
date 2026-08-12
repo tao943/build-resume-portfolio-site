@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JDMatchReport",
+  "type": "object",
+  "required": ["schema_version", "jd_source", "target_role", "organization", "requirements", "matches", "unmatched_requirement_ids", "clarification_candidates", "role_specific_copy_layer_id"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "jd_source": {"type": "object", "required": ["source_id", "path", "sha256"]},
+    "target_role": {"type": "string"},
+    "organization": {"type": "string"},
+    "requirements": {"type": "array", "minItems": 1},
+    "matches": {"type": "array", "minItems": 1},
+    "unmatched_requirement_ids": {"type": "array", "items": {"type": "string"}},
+    "clarification_candidates": {"type": "array", "items": {"type": "string"}},
+    "role_specific_copy_layer_id": {"type": ["string", "null"]}
+  }
+}

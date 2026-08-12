@@ -22,7 +22,7 @@ Stop with `resource_blocked` when the refined project or required confirmed repo
 ## Procedure
 
 1. Inventory confirmed effects/controllers and their installed effect sources. Merge compatible controller ownership into shared timelines; isolate a section if a conflict cannot be shared safely. There is no numeric effect cap.
-2. If React Bits is selected, run `scripts/ensure_react_bits_registry.py` and use exact `@react-bits` registry variants through the shadcn MCP. Otherwise use only the installed source needed by the direction.
+2. If React Bits is selected, use only component source already installed in the active project. Do not configure or fetch a remote registry. Otherwise use only the installed source needed by the direction.
 3. Write `.resume-site-work/reports/motion-plan.json` before editing source. Every item needs a unique ID plus source, target, purpose, controllers, dependencies, conflict_resolution, cleanup, mobile, reduced_motion, and fallback.
 4. Integrate only the planned effects and required dependencies in the same React + Vite project. Keep content immediately accessible; do not add scroll hijacking, cursor replacement, autoplay audio, blocking loaders, or a second visual redesign.
 5. Add lifecycle cleanup, component-level fallbacks, a CSS `@media (prefers-reduced-motion: reduce)` rule, and static reduced-motion equivalents. Disable or simplify continuous effects on mobile/coarse pointers when needed.

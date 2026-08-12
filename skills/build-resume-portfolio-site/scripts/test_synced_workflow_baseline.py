@@ -16,13 +16,25 @@ class SyncedWorkflowBaselineTests(unittest.TestCase):
             "scripts/validate_content_handoff.py",
             "scripts/validate_creative_direction.py",
             "scripts/validate_multi_agent_plan.py",
+            "prompts/extract-content-facts.md",
+            "prompts/ask-content-clarification.md",
+            "prompts/optimize-content-copy.md",
+            "references/content-package-contract.md",
+            "references/jd-customization-rules.md",
+            "references/jd-match-schema.json",
+            "scripts/validate_content_package.py",
+            "scripts/validate_content_design_spec.py",
+            "scripts/validate_content_implementation_plan.py",
+            "scripts/validate_jd_match.py",
+            "scripts/write_resume_site_input.py",
         ]
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual(missing, [])
 
     def test_skill_routes_content_and_selects_agent_strategy(self) -> None:
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("resume-content-intelligence", text)
+        self.assertIn("bundled content workflow", text)
+        self.assertNotIn("resume-content-intelligence", text)
         self.assertIn("当前会话单 Agent", text)
         self.assertIn("多 Agent 并行", text)
         self.assertNotIn("fresh-agent-sequential", text)

@@ -7,7 +7,6 @@ from pathlib import Path, PurePosixPath
 from typing import Sequence
 
 from validate_design_catalog import validate_catalog as validate_design_catalog
-from validate_motion_catalog import validate_catalog as validate_motion_catalog
 
 
 PROMPT_SPECS = {
@@ -24,12 +23,6 @@ PROMPT_SPECS = {
     "audit-screenshot": ("04-audit-screenshot.md", "visual-audit-json"),
     "repair-local-issues": ("05-repair-local-issues.md", "react-vite-project-update"),
     "add-motion": ("06-add-motion.md", "react-vite-project-update-and-motion-plan-json"),
-    "select-motion-enhancement": ("07-select-motion-enhancement.md", "motion-enhancement-selection-json"),
-    "plan-motion-media": ("08-plan-motion-media.md", "motion-media-slot-json-and-poster"),
-    "apply-motion-enhancement": (
-        "09-apply-motion-enhancement.md",
-        "react-vite-project-update-and-motion-enhancement-plan-json",
-    ),
     "upgrade-poster-to-video": (
         "10-upgrade-poster-to-video.md",
         "react-vite-media-only-update-and-video-validation-json",
@@ -66,7 +59,36 @@ AESTHETIC_QUALITY_FILES = (
     "scripts/validate_visual_audit.py",
 )
 
+CONTENT_WORKFLOW_FILES = (
+    "prompts/extract-content-facts.md",
+    "prompts/ask-content-clarification.md",
+    "prompts/optimize-content-copy.md",
+    "references/ats-safety-checklist.md",
+    "references/content-brainstorming-contract.md",
+    "references/content-conversation-workflow.md",
+    "references/content-design-spec-schema.json",
+    "references/content-implementation-plan-schema.json",
+    "references/content-package-contract.md",
+    "references/content-planning-contract.md",
+    "references/evidence-schema.json",
+    "references/fact-verification-rules.md",
+    "references/jd-customization-rules.md",
+    "references/jd-match-schema.json",
+    "references/resume-content-schema.json",
+    "references/star-and-impact-rubric.md",
+    "references/writing-coach-rules.md",
+    "scripts/extract_resume_text.py",
+    "scripts/normalize_resume_sources.py",
+    "scripts/validate_content_design_spec.py",
+    "scripts/validate_content_handoff.py",
+    "scripts/validate_content_implementation_plan.py",
+    "scripts/validate_content_package.py",
+    "scripts/validate_jd_match.py",
+    "scripts/write_resume_site_input.py",
+)
+
 STAGE_RESOURCES = {
+    "content-preparation": ("content-workflow",),
     "discovery": (
         "site-brainstorming-contract",
         "site-design-spec-schema",
@@ -93,11 +115,8 @@ STAGE_RESOURCES = {
     ),
     "screenshot": ("audit-screenshot", "repair-local-issues"),
     "motion": ("add-motion",),
-    "motion-enhancement": (
-        "select-motion-enhancement", "plan-motion-media",
-        "apply-motion-enhancement", "motion-catalog",
-    ),
-    "video-upgrade": ("upgrade-poster-to-video", "motion-catalog"),
+    "motion-enhancement": ("add-motion",),
+    "video-upgrade": ("upgrade-poster-to-video",),
 }
 
 ALLOWED_STATUSES = {"awaiting-user-supplied-content", "ready"}
@@ -261,10 +280,10 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
         + tuple(CONTRACT_SPECS)
         + (
             "reference-library",
-            "motion-catalog",
             "design-catalog",
             "visual-companion",
             "aesthetic-quality-loop",
+            "content-workflow",
         )
         if mode == "skeleton"
         else STAGE_RESOURCES[stage]
@@ -305,18 +324,6 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                 f"invalid_design_catalog: {error}" for error in design_report.errors
             ]
             resource_ready = design_report.ok
-        elif resource_id == "motion-catalog":
-            catalog_report = validate_motion_catalog(
-                skill_root / "assets" / "motion-enhancement" / "catalog",
-                require_ready=require_ready,
-            )
-            resource_errors = []
-            for error in catalog_report.errors:
-                if error.startswith("resource_not_ready"):
-                    resource_errors.append("resource_not_ready: motion-catalog")
-                else:
-                    resource_errors.append(f"invalid_motion_catalog: {error}")
-            resource_ready = catalog_report.ready
         elif resource_id == "visual-companion":
             resource_errors = [
                 f"missing_visual_companion: {relative}"
@@ -330,6 +337,24 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                 for relative in AESTHETIC_QUALITY_FILES
                 if not (skill_root / relative).is_file()
             ]
+            resource_ready = not resource_errors
+        elif resource_id == "content-workflow":
+            resource_errors = []
+            for relative in CONTENT_WORKFLOW_FILES:
+                path = skill_root / relative
+                if not path.is_file():
+                    resource_errors.append(f"missing_content_workflow_file: {relative}")
+                    continue
+                try:
+                    text = path.read_text(encoding="utf-8").strip()
+                    if not text:
+                        resource_errors.append(f"empty_content_workflow_file: {relative}")
+                    elif path.suffix == ".json" and not isinstance(json.loads(text), dict):
+                        resource_errors.append(f"invalid_content_workflow_file: {relative}")
+                except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                    resource_errors.append(
+                        f"invalid_content_workflow_file: {relative}: {error}"
+                    )
             resource_ready = not resource_errors
         else:
             resource_errors, resource_ready = _validate_prompt(

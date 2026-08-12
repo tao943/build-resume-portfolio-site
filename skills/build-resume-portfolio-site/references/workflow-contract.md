@@ -7,6 +7,11 @@ browser activity, or approval of another category.
 
 ```text
 content_preflight
+-> content_inventory (when preparation is required)
+-> content_clarification
+-> content_strategy_waiting_confirmation
+-> content_plan_generating
+-> content_copy_waiting_confirmation
 -> design_structure_selecting
 -> design_typography_selecting
 -> design_color_selecting
@@ -28,6 +33,12 @@ Every enabled design state compares candidates and offers its separate browser
 comparison before user selection. An optional independent Gallery supports the
 decision; selection and confirmation happen afterward in the conversation. A
 decline affects only that category.
+
+Missing or invalid content stays inside this Skill. The bundled content phase
+establishes fact/evidence records, optional JD matching, explicit strategy
+approval, a validated content plan, and explicit copy approval. Only a validated
+`CONTENT_READY` handoff transitions to website design. JD `unmatched` items stay
+unmatched unless the user supplies evidence; they never become generated facts.
 
 `requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
 the schema-v3 design specification. Then:
@@ -91,8 +102,9 @@ requirements approval, TODO plan approval, and JSON implementation plan.
 
 Run content preflight before a new site and whenever a resume, JD, factual
 claim, or copy revision enters scope. `CONTENT_READY` continues;
-`ROUTE_REQUIRED` invokes `resume-content-intelligence` and waits for its approved
-handoff; `CONTENT_INVALID` freezes all website artifacts until repaired.
+`CONTENT_PREPARATION_REQUIRED` invokes the bundled content workflow and waits for
+its approved handoff; `CONTENT_INVALID` freezes all website artifacts while the
+same bundled workflow repairs the package.
 
 ## Planning and strategy
 

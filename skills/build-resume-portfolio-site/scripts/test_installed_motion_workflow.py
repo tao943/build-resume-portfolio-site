@@ -56,20 +56,5 @@ class InstalledMotionWorkflowTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, text)
 
-    def test_motion_selection_prompt_accepts_multiple_recipes_without_numeric_limits(self) -> None:
-        text = (SKILL_ROOT / "prompts" / "07-select-motion-enhancement.md").read_text(encoding="utf-8")
-        self.assertIn("multiple primary recipes", text)
-        self.assertIn("multiple secondary effects", text)
-        self.assertIn("conflict_resolution", text)
-        self.assertNotIn("zero or one", text)
-
-    def test_motion_apply_prompt_applies_all_compatible_selected_items_without_caps(self) -> None:
-        text = (SKILL_ROOT / "prompts" / "09-apply-motion-enhancement.md").read_text(encoding="utf-8")
-        self.assertIn("all compatible selected primary recipes and secondary effects", text)
-        self.assertIn("target/controller conflict_resolution", text)
-        self.assertNotIn("Apply one selected primary recipe", text)
-        self.assertNotIn("at most one compatible lightweight local effect", text)
-
-
 if __name__ == "__main__":
     unittest.main()

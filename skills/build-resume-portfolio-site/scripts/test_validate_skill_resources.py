@@ -27,16 +27,6 @@ PROMPTS = {
     "audit-screenshot": ("04-audit-screenshot.md", "visual-audit-json"),
     "repair-local-issues": ("05-repair-local-issues.md", "react-vite-project-update"),
     "add-motion": ("06-add-motion.md", "react-vite-project-update-and-motion-plan-json"),
-    "select-motion-enhancement": (
-        "07-select-motion-enhancement.md", "motion-enhancement-selection-json"
-    ),
-    "plan-motion-media": (
-        "08-plan-motion-media.md", "motion-media-slot-json-and-poster"
-    ),
-    "apply-motion-enhancement": (
-        "09-apply-motion-enhancement.md",
-        "react-vite-project-update-and-motion-enhancement-plan-json",
-    ),
     "upgrade-poster-to-video": (
         "10-upgrade-poster-to-video.md",
         "react-vite-media-only-update-and-video-validation-json",
@@ -65,6 +55,33 @@ AESTHETIC_QUALITY_FILES = (
     "references/visual-audit-schema.json",
     "scripts/validate_design_contract.py",
     "scripts/validate_visual_audit.py",
+)
+CONTENT_WORKFLOW_FILES = (
+    "prompts/extract-content-facts.md",
+    "prompts/ask-content-clarification.md",
+    "prompts/optimize-content-copy.md",
+    "references/ats-safety-checklist.md",
+    "references/content-brainstorming-contract.md",
+    "references/content-conversation-workflow.md",
+    "references/content-design-spec-schema.json",
+    "references/content-implementation-plan-schema.json",
+    "references/content-package-contract.md",
+    "references/content-planning-contract.md",
+    "references/evidence-schema.json",
+    "references/fact-verification-rules.md",
+    "references/jd-customization-rules.md",
+    "references/jd-match-schema.json",
+    "references/resume-content-schema.json",
+    "references/star-and-impact-rubric.md",
+    "references/writing-coach-rules.md",
+    "scripts/extract_resume_text.py",
+    "scripts/normalize_resume_sources.py",
+    "scripts/validate_content_design_spec.py",
+    "scripts/validate_content_handoff.py",
+    "scripts/validate_content_implementation_plan.py",
+    "scripts/validate_content_package.py",
+    "scripts/validate_jd_match.py",
+    "scripts/write_resume_site_input.py",
 )
 
 
@@ -140,10 +157,6 @@ def write_complete_skeleton(root: Path) -> None:
     for filename in CONTRACTS:
         shutil.copy2(SKILL_ROOT / "references" / filename, references / filename)
     shutil.copytree(
-        SKILL_ROOT / "assets" / "motion-enhancement" / "catalog",
-        root / "assets" / "motion-enhancement" / "catalog",
-    )
-    shutil.copytree(
         SKILL_ROOT / "vendor" / "ui-ux-pro-max",
         root / "vendor" / "ui-ux-pro-max",
     )
@@ -158,6 +171,11 @@ def write_complete_skeleton(root: Path) -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
         if not destination.exists():
             shutil.copy2(source, destination)
+    for relative in CONTENT_WORKFLOW_FILES:
+        source = SKILL_ROOT / relative
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
 
 
 
@@ -189,6 +207,23 @@ def write_workspace_manifest(root: Path) -> None:
         encoding="utf-8",
     )
 class ValidateSkillResourcesTests(unittest.TestCase):
+    def test_content_stage_accepts_complete_bundled_workflow(self) -> None:
+        report = validate_resources(SKILL_ROOT, "runtime", "content-preparation")
+        self.assertTrue(report.ok, report.errors)
+        self.assertTrue(report.ready, report.errors)
+
+    def test_skeleton_rejects_each_missing_content_workflow_file(self) -> None:
+        for relative in CONTENT_WORKFLOW_FILES:
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                write_complete_skeleton(root)
+                (root / relative).unlink()
+                report = validate_resources(root, "skeleton", None)
+                self.assertFalse(report.ok)
+                self.assertIn(
+                    f"missing_content_workflow_file: {relative}", report.errors
+                )
+
     def test_skeleton_accepts_well_formed_unavailable_resources(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -333,12 +368,12 @@ class ValidateSkillResourcesTests(unittest.TestCase):
         self.assertFalse(report.ok)
         self.assertIn("invalid_stage: style", report.errors)
 
-    def test_runtime_accepts_ready_motion_enhancement_prompts_and_catalog(self) -> None:
+    def test_runtime_accepts_motion_enhancement_without_a_recipe_catalog(self) -> None:
         report = validate_resources(SKILL_ROOT, "runtime", "motion-enhancement")
         self.assertTrue(report.ok, report.errors)
         self.assertTrue(report.ready, report.errors)
 
-    def test_runtime_video_upgrade_requires_ready_upgrade_prompt_and_catalog(self) -> None:
+    def test_runtime_video_upgrade_requires_only_the_ready_upgrade_prompt(self) -> None:
         report = validate_resources(SKILL_ROOT, "runtime", "video-upgrade")
         self.assertTrue(report.ok, report.errors)
         self.assertTrue(report.ready, report.errors)

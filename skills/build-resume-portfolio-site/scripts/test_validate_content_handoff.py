@@ -94,11 +94,12 @@ class ContentHandoffValidatorTests(unittest.TestCase):
             check=False,
         )
 
-    def test_missing_package_requires_content_route(self) -> None:
+    def test_missing_package_requires_bundled_content_preparation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             result = self.run_validator(Path(temp_dir))
         self.assertEqual(result.returncode, 2)
-        self.assertIn("ROUTE_REQUIRED", result.stdout)
+        self.assertIn("CONTENT_PREPARATION_REQUIRED", result.stdout)
+        self.assertIn("bundled content workflow", result.stdout)
 
     def test_accepts_an_approved_consistent_handoff(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -108,7 +109,7 @@ class ContentHandoffValidatorTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("CONTENT_READY", result.stdout)
 
-    def test_unapproved_package_requires_content_route(self) -> None:
+    def test_unapproved_package_requires_bundled_content_preparation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             package = approved_package()
@@ -116,7 +117,7 @@ class ContentHandoffValidatorTests(unittest.TestCase):
             write_handoff(workspace, package)
             result = self.run_validator(workspace)
         self.assertEqual(result.returncode, 2)
-        self.assertIn("ROUTE_REQUIRED", result.stdout)
+        self.assertIn("CONTENT_PREPARATION_REQUIRED", result.stdout)
 
     def test_rejects_normalized_fact_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
