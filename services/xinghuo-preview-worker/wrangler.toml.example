@@ -1,9 +1,0 @@
-name = "xinghuo-portfolio-preview"
-main = "src/worker.mjs"
-compatibility_date = "2026-08-01"
-workers_dev = true
-
-[[kv_namespaces]]
-binding = "PREVIEWS"
-id = "replace-with-production-kv-id"
-preview_id = "replace-with-preview-kv-id"
