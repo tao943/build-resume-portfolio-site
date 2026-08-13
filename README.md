@@ -38,7 +38,7 @@ Skill 会保留事实与证据边界：未匹配的 JD 要求不会被自动写�
 
 ## 使用
 
-将本目录安装为本地 Skill 后，在对话中调用：
+将 `skills/build-resume-portfolio-site/` 安装为本地 Skill 后，在对话中调用：
 
 ```text
 $build-resume-portfolio-site
@@ -55,11 +55,14 @@ $build-resume-portfolio-site
 ## 目录
 
 ```text
-SKILL.md                  # 主流程与状态门禁
-prompts/                  # 内容、设计、生成和审查提示
-references/               # 内容、JD、设计、动效和输出契约
-scripts/                  # 本地校验、预览和构建辅助脚本
-vendor/ui-ux-pro-max/     # 本地 UI/UX 设计数据库
+README.md
+skills/build-resume-portfolio-site/
+├── SKILL.md              # 主流程与状态门禁
+├── prompts/              # 内容、设计、生成和审查提示
+├── references/           # 内容、JD、设计、动效和输出契约
+├── scripts/              # 本地校验、预览和构建辅助脚本
+├── assets/               # Visual Companion 和参考资源
+└── vendor/ui-ux-pro-max/ # 本地 UI/UX 设计数据库
 ```
 
 本 Skill 不要求外部内容 Skill、远程组件注册表、云端模型服务或外部运行时依赖。PDF/DOCX 提取工具仅在环境已有对应库时作为可选辅助；无法提取时可改用原生读取、文本文件或用户转录。
