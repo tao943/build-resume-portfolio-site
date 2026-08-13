@@ -145,7 +145,17 @@ def main() -> int:
     args = parser.parse_args()
 
     code, messages = validate_workspace(args.workspace_root.resolve())
-    label = {0: "CONTENT_READY", 1: "CONTENT_INVALID", 2: "ROUTE_REQUIRED"}[code]
+    label = {
+        0: "CONTENT_READY",
+        1: "CONTENT_INVALID",
+        2: "CONTENT_PREPARATION_REQUIRED",
+    }[code]
+    if code == 2:
+        print(
+            "CONTENT_PREPARATION_REQUIRED: run the bundled content workflow "
+            "in this Skill, obtain explicit content approval, write the handoff, "
+            "and rerun validation"
+        )
     for message in messages:
         print(f"{label}: {message}")
     return code

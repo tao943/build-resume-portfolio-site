@@ -2,8 +2,7 @@
 
 `reports/motion-media-slot.json` records:
 
-- `recipe_id` and optional `secondary_effect_id`;
-- source `placement_reference` and site-specific `resolved_placement`;
+- a stable `media_slot_id` and site-specific `resolved_placement`;
 - local `poster_path`, `aspect_ratio`, `fit`, layer, and text-safe area;
 - passive `playback` with `scroll_linked=false` and `pointer_linked=false`;
 - required `preserve` invariants;

@@ -15,4 +15,4 @@ Write `reports/motion-plan.json` before source edits. Each item has a unique `id
 
 ## Verification and snapshot
 
-Validate the motion source, build it, and inspect desktop, tablet, mobile/coarse-pointer, and reduced-motion states. Confirm the Poster/media fallback remains safe. On success snapshot `.resume-site-work\\versions\\v4-motion` (or a retry suffix); that snapshot is the confirmed baseline for optional MotionSite enhancement.
+Validate the motion source, build it, and inspect desktop, tablet, mobile/coarse-pointer, and reduced-motion states. Confirm the Poster/media fallback remains safe. On success snapshot `.resume-site-work\\versions\\v4-motion` (or a retry suffix); that snapshot is the confirmed baseline for any later user-approved motion refinement.

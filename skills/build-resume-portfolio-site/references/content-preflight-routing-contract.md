@@ -2,10 +2,9 @@
 
 ## Purpose
 
-The website builder is the default entry point, while
-`resume-content-intelligence` remains the owner of extraction, fact
-verification, copy optimization, JD matching, and content approval. This
-preflight selects the correct path before a new Stage 1 build.
+This Skill owns extraction, fact verification, copy optimization, JD matching,
+content approval, and website generation. This preflight selects either the
+bundled content-preparation phase or website discovery before React generation.
 It is not a website stage or confirmation gate.
 
 ## When to run
@@ -30,11 +29,11 @@ python "$SKILL_ROOT\scripts\validate_content_handoff.py" --workspace-root "."
 ```
 
 - Exit `0`, `CONTENT_READY`: consume the approved package directly.
-- Exit `2`, `ROUTE_REQUIRED`: **REQUIRED SUB-SKILL:** Use
-  `resume-content-intelligence`, wait for user content approval and handoff,
-  then rerun this validator.
+- Exit `2`, `CONTENT_PREPARATION_REQUIRED`: run the bundled content workflow,
+  wait for explicit content-strategy and copy approvals, write the handoff, then
+  rerun this validator.
 - Exit `1`, `CONTENT_INVALID`: do not edit React source, state, preview, or
-  snapshots. Use `resume-content-intelligence` to repair or revise the package,
+  snapshots. Repair or revise the package with the bundled content workflow,
   then rerun validation.
 
 The required handoff is:
@@ -44,7 +43,13 @@ The required handoff is:
 .resume-site-work/input/normalized-resume.json
 .resume-site-work/input/approved-copy.json
 .resume-site-work/reports/content-provenance.json
+.resume-site-work/reports/content-design-spec.json
+.resume-site-work/reports/content-implementation-plan.json
 ```
+
+When a JD is supplied, also write and validate
+`.resume-site-work/reports/jd-match.json`. It is a role-specific matching layer,
+not a source of new facts.
 
 ## Consumption rules
 

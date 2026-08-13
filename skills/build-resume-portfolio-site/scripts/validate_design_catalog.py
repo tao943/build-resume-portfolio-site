@@ -12,7 +12,7 @@ MANIFEST_LINE_PATTERN = re.compile(r"^([0-9a-f]{64})  (.+)$")
 EXPECTED_COPYRIGHT = "Copyright (c) 2024 Next Level Builder"
 
 REQUIRED_HASHED_FILES = (
-    "LICENSE",
+    "LICENSE.md",
     "UPSTREAM.md",
     "data/styles.csv",
     "data/colors.csv",
@@ -48,7 +48,7 @@ class CatalogReport(NamedTuple):
 
 def _sha256(path: Path) -> str:
     payload = path.read_bytes()
-    if path.name in {"LICENSE", "UPSTREAM.md"}:
+    if path.name in {"LICENSE.md", "UPSTREAM.md"}:
         payload = payload.replace(b"\r\n", b"\n")
     return hashlib.sha256(payload).hexdigest()
 
@@ -70,6 +70,8 @@ def _read_manifest(path: Path) -> tuple[dict[str, str], list[str]]:
             errors.append(f"invalid_manifest_line: {line_number}")
             continue
         digest, relative = match.groups()
+        if relative == "LICENSE":
+            relative = "LICENSE.md"
         pure = PurePosixPath(relative)
         if pure.is_absolute() or ".." in pure.parts or relative != pure.as_posix():
             errors.append(f"invalid_manifest_path: {relative}")
@@ -86,7 +88,7 @@ def validate_catalog(catalog_root: Path, require_hashes: bool = True) -> Catalog
     errors: list[str] = []
     checked: list[str] = []
 
-    license_path = root / "LICENSE"
+    license_path = root / "LICENSE.md"
     upstream_path = root / "UPSTREAM.md"
     if not license_path.is_file():
         errors.append("missing_license")
@@ -116,7 +118,7 @@ def validate_catalog(catalog_root: Path, require_hashes: bool = True) -> Catalog
             if EXPECTED_COPYRIGHT not in upstream_text:
                 errors.append("missing_upstream_copyright")
 
-    manifest, manifest_errors = _read_manifest(root / "MANIFEST.sha256")
+    manifest, manifest_errors = _read_manifest(root / "MANIFEST.txt")
     errors.extend(manifest_errors)
     for relative in REQUIRED_HASHED_FILES:
         path = root / Path(relative)

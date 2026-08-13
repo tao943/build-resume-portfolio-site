@@ -58,7 +58,7 @@ Stopping a local session preserves its gallery for review.
 
 The three content files under `input/` plus
 `reports/content-provenance.json` are owned by
-`resume-content-intelligence`. The website builder validates and consumes
+the bundled content workflow. The website builder validates and consumes
 them; it does not rewrite them.
 
 `reports/media-inventory.json` has the workspace-owned shape `{"schema_version": 1, "assets": [...]}`. It is always created before media-direction report validation; use the explicit empty inventory `{"schema_version": 1, "assets": []}` when no media is authorized. Every asset records a stable `id`, `factual_meaning`, and a non-empty `immutable_facts` list; `role` and `source` are optional. The media-direction report validator uses this inventory as the only authorization and factual-preservation source.
