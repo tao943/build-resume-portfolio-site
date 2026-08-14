@@ -348,4 +348,4 @@ architecture. If scope expands, stop and return to full discovery.
   or user-supplied local font assets; do not add a remote font stylesheet,
   import, or download URL.
 - Preserve the last valid preview and immutable source snapshot on failure.
-- No external Superpowers skill is required at runtime.
+- No external sub-Skill is required at runtime.
