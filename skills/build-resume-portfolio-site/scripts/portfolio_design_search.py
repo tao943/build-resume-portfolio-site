@@ -360,6 +360,146 @@ def build_baseline(
     return report
 
 
+def build_anti_template_baseline(
+    content_map: Mapping[str, object],
+    baseline: Mapping[str, object],
+) -> dict[str, object]:
+    if not isinstance(content_map, Mapping):
+        raise ValueError("content map must be a JSON object")
+    if validate_discovery_report(baseline, expected_type="baseline"):
+        raise ValueError("baseline design discovery report is invalid")
+
+    selected_id = _string(baseline.get("selected_direction_id"))
+    selected = next(
+        (
+            _mapping(item)
+            for item in _sequence(baseline.get("candidate_directions"))
+            if _string(_mapping(item).get("id")) == selected_id
+        ),
+        {},
+    )
+    if not selected:
+        raise ValueError("selected baseline direction is missing")
+
+    profile = _content_profile(content_map)
+    evidence_ids = _unique_tokens(
+        [
+            *(
+                _string(item)
+                for item in _sequence(selected.get("source_ids"))
+                if _string(item)
+            ),
+            *(
+                _string(item)
+                for item in _sequence(baseline.get("reference_selection_ids"))
+                if _string(item)
+            ),
+            "content-map:profile.role",
+            "content-map:profile.industry",
+            "content-map:projects",
+            "content-map:skills",
+        ],
+        limit=24,
+    )
+    style_family = _string(selected.get("style_family"), "content-led")
+    composition = _string(
+        selected.get("composition"), "asymmetric evidence-led narrative"
+    )
+    role = _string(profile.get("role"), "portfolio professional")
+    protagonist = (
+        f"The evidence-backed project progression of this {role}, rather than "
+        "a generic profile introduction."
+    )
+    content_form_thesis = (
+        f"Use {composition} to make project decisions, scope, and outcomes carry "
+        "the hierarchy instead of flattening unrelated evidence into equal cards."
+    )
+    rules = [
+        {
+            "id": "anti-template.no-equal-card-grid",
+            "criterion": (
+                "Do not flatten unrelated experience, project, and skill evidence "
+                "into repeated equal-weight cards."
+            ),
+            "evidence_ids": evidence_ids,
+        },
+        {
+            "id": "anti-template.signature-remains-visible",
+            "criterion": (
+                "Keep the approved evidence-led protagonist and a recognizable "
+                "structural device visible across responsive layouts."
+            ),
+            "evidence_ids": evidence_ids,
+        },
+        {
+            "id": "anti-template.effects-have-purpose",
+            "criterion": (
+                "Use surface and motion effects only when they clarify content, "
+                "hierarchy, interaction, or navigation."
+            ),
+            "evidence_ids": evidence_ids,
+        },
+    ]
+    obligation_text = {
+        "structure": (
+            "Preserve the evidence-led protagonist in an identifiable composition.",
+            "Avoid a generic centered hero followed by an equal card grid.",
+        ),
+        "typography": (
+            "Give project decisions and outcomes a distinctive hierarchy.",
+            "Avoid one interchangeable scale for every content type.",
+        ),
+        "color": (
+            "Use color to reinforce evidence priority and the signature device.",
+            "Avoid distributing gradients, glow, or accent color uniformly.",
+        ),
+        "media": (
+            "Give authorized evidence one clear narrative role.",
+            "Avoid decorative stock imagery or repeated placeholder treatments.",
+        ),
+        "primary_motion": (
+            "Tie the primary motion system to narrative progression or navigation.",
+            "Avoid a generic reveal effect applied to every section.",
+        ),
+        "secondary_motion": (
+            "Use secondary effects to explain state, hierarchy, or affordance.",
+            "Avoid decorative motion that competes with the primary system.",
+        ),
+    }
+    obligations = {
+        category: {
+            "id": f"anti-template-obligation.{category}",
+            "preserve": texts[0],
+            "avoid": texts[1],
+            "evidence_ids": evidence_ids,
+        }
+        for category, texts in obligation_text.items()
+    }
+    return {
+        "schema_version": 1,
+        "id": f"anti-template-baseline:{selected_id}",
+        "report_type": "anti_template_baseline",
+        "mode": "anti-template-baseline",
+        "status": "provisional_unapproved",
+        "query_context": profile,
+        "evidence_ids": evidence_ids,
+        "visual_protagonist": protagonist,
+        "content_form_thesis": content_form_thesis,
+        "composition_hypothesis": composition,
+        "signature_device_candidates": [
+            f"A persistent project-evidence index shaped by {composition}",
+            f"A {style_family} hierarchy that exposes decisions before decoration",
+        ],
+        "template_independence_claim": (
+            f"The direction is project-specific because {role} evidence controls "
+            f"the {style_family} composition, hierarchy, and interaction choices."
+        ),
+        "anti_template_rules": rules,
+        "category_obligations": obligations,
+        "provenance": dict(_mapping(baseline.get("provenance"))),
+    }
+
+
 def _row_label(domain: str, row: Mapping[str, object]) -> str:
     return _string(row.get(DOMAIN_ID_KEYS[domain]), domain)
 
@@ -664,6 +804,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     baseline_parser.add_argument("--content-map", type=Path, required=True)
     baseline_parser.add_argument("--reference-selection", type=Path)
     baseline_parser.add_argument("--output", type=Path, required=True)
+    anti_template_parser = subparsers.add_parser("anti-template-baseline")
+    anti_template_parser.add_argument("--content-map", type=Path, required=True)
+    anti_template_parser.add_argument("--baseline", type=Path, required=True)
+    anti_template_parser.add_argument("--output", type=Path, required=True)
     category_parser = subparsers.add_parser("category")
     category_parser.add_argument(
         "--category", choices=tuple(CATEGORY_DOMAINS), required=True
@@ -696,6 +840,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = build_baseline(
                 _read_json_object(args.content_map, "content map"),
                 reference_selection,
+            )
+        elif args.command == "anti-template-baseline":
+            result = build_anti_template_baseline(
+                _read_json_object(args.content_map, "content map"),
+                _read_json_object(args.baseline, "baseline"),
             )
         elif args.command == "category":
             result = search_category(

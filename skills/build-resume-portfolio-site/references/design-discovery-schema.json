@@ -4,6 +4,7 @@
   "title": "Database-first portfolio design discovery report",
   "oneOf": [
     { "$ref": "#/$defs/baseline" },
+    { "$ref": "#/$defs/antiTemplateBaseline" },
     { "$ref": "#/$defs/categoryReport" }
   ],
   "$defs": {
@@ -128,6 +129,71 @@
         "guardrails": { "$ref": "#/$defs/stringList" },
         "react_guidelines": { "$ref": "#/$defs/stringList" },
         "reference_selection_ids": { "$ref": "#/$defs/stringList" },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      },
+      "additionalProperties": false
+    },
+    "antiTemplateRule": {
+      "type": "object",
+      "required": ["id", "criterion", "evidence_ids"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "criterion": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "categoryObligation": {
+      "type": "object",
+      "required": ["id", "preserve", "avoid", "evidence_ids"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "preserve": { "$ref": "#/$defs/nonEmptyString" },
+        "avoid": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "antiTemplateBaseline": {
+      "type": "object",
+      "required": [
+        "schema_version", "id", "report_type", "mode", "status",
+        "query_context", "evidence_ids", "visual_protagonist",
+        "content_form_thesis", "composition_hypothesis",
+        "signature_device_candidates", "template_independence_claim",
+        "anti_template_rules", "category_obligations", "provenance"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "report_type": { "const": "anti_template_baseline" },
+        "mode": { "const": "anti-template-baseline" },
+        "status": { "const": "provisional_unapproved" },
+        "query_context": { "$ref": "#/$defs/queryProfile" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "visual_protagonist": { "$ref": "#/$defs/nonEmptyString" },
+        "content_form_thesis": { "$ref": "#/$defs/nonEmptyString" },
+        "composition_hypothesis": { "$ref": "#/$defs/nonEmptyString" },
+        "signature_device_candidates": { "$ref": "#/$defs/nonEmptyStringList" },
+        "template_independence_claim": { "$ref": "#/$defs/nonEmptyString" },
+        "anti_template_rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/antiTemplateRule" }
+        },
+        "category_obligations": {
+          "type": "object",
+          "required": ["structure", "typography", "color", "media", "primary_motion", "secondary_motion"],
+          "properties": {
+            "structure": { "$ref": "#/$defs/categoryObligation" },
+            "typography": { "$ref": "#/$defs/categoryObligation" },
+            "color": { "$ref": "#/$defs/categoryObligation" },
+            "media": { "$ref": "#/$defs/categoryObligation" },
+            "primary_motion": { "$ref": "#/$defs/categoryObligation" },
+            "secondary_motion": { "$ref": "#/$defs/categoryObligation" }
+          },
+          "additionalProperties": false
+        },
         "provenance": { "$ref": "#/$defs/provenance" }
       },
       "additionalProperties": false
