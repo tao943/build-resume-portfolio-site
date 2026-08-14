@@ -123,16 +123,33 @@ def _validate_candidates(candidates: Any, category: str) -> tuple[list[str], lis
             continue
         candidate_id = candidate.get("id")
         label = candidate.get("label")
-        tradeoffs = candidate.get("tradeoffs")
         if not isinstance(candidate_id, str) or not candidate_id.strip():
             errors.append(f"{category} candidate[{index}] requires an ID")
             continue
         ids.append(candidate_id)
         if not isinstance(label, str) or not label.strip():
             errors.append(f"{category} candidate[{index}] requires a label")
-        if not _strings(tradeoffs, non_empty=True):
+        for field in (
+            "fit",
+            "risks",
+            "tradeoffs",
+            "accessibility_notes",
+            "source_ids",
+        ):
+            if not _strings(candidate.get(field), non_empty=True):
+                errors.append(
+                    f"{category} candidate[{index}] requires {field}"
+                )
+        if not _strings(candidate.get("compatibility")):
             errors.append(
-                f"{category} candidate[{index}] requires tradeoffs"
+                f"{category} candidate[{index}] compatibility must be a string list"
+            )
+        if (
+            not isinstance(candidate.get("responsive_fallback"), str)
+            or not candidate["responsive_fallback"].strip()
+        ):
+            errors.append(
+                f"{category} candidate[{index}] requires responsive_fallback"
             )
     if len(ids) != len(set(ids)):
         errors.append(f"{category} candidate IDs must be unique")
@@ -150,6 +167,19 @@ def _validate_confirmed_decision(
     candidate_ids, errors = _validate_candidates(
         decision.get("candidates"), category
     )
+    expected_report = (
+        ".resume-site-work/reports/design-discovery/"
+        f"{category.replace('_', '-')}.json"
+    )
+    discovery_report = str(decision.get("discovery_report") or "").replace(
+        "\\", "/"
+    )
+    if not discovery_report:
+        errors.append(f"{category} requires a discovery report")
+    elif discovery_report != expected_report:
+        errors.append(
+            f"{category} discovery report must be {expected_report}"
+        )
     known = set(candidate_ids)
     if decision.get("recommended_candidate_id") not in known:
         errors.append(f"{category} recommendation must reference a candidate")
@@ -173,10 +203,12 @@ def _validate_confirmed_decision(
 
 def _validate_media_decision(decision: Any) -> list[str]:
     if isinstance(decision, dict) and decision.get("status") == "skipped":
+        errors: list[str] = []
         reason = decision.get("skip_reason")
         if not isinstance(reason, str) or not reason.strip():
-            return ["media skip requires a reason"]
-        return []
+            errors.append("media skip requires a reason")
+        errors.extend(_validate_approval(decision.get("approval"), "media"))
+        return errors
     return _validate_confirmed_decision(
         "media", decision, allow_multiple=False
     )
