@@ -53,6 +53,20 @@ class SyncedWorkflowBaselineTests(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_skill_uses_database_first_inherited_design_discovery(self) -> None:
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn('portfolio_design_search.py" baseline', text)
+        for category in (
+            "structure",
+            "typography",
+            "color",
+            "media",
+            "primary_motion",
+            "secondary_motion",
+        ):
+            self.assertIn(f"--category {category}", text)
+        self.assertIn("inherited_decision_ids", text)
+
 
 if __name__ == "__main__":
     unittest.main()

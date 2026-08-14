@@ -13,6 +13,28 @@ from validate_skill_resources import STAGE_RESOURCES, validate_resources
 
 
 class DesignIntelligenceWorkflowTests(unittest.TestCase):
+    def test_database_baseline_precedes_first_structure_question(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        baseline = skill.index('portfolio_design_search.py" baseline')
+        structure = skill.index("overall structure")
+        self.assertLess(baseline, structure)
+
+    def test_every_visual_category_has_a_database_query(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for category in (
+            "structure",
+            "typography",
+            "color",
+            "media",
+            "primary_motion",
+            "secondary_motion",
+        ):
+            with self.subTest(category=category):
+                self.assertIn(f"--category {category}", skill)
+
+    def test_discovery_resources_require_design_catalog(self) -> None:
+        self.assertIn("design-catalog", STAGE_RESOURCES["discovery"])
+
     def test_prototype_and_media_direction_require_the_vendored_design_catalog(self) -> None:
         self.assertIn("design-catalog", STAGE_RESOURCES["prototype"])
         self.assertIn("design-catalog", STAGE_RESOURCES["media-direction"])
