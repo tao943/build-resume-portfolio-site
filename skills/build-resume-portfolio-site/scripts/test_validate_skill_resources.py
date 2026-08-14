@@ -83,6 +83,11 @@ CONTENT_WORKFLOW_FILES = (
     "scripts/validate_jd_match.py",
     "scripts/write_resume_site_input.py",
 )
+DESIGN_DISCOVERY_FILES = (
+    "references/design-discovery-schema.json",
+    "scripts/validate_design_discovery.py",
+    "scripts/portfolio_design_search.py",
+)
 
 
 def write_prompt(root: Path, resource_id: str, *, ready: bool = False) -> None:
@@ -207,6 +212,21 @@ def write_workspace_manifest(root: Path) -> None:
         encoding="utf-8",
     )
 class ValidateSkillResourcesTests(unittest.TestCase):
+    def test_skeleton_rejects_each_missing_design_discovery_file(self) -> None:
+        for relative in DESIGN_DISCOVERY_FILES:
+            with self.subTest(
+                relative=relative
+            ), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory) / "skill"
+                shutil.copytree(SKILL_ROOT, root)
+                (root / relative).unlink()
+                report = validate_resources(root, "skeleton", None)
+                self.assertFalse(report.ok)
+                self.assertIn(
+                    f"missing_design_discovery_file: {relative}",
+                    report.errors,
+                )
+
     def test_content_stage_accepts_complete_bundled_workflow(self) -> None:
         report = validate_resources(SKILL_ROOT, "runtime", "content-preparation")
         self.assertTrue(report.ok, report.errors)
