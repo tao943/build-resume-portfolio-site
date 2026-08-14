@@ -12,12 +12,14 @@ content_preflight
 -> content_strategy_waiting_confirmation
 -> content_plan_generating
 -> content_copy_waiting_confirmation
--> design_structure_selecting
--> design_typography_selecting
--> design_color_selecting
--> design_media_selecting OR design_media_skipped
--> design_primary_motion_selecting
--> design_secondary_motion_selecting
+-> design_baseline_generating
+-> design_baseline_ready
+-> design_structure_querying -> design_structure_selecting
+-> design_typography_querying -> design_typography_selecting
+-> design_color_querying -> design_color_selecting
+-> design_media_querying -> design_media_selecting OR design_media_skipped
+-> design_primary_motion_querying -> design_primary_motion_selecting
+-> design_secondary_motion_querying -> design_secondary_motion_selecting
 -> requirements_waiting_confirmation
 -> todo_plan_generating
 -> todo_plan_waiting_confirmation
@@ -33,6 +35,13 @@ Every enabled design state compares candidates and offers its separate browser
 comparison before user selection. An optional independent Gallery supports the
 decision; selection and confirmation happen afterward in the conversation. A
 decline affects only that category.
+
+`CONTENT_READY` first creates the privacy-safe content map. Baseline generation
+queries the vendored catalog and must validate before structure querying begins.
+Each category querying state consumes the same baseline plus every prior
+approved decision ID, emits a validated source-linked report, and only then
+enters selection. `design_catalog_insufficient` freezes selection and preserves
+the last valid reports; it never permits fabricated fallback candidates.
 
 Missing or invalid content stays inside this Skill. The bundled content phase
 establishes fact/evidence records, optional JD matching, explicit strategy
@@ -97,6 +106,9 @@ integrated_waiting_confirmation --提出修改 and core reversal--> affected des
 Motion enhancement preserves content, structure, typography, color, and media treatment. It may revise only primary/secondary motion plans and implementation.
 A core reversal invalidates that decision's downstream evidence, final
 requirements approval, TODO plan approval, and JSON implementation plan.
+The revised category report and every later category report must be regenerated
+in order so their inherited decision IDs remain truthful. Earlier reports remain
+valid and are not rerun.
 
 ## Content preflight
 
