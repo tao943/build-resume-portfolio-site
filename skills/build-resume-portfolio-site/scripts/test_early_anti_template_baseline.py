@@ -4,6 +4,7 @@ import copy
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
@@ -75,6 +76,37 @@ def _content_map() -> dict[str, object]:
     }
 
 
+def _candidate(category: str, index: int) -> dict[str, object]:
+    return {
+        "id": f"{category}-{index}",
+        "label": f"{category.title()} option {index}",
+        "fit": ["Strengthens the evidence-led hierarchy."],
+        "risks": ["Requires responsive verification."],
+        "tradeoffs": ["Balances expression and readability."],
+        "compatibility": [],
+        "responsive_fallback": "Preserve semantic order in one column.",
+        "accessibility_notes": ["Preserve focus and reduced motion."],
+        "source_ids": [f"style:{category}-{index}"],
+    }
+
+
+def _approved_design_spec() -> dict[str, object]:
+    return {
+        "decisions": {
+            category: {
+                "status": "confirmed",
+                "selected_candidate_ids": [f"{category}-1"],
+                "discovery_report": (
+                    ".resume-site-work/reports/design-discovery/"
+                    f"{category.replace('_', '-')}.json"
+                ),
+                "approval": {"status": "user_approved"},
+            }
+            for category in search.CATEGORY_DOMAINS
+        }
+    }
+
+
 class EarlyAntiTemplateBaselineTests(unittest.TestCase):
     def test_builds_valid_provisional_baseline(self) -> None:
         report = search.build_anti_template_baseline(_content_map(), _baseline())
@@ -98,6 +130,114 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
             "anti-template baseline requires evidence_ids",
             discovery_validator.validate(invalid, "anti_template_baseline"),
         )
+
+    def test_category_inherits_anti_template_rules_and_obligation(self) -> None:
+        anti_template = search.build_anti_template_baseline(
+            _content_map(), _baseline()
+        )
+        with patch.object(
+            search,
+            "_category_candidates",
+            return_value=[_candidate("structure", 1), _candidate("structure", 2)],
+        ):
+            report = search.search_category(
+                "structure", _content_map(), _baseline(), anti_template, {}
+            )
+
+        self.assertEqual(
+            report["anti_template_baseline_id"], anti_template["id"]
+        )
+        self.assertTrue(
+            report["candidates"][0]["anti_template_evaluation"][
+                "baseline_rule_ids"
+            ]
+        )
+        self.assertEqual(discovery_validator.validate(report, "category"), [])
+
+    def test_category_validation_rejects_broken_traceability(self) -> None:
+        anti_template = search.build_anti_template_baseline(
+            _content_map(), _baseline()
+        )
+        with patch.object(
+            search,
+            "_category_candidates",
+            return_value=[_candidate("color", 1), _candidate("color", 2)],
+        ):
+            report = search.search_category(
+                "color", _content_map(), _baseline(), anti_template, {}
+            )
+
+        missing_id = copy.deepcopy(report)
+        missing_id["anti_template_baseline_id"] = ""
+        self.assertIn(
+            "category requires anti_template_baseline_id",
+            discovery_validator.validate(missing_id, "category"),
+        )
+
+        unknown_rule = copy.deepcopy(report)
+        unknown_rule["candidates"][0]["anti_template_evaluation"][
+            "baseline_rule_ids"
+        ] = ["anti-template.unknown"]
+        self.assertIn(
+            "candidate color-1 references unknown anti-template rules",
+            discovery_validator.validate(unknown_rule, "category"),
+        )
+
+        missing_obligation = copy.deepcopy(report)
+        missing_obligation["candidates"][0]["anti_template_evaluation"][
+            "obligation_ids"
+        ] = []
+        self.assertIn(
+            "candidate color-1 must reference the category obligation",
+            discovery_validator.validate(missing_obligation, "category"),
+        )
+
+        invalid_relationship = copy.deepcopy(report)
+        invalid_relationship["candidates"][0]["anti_template_evaluation"][
+            "relationship"
+        ] = "decorates"
+        self.assertIn(
+            "candidate color-1 has invalid anti-template relationship",
+            discovery_validator.validate(invalid_relationship, "category"),
+        )
+
+    def test_aggregate_requires_one_anti_template_baseline(self) -> None:
+        anti_template = search.build_anti_template_baseline(
+            _content_map(), _baseline()
+        )
+        reports: dict[str, object] = {}
+        for category in search.CATEGORY_DOMAINS:
+            with patch.object(
+                search,
+                "_category_candidates",
+                return_value=[_candidate(category, 1), _candidate(category, 2)],
+            ):
+                reports[category] = search.search_category(
+                    category, _content_map(), _baseline(), anti_template, {}
+                )
+
+        aggregate = search.aggregate_discovery(
+            _content_map(),
+            _baseline(),
+            anti_template,
+            reports,
+            _approved_design_spec(),
+        )
+        self.assertEqual(aggregate["anti_template_baseline"], anti_template)
+        self.assertIs(aggregate["anti_template_resolution_required"], True)
+
+        mismatched = copy.deepcopy(reports)
+        mismatched["secondary_motion"]["anti_template_baseline_id"] = (
+            "anti-template-baseline:other"
+        )
+        with self.assertRaisesRegex(ValueError, "anti-template baseline mismatch"):
+            search.aggregate_discovery(
+                _content_map(),
+                _baseline(),
+                anti_template,
+                mismatched,
+                _approved_design_spec(),
+            )
 
 
 if __name__ == "__main__":

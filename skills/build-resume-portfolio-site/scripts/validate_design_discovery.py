@@ -146,6 +146,17 @@ def _validate_category(payload: dict[str, Any]) -> list[str]:
     if not _strings(inherited):
         errors.append("inherited_decision_ids must be a string list")
 
+    baseline_id = payload.get("anti_template_baseline_id")
+    if not _string(baseline_id):
+        errors.append("category requires anti_template_baseline_id")
+    known_rule_ids = payload.get("anti_template_rule_ids")
+    if not _strings(known_rule_ids, non_empty=True):
+        errors.append("category requires anti_template_rule_ids")
+        known_rule_ids = []
+    obligation_id = payload.get("category_obligation_id")
+    if not _string(obligation_id):
+        errors.append("category requires category_obligation_id")
+
     candidates = payload.get("candidates")
     if not isinstance(candidates, list) or len(candidates) < 2:
         errors.append("category requires at least two candidates")
@@ -173,6 +184,39 @@ def _validate_category(payload: dict[str, Any]) -> list[str]:
             errors.append(f"candidate {candidate_id} compatibility must be a string list")
         if not _string(candidate.get("responsive_fallback")):
             errors.append(f"candidate {candidate_id} requires responsive_fallback")
+        evaluation = candidate.get("anti_template_evaluation")
+        if not isinstance(evaluation, dict):
+            errors.append(
+                f"candidate {candidate_id} requires anti_template_evaluation"
+            )
+            continue
+        candidate_rule_ids = evaluation.get("baseline_rule_ids")
+        if not _strings(candidate_rule_ids, non_empty=True) or not set(
+            candidate_rule_ids
+        ) <= set(known_rule_ids):
+            errors.append(
+                f"candidate {candidate_id} references unknown anti-template rules"
+            )
+        obligation_ids = evaluation.get("obligation_ids")
+        if (
+            not _strings(obligation_ids, non_empty=True)
+            or obligation_id not in obligation_ids
+        ):
+            errors.append(
+                f"candidate {candidate_id} must reference the category obligation"
+            )
+        if evaluation.get("relationship") not in {
+            "strengthens",
+            "preserves",
+            "conflicts",
+        }:
+            errors.append(
+                f"candidate {candidate_id} has invalid anti-template relationship"
+            )
+        if not _string(evaluation.get("rationale")):
+            errors.append(
+                f"candidate {candidate_id} requires anti-template rationale"
+            )
     if len(ids) != len(set(ids)):
         errors.append("candidate IDs must be unique")
     if payload.get("recommended_candidate_id") not in ids:

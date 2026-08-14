@@ -38,10 +38,12 @@
         { "$ref": "#/$defs/queryProfile" },
         {
           "type": "object",
-          "required": ["baseline_direction_id", "approved_decision_ids"],
+          "required": ["baseline_direction_id", "approved_decision_ids", "anti_template_baseline_id", "anti_template_terms"],
           "properties": {
             "baseline_direction_id": { "$ref": "#/$defs/nonEmptyString" },
-            "approved_decision_ids": { "$ref": "#/$defs/stringList" }
+            "approved_decision_ids": { "$ref": "#/$defs/stringList" },
+            "anti_template_baseline_id": { "$ref": "#/$defs/nonEmptyString" },
+            "anti_template_terms": { "$ref": "#/$defs/nonEmptyStringList" }
           }
         }
       ],
@@ -92,7 +94,8 @@
       "type": "object",
       "required": [
         "id", "label", "fit", "risks", "tradeoffs", "compatibility",
-        "responsive_fallback", "accessibility_notes", "source_ids"
+        "responsive_fallback", "accessibility_notes", "source_ids",
+        "anti_template_evaluation"
       ],
       "properties": {
         "id": { "$ref": "#/$defs/nonEmptyString" },
@@ -103,7 +106,18 @@
         "compatibility": { "$ref": "#/$defs/stringList" },
         "responsive_fallback": { "$ref": "#/$defs/nonEmptyString" },
         "accessibility_notes": { "$ref": "#/$defs/nonEmptyStringList" },
-        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "anti_template_evaluation": {
+          "type": "object",
+          "required": ["baseline_rule_ids", "obligation_ids", "relationship", "rationale"],
+          "properties": {
+            "baseline_rule_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+            "obligation_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+            "relationship": { "enum": ["strengthens", "preserves", "conflicts"] },
+            "rationale": { "$ref": "#/$defs/nonEmptyString" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
@@ -202,7 +216,8 @@
       "type": "object",
       "required": [
         "schema_version", "report_type", "category", "query_context",
-        "domains_searched", "inherited_decision_ids", "candidates",
+        "domains_searched", "inherited_decision_ids", "anti_template_baseline_id",
+        "anti_template_rule_ids", "category_obligation_id", "candidates",
         "recommended_candidate_id", "provenance"
       ],
       "properties": {
@@ -214,6 +229,9 @@
         "query_context": { "$ref": "#/$defs/queryContext" },
         "domains_searched": { "$ref": "#/$defs/nonEmptyStringList" },
         "inherited_decision_ids": { "$ref": "#/$defs/stringList" },
+        "anti_template_baseline_id": { "$ref": "#/$defs/nonEmptyString" },
+        "anti_template_rule_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "category_obligation_id": { "$ref": "#/$defs/nonEmptyString" },
         "candidates": {
           "type": "array",
           "minItems": 2,

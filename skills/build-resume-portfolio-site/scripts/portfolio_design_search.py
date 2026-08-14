@@ -588,6 +588,7 @@ def search_category(
     category: str,
     content_map: Mapping[str, object],
     baseline: Mapping[str, object],
+    anti_template_baseline: Mapping[str, object],
     decisions: Mapping[str, object],
 ) -> dict[str, object]:
     if category not in CATEGORY_DOMAINS:
@@ -596,10 +597,23 @@ def search_category(
         raise ValueError("content map must be a JSON object")
     if not isinstance(baseline, Mapping):
         raise ValueError("baseline must be a JSON object")
+    if validate_discovery_report(
+        anti_template_baseline, expected_type="anti_template_baseline"
+    ):
+        raise ValueError("anti-template baseline design discovery report is invalid")
     if not isinstance(decisions, Mapping):
         raise ValueError("decisions must be a JSON object")
 
     context = _category_query_context(content_map, baseline, decisions)
+    anti_template_id = _string(anti_template_baseline.get("id"))
+    anti_template_terms = [
+        _string(anti_template_baseline.get("visual_protagonist")),
+        _string(anti_template_baseline.get("content_form_thesis")),
+        _string(anti_template_baseline.get("composition_hypothesis")),
+        _string(anti_template_baseline.get("template_independence_claim")),
+    ]
+    context["anti_template_baseline_id"] = anti_template_id
+    context["anti_template_terms"] = [term for term in anti_template_terms if term]
     inherited_ids = list(context["approved_decision_ids"])
     full_query = _query_text(
         context,
@@ -607,6 +621,7 @@ def search_category(
             [
                 category,
                 _string(context["baseline_direction_id"]),
+                *context["anti_template_terms"],
                 *inherited_ids,
             ]
         ),
@@ -622,6 +637,7 @@ def search_category(
                     _string(context["content_density"]),
                     _string(context["media_profile"]),
                     _string(context["baseline_direction_id"]),
+                    *context["anti_template_terms"],
                     *inherited_ids,
                     category,
                 ),
@@ -634,6 +650,68 @@ def search_category(
             f"category={category}; domains={','.join(CATEGORY_DOMAINS[category])}; "
             f"found={len(candidates)}; required=2"
         )
+    rules = [
+        _mapping(item)
+        for item in _sequence(anti_template_baseline.get("anti_template_rules"))
+    ]
+    rule_ids = [_string(rule.get("id")) for rule in rules if _string(rule.get("id"))]
+    obligation = _mapping(
+        _mapping(anti_template_baseline.get("category_obligations")).get(category)
+    )
+    obligation_id = _string(obligation.get("id"))
+    evaluated_candidates: list[dict[str, object]] = []
+    conflict_markers = (
+        "generic centered",
+        "equal-weight",
+        "decorative-only",
+        "template conflict",
+    )
+    for index, candidate_value in enumerate(candidates):
+        candidate = dict(_mapping(candidate_value))
+        candidate_text = " ".join(
+            _string(item)
+            for field in ("label", "fit", "risks", "tradeoffs")
+            for item in (
+                _sequence(candidate.get(field))
+                if field != "label"
+                else [candidate.get(field)]
+            )
+        ).casefold()
+        if any(marker in candidate_text for marker in conflict_markers):
+            relationship = "conflicts"
+            rationale = _string(obligation.get("avoid"))
+        elif index == 0:
+            relationship = "strengthens"
+            rationale = _string(obligation.get("preserve"))
+        else:
+            relationship = "preserves"
+            rationale = (
+                f"Compatible with {obligation_id}; verify the signature remains "
+                "more prominent than the supporting treatment."
+            )
+        candidate["anti_template_evaluation"] = {
+            "baseline_rule_ids": rule_ids,
+            "obligation_ids": [obligation_id],
+            "relationship": relationship,
+            "rationale": rationale,
+        }
+        evaluated_candidates.append(candidate)
+    recommended = next(
+        (
+            candidate
+            for relationship in ("strengthens", "preserves")
+            for candidate in evaluated_candidates
+            if _mapping(candidate.get("anti_template_evaluation")).get(
+                "relationship"
+            )
+            == relationship
+        ),
+        None,
+    )
+    if recommended is None:
+        raise ValueError(
+            f"anti_template_conflict_all_candidates: category={category}"
+        )
     return {
         "schema_version": 1,
         "report_type": "category",
@@ -641,8 +719,11 @@ def search_category(
         "query_context": context,
         "domains_searched": list(CATEGORY_DOMAINS[category]),
         "inherited_decision_ids": inherited_ids,
-        "candidates": candidates,
-        "recommended_candidate_id": candidates[0]["id"],
+        "anti_template_baseline_id": anti_template_id,
+        "anti_template_rule_ids": rule_ids,
+        "category_obligation_id": obligation_id,
+        "candidates": evaluated_candidates,
+        "recommended_candidate_id": recommended["id"],
         "provenance": {
             "upstream": UPSTREAM,
             "catalog_version": validate_catalog(CATALOG_ROOT).catalog_version,
@@ -653,6 +734,7 @@ def search_category(
 def aggregate_discovery(
     content_map: Mapping[str, object],
     baseline: Mapping[str, object],
+    anti_template_baseline: Mapping[str, object],
     category_reports: Mapping[str, object],
     design_spec: Mapping[str, object],
 ) -> dict[str, object]:
@@ -660,6 +742,11 @@ def aggregate_discovery(
         raise ValueError("content map must be a JSON object")
     if validate_discovery_report(baseline, expected_type="baseline"):
         raise ValueError("baseline design discovery report is invalid")
+    if validate_discovery_report(
+        anti_template_baseline, expected_type="anti_template_baseline"
+    ):
+        raise ValueError("anti-template baseline design discovery report is invalid")
+    anti_template_id = _string(anti_template_baseline.get("id"))
     decisions = _mapping(design_spec.get("decisions"))
     approved_decisions: dict[str, object] = {}
     for category in CATEGORY_DOMAINS:
@@ -667,6 +754,8 @@ def aggregate_discovery(
         errors = validate_discovery_report(report, expected_type="category")
         if errors or report.get("category") != category:
             raise ValueError(f"invalid category report: {category}")
+        if report.get("anti_template_baseline_id") != anti_template_id:
+            raise ValueError(f"anti-template baseline mismatch: {category}")
         decision = _mapping(decisions.get(category))
         approval = _mapping(decision.get("approval"))
         if approval.get("status") != "user_approved":
@@ -705,6 +794,8 @@ def aggregate_discovery(
         "mode": "approved-discovery",
         "query": _content_profile(content_map),
         "baseline": dict(baseline),
+        "anti_template_baseline": dict(anti_template_baseline),
+        "anti_template_resolution_required": True,
         "approved_decisions": approved_decisions,
         "guardrails": list(_sequence(baseline.get("guardrails"))),
         "react_guidelines": list(
@@ -814,11 +905,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     category_parser.add_argument("--content-map", type=Path, required=True)
     category_parser.add_argument("--baseline", type=Path, required=True)
+    category_parser.add_argument(
+        "--anti-template-baseline", type=Path, required=True
+    )
     category_parser.add_argument("--decisions", type=Path, required=True)
     category_parser.add_argument("--output", type=Path, required=True)
     aggregate_parser = subparsers.add_parser("aggregate")
     aggregate_parser.add_argument("--content-map", type=Path, required=True)
     aggregate_parser.add_argument("--baseline", type=Path, required=True)
+    aggregate_parser.add_argument(
+        "--anti-template-baseline", type=Path, required=True
+    )
     aggregate_parser.add_argument("--reports-dir", type=Path, required=True)
     aggregate_parser.add_argument("--site-design-spec", type=Path, required=True)
     aggregate_parser.add_argument("--output", type=Path, required=True)
@@ -851,6 +948,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.category,
                 _read_json_object(args.content_map, "content map"),
                 _read_json_object(args.baseline, "baseline"),
+                _read_json_object(
+                    args.anti_template_baseline, "anti-template baseline"
+                ),
                 _read_json_object(args.decisions, "decisions"),
             )
         else:
@@ -864,6 +964,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = aggregate_discovery(
                 _read_json_object(args.content_map, "content map"),
                 _read_json_object(args.baseline, "baseline"),
+                _read_json_object(
+                    args.anti_template_baseline, "anti-template baseline"
+                ),
                 reports,
                 _read_json_object(args.site_design_spec, "site design spec"),
             )
