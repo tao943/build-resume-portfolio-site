@@ -19,12 +19,18 @@ Read and preserve:
 - `reports/site-design-spec.json` schema version 3;
 - `reports/site-todo-plan.md` as the user-approved readable plan;
 - `reports/site-implementation-plan.json` schema version 2;
-- `reports/design-intelligence.json` as soft design guidance;
+- `reports/design-intelligence.json` in `approved-discovery` mode as the
+  database-backed baseline and fixed selected-candidate evidence;
 - validated `reports/design-contract.json` as observable implementation and
   acceptance commitments;
 - `reports/media-inventory.json` when authorized media exists.
 
 Do not implement when final requirements or TODO plan approval is missing.
+Do not select a different catalog candidate, rerun a generic recommendation,
+or treat an unselected candidate as implementation freedom. Open details inside
+the approved candidates remain implementation freedom only when they do not
+contradict the six confirmed decisions, responsive fallbacks, accessibility
+notes, or source-linked constraints.
 
 ## Integrated implementation
 

@@ -12,6 +12,7 @@ from types import ModuleType
 from typing import Any
 
 from validate_design_catalog import validate_catalog
+from validate_design_discovery import validate as validate_discovery_report
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +42,9 @@ DOMAIN_ID_KEYS = {
     "motion": "Category",
     "react": "Guideline",
     "ux": "Issue",
+}
+DOMAIN_QUERY_HINTS = {
+    "motion": "scroll reveal hover stagger pin scrub interaction",
 }
 WORD_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9+.#-]{1,30}")
 _VENDOR_CORE: ModuleType | None = None
@@ -421,7 +425,12 @@ def _category_candidates(
 ) -> list[dict[str, object]]:
     domains = CATEGORY_DOMAINS[category]
     rows_by_domain = {
-        domain: _search_logical_domain(domain, query, 8) for domain in domains
+        domain: _search_logical_domain(
+            domain,
+            " ".join(filter(None, (query, DOMAIN_QUERY_HINTS.get(domain, "")))),
+            8,
+        )
+        for domain in domains
     }
     available = min((len(rows) for rows in rows_by_domain.values()), default=0)
     return [
@@ -498,6 +507,70 @@ def search_category(
             "upstream": UPSTREAM,
             "catalog_version": validate_catalog(CATALOG_ROOT).catalog_version,
         },
+    }
+
+
+def aggregate_discovery(
+    content_map: Mapping[str, object],
+    baseline: Mapping[str, object],
+    category_reports: Mapping[str, object],
+    design_spec: Mapping[str, object],
+) -> dict[str, object]:
+    if not isinstance(content_map, Mapping):
+        raise ValueError("content map must be a JSON object")
+    if validate_discovery_report(baseline, expected_type="baseline"):
+        raise ValueError("baseline design discovery report is invalid")
+    decisions = _mapping(design_spec.get("decisions"))
+    approved_decisions: dict[str, object] = {}
+    for category in CATEGORY_DOMAINS:
+        report = _mapping(category_reports.get(category))
+        errors = validate_discovery_report(report, expected_type="category")
+        if errors or report.get("category") != category:
+            raise ValueError(f"invalid category report: {category}")
+        decision = _mapping(decisions.get(category))
+        approval = _mapping(decision.get("approval"))
+        if approval.get("status") != "user_approved":
+            raise ValueError(f"category is not user approved: {category}")
+        selected_ids = [
+            _string(item)
+            for item in _sequence(decision.get("selected_candidate_ids"))
+            if _string(item)
+        ]
+        candidates = [
+            _mapping(item) for item in _sequence(report.get("candidates"))
+        ]
+        candidate_by_id = {
+            _string(candidate.get("id")): candidate for candidate in candidates
+        }
+        if decision.get("status") != "skipped":
+            if not selected_ids or not set(selected_ids) <= set(candidate_by_id):
+                raise ValueError(
+                    f"approved IDs do not reference {category} candidates"
+                )
+        report_path = _string(decision.get("discovery_report")) or (
+            ".resume-site-work/reports/design-discovery/"
+            f"{category.replace('_', '-')}.json"
+        )
+        approved_decisions[category] = {
+            "status": _string(decision.get("status"), "confirmed"),
+            "selected_candidate_ids": selected_ids,
+            "selected_candidates": [
+                dict(candidate_by_id[candidate_id])
+                for candidate_id in selected_ids
+            ],
+            "discovery_report": report_path,
+        }
+    return {
+        "schema_version": 1,
+        "mode": "approved-discovery",
+        "query": _content_profile(content_map),
+        "baseline": dict(baseline),
+        "approved_decisions": approved_decisions,
+        "guardrails": list(_sequence(baseline.get("guardrails"))),
+        "react_guidelines": list(
+            _sequence(baseline.get("react_guidelines"))
+        ),
+        "provenance": dict(_mapping(baseline.get("provenance"))),
     }
 
 
@@ -599,6 +672,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     category_parser.add_argument("--baseline", type=Path, required=True)
     category_parser.add_argument("--decisions", type=Path, required=True)
     category_parser.add_argument("--output", type=Path, required=True)
+    aggregate_parser = subparsers.add_parser("aggregate")
+    aggregate_parser.add_argument("--content-map", type=Path, required=True)
+    aggregate_parser.add_argument("--baseline", type=Path, required=True)
+    aggregate_parser.add_argument("--reports-dir", type=Path, required=True)
+    aggregate_parser.add_argument("--site-design-spec", type=Path, required=True)
+    aggregate_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "recommend":
@@ -618,12 +697,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 _read_json_object(args.content_map, "content map"),
                 reference_selection,
             )
-        else:
+        elif args.command == "category":
             result = search_category(
                 args.category,
                 _read_json_object(args.content_map, "content map"),
                 _read_json_object(args.baseline, "baseline"),
                 _read_json_object(args.decisions, "decisions"),
+            )
+        else:
+            reports = {
+                category: _read_json_object(
+                    args.reports_dir / f"{category.replace('_', '-')}.json",
+                    f"{category} category report",
+                )
+                for category in CATEGORY_DOMAINS
+            }
+            result = aggregate_discovery(
+                _read_json_object(args.content_map, "content map"),
+                _read_json_object(args.baseline, "baseline"),
+                reports,
+                _read_json_object(args.site_design_spec, "site design spec"),
             )
         _atomic_write_json(args.output, result)
     except DesignCatalogInsufficient as error:

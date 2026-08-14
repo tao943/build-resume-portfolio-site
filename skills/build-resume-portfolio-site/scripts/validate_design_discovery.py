@@ -16,7 +16,6 @@ EXPECTED_DOMAINS = {
     "secondary_motion": ["motion", "react", "ux"],
 }
 PRIVACY_SENSITIVE_KEYS = {
-    "name",
     "full_name",
     "email",
     "phone",
@@ -66,16 +65,18 @@ def _strings(value: Any, *, non_empty: bool = False) -> bool:
     )
 
 
-def _privacy_errors(value: Any) -> list[str]:
+def _privacy_errors(
+    value: Any, forbidden_keys: set[str] = PRIVACY_SENSITIVE_KEYS
+) -> list[str]:
     errors: list[str] = []
     if isinstance(value, dict):
         for key, child in value.items():
-            if str(key).strip().casefold() in PRIVACY_SENSITIVE_KEYS:
+            if str(key).strip().casefold() in forbidden_keys:
                 errors.append(f"privacy-sensitive key is not allowed: {key}")
-            errors.extend(_privacy_errors(child))
+            errors.extend(_privacy_errors(child, forbidden_keys))
     elif isinstance(value, list):
         for child in value:
-            errors.extend(_privacy_errors(child))
+            errors.extend(_privacy_errors(child, forbidden_keys))
     return errors
 
 
@@ -184,6 +185,10 @@ def validate(payload: Any, expected_type: str | None = None) -> list[str]:
     if expected_type is not None and report_type != expected_type:
         errors.append(f"expected report type: {expected_type}")
     errors.extend(_privacy_errors(payload))
+    query_payload = payload.get("query")
+    if query_payload is None:
+        query_payload = payload.get("query_context")
+    errors.extend(_privacy_errors(query_payload, {"name"}))
     if report_type == "baseline":
         errors.extend(_validate_baseline(payload))
     elif report_type == "category":
