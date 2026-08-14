@@ -51,6 +51,13 @@ STYLE_BRIEF = {
     "avoid_literal_copying": ["logos", "exact composition"],
 }
 
+DECISION_CONTEXT = {
+    "structure": {
+        "selected_candidate_ids": ["structure-editorial-grid"],
+        "approval": {"status": "user_approved"},
+    }
+}
+
 
 def load_search_module():
     if not SEARCH_PATH.is_file():
@@ -65,6 +72,62 @@ def load_search_module():
 
 
 class PortfolioDesignSearchTests(unittest.TestCase):
+    def test_build_baseline_runs_before_category_search_and_is_privacy_safe(self) -> None:
+        module = load_search_module()
+
+        result = module.build_baseline(CONTENT_MAP)
+
+        self.assertEqual(result["report_type"], "baseline")
+        self.assertEqual(len(result["candidate_directions"]), 3)
+        serialized = json.dumps(result, ensure_ascii=False)
+        self.assertNotIn("Private Person", serialized)
+        self.assertNotIn("person@example.com", serialized)
+
+    def test_each_category_has_exact_required_catalog_domains(self) -> None:
+        module = load_search_module()
+
+        self.assertEqual(
+            module.CATEGORY_DOMAINS,
+            {
+                "structure": ("landing", "style", "product", "ux"),
+                "typography": ("typography", "style", "ux"),
+                "color": ("color", "style", "ux"),
+                "media": ("style", "product", "landing", "ux"),
+                "primary_motion": ("motion", "style", "landing", "ux"),
+                "secondary_motion": ("motion", "react", "ux"),
+            },
+        )
+
+    def test_typography_search_inherits_approved_structure(self) -> None:
+        module = load_search_module()
+        baseline = module.build_baseline(CONTENT_MAP)
+
+        report = module.search_category(
+            "typography", CONTENT_MAP, baseline, DECISION_CONTEXT
+        )
+
+        self.assertEqual(
+            report["inherited_decision_ids"], ["structure-editorial-grid"]
+        )
+        self.assertEqual(
+            report["domains_searched"], ["typography", "style", "ux"]
+        )
+        self.assertTrue(all(item["source_ids"] for item in report["candidates"]))
+
+    def test_category_search_never_fabricates_when_catalog_is_insufficient(self) -> None:
+        module = load_search_module()
+        baseline = module.build_baseline(CONTENT_MAP)
+        original = module._search
+        module._search = lambda domain, query, count=8: []
+        try:
+            with self.assertRaisesRegex(
+                module.DesignCatalogInsufficient,
+                "design_catalog_insufficient",
+            ):
+                module.search_category("color", CONTENT_MAP, baseline, {})
+        finally:
+            module._search = original
+
     def test_recommend_returns_three_distinct_privacy_safe_directions(self) -> None:
         module = load_search_module()
 
