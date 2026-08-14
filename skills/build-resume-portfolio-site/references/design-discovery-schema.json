@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "design-discovery-schema.json",
+  "title": "Database-first portfolio design discovery report",
+  "oneOf": [
+    { "$ref": "#/$defs/baseline" },
+    { "$ref": "#/$defs/categoryReport" }
+  ],
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "nonEmptyStringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "queryProfile": {
+      "type": "object",
+      "required": ["role", "industry", "content_density", "media_profile", "keywords"],
+      "properties": {
+        "role": { "$ref": "#/$defs/nonEmptyString" },
+        "industry": { "$ref": "#/$defs/nonEmptyString" },
+        "content_density": { "$ref": "#/$defs/nonEmptyString" },
+        "media_profile": { "$ref": "#/$defs/nonEmptyString" },
+        "keywords": { "$ref": "#/$defs/stringList" }
+      },
+      "additionalProperties": false
+    },
+    "queryContext": {
+      "allOf": [
+        { "$ref": "#/$defs/queryProfile" },
+        {
+          "type": "object",
+          "required": ["baseline_direction_id", "approved_decision_ids"],
+          "properties": {
+            "baseline_direction_id": { "$ref": "#/$defs/nonEmptyString" },
+            "approved_decision_ids": { "$ref": "#/$defs/stringList" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["upstream", "catalog_version"],
+      "properties": {
+        "upstream": { "$ref": "#/$defs/nonEmptyString" },
+        "catalog_version": { "$ref": "#/$defs/nonEmptyString" },
+        "domains": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "direction": {
+      "type": "object",
+      "required": [
+        "id", "name", "style_family", "composition", "color_relationships",
+        "typography_roles", "surface_language", "media_strategy", "fit_reasons",
+        "risks", "source_ids"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "style_family": { "$ref": "#/$defs/nonEmptyString" },
+        "composition": { "$ref": "#/$defs/nonEmptyString" },
+        "color_relationships": { "$ref": "#/$defs/nonEmptyStringList" },
+        "typography_roles": {
+          "type": "object",
+          "required": ["display", "body", "hierarchy"],
+          "properties": {
+            "display": { "$ref": "#/$defs/nonEmptyString" },
+            "body": { "$ref": "#/$defs/nonEmptyString" },
+            "hierarchy": { "$ref": "#/$defs/nonEmptyString" }
+          },
+          "additionalProperties": false
+        },
+        "surface_language": { "$ref": "#/$defs/nonEmptyString" },
+        "media_strategy": { "$ref": "#/$defs/nonEmptyString" },
+        "fit_reasons": { "$ref": "#/$defs/nonEmptyStringList" },
+        "risks": { "$ref": "#/$defs/nonEmptyStringList" },
+        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "id", "label", "fit", "risks", "tradeoffs", "compatibility",
+        "responsive_fallback", "accessibility_notes", "source_ids"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "label": { "$ref": "#/$defs/nonEmptyString" },
+        "fit": { "$ref": "#/$defs/nonEmptyStringList" },
+        "risks": { "$ref": "#/$defs/nonEmptyStringList" },
+        "tradeoffs": { "$ref": "#/$defs/nonEmptyStringList" },
+        "compatibility": { "$ref": "#/$defs/stringList" },
+        "responsive_fallback": { "$ref": "#/$defs/nonEmptyString" },
+        "accessibility_notes": { "$ref": "#/$defs/nonEmptyStringList" },
+        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "schema_version", "report_type", "mode", "query", "candidate_directions",
+        "selected_direction_id", "guardrails", "react_guidelines",
+        "reference_selection_ids", "provenance"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "report_type": { "const": "baseline" },
+        "mode": { "const": "baseline" },
+        "query": { "$ref": "#/$defs/queryProfile" },
+        "candidate_directions": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/direction" }
+        },
+        "selected_direction_id": { "$ref": "#/$defs/nonEmptyString" },
+        "guardrails": { "$ref": "#/$defs/stringList" },
+        "react_guidelines": { "$ref": "#/$defs/stringList" },
+        "reference_selection_ids": { "$ref": "#/$defs/stringList" },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      },
+      "additionalProperties": false
+    },
+    "categoryReport": {
+      "type": "object",
+      "required": [
+        "schema_version", "report_type", "category", "query_context",
+        "domains_searched", "inherited_decision_ids", "candidates",
+        "recommended_candidate_id", "provenance"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "report_type": { "const": "category" },
+        "category": {
+          "enum": ["structure", "typography", "color", "media", "primary_motion", "secondary_motion"]
+        },
+        "query_context": { "$ref": "#/$defs/queryContext" },
+        "domains_searched": { "$ref": "#/$defs/nonEmptyStringList" },
+        "inherited_decision_ids": { "$ref": "#/$defs/stringList" },
+        "candidates": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/candidate" }
+        },
+        "recommended_candidate_id": { "$ref": "#/$defs/nonEmptyString" },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

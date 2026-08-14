@@ -37,6 +37,15 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- content-implementation-plan.json
 |   |-- content-quality-review.json # evidence, writing, ATS, JD, and copy approval gate
 |   |-- jd-match.json               # only when a JD is supplied
+|   |-- design-decisions-working.json # approved IDs accumulated during discovery
+|   |-- design-discovery/
+|   |   |-- baseline.json
+|   |   |-- structure.json
+|   |   |-- typography.json
+|   |   |-- color.json
+|   |   |-- media.json
+|   |   |-- primary-motion.json
+|   |   `-- secondary-motion.json
 |   |-- creative-direction.json    # fixed floor, open ceiling, and selected layout family
 |   |-- design-contract.json       # compiled observable design and acceptance commitments
 |   |-- multi-agent-implementation.json # only when multi-agent execution is authorized
@@ -90,6 +99,14 @@ React source edits. The
 creative-direction report may translate the approved design spec into
 implementation detail but may not contradict it.
 
+`reports/design-discovery/baseline.json` records the three database-backed
+directions created before the first visual question. Each category report
+records its exact catalog domains, privacy-safe query context, inherited prior
+decision IDs, candidates, recommendation, and source IDs. The working decision
+file contains only approved candidate IDs and conversational approval metadata;
+it is the inheritance input for the next category and has no independent
+approval semantics.
+
 `reports/multi-agent-implementation.json` exists only when the user explicitly
 selects parallel multi-Agent implementation. It records the parallel-wave
 strategy, dependencies,
@@ -108,6 +125,17 @@ Initialize `build-state.json` with this minimum shape:
   "skill_version": "1.2.0-react-vite",
   "workflow_mode": "full",
   "discovery": {
+    "design_discovery": {
+      "baseline": "reports/design-discovery/baseline.json",
+      "categories": {
+        "structure": "reports/design-discovery/structure.json",
+        "typography": "reports/design-discovery/typography.json",
+        "color": "reports/design-discovery/color.json",
+        "media": "reports/design-discovery/media.json",
+        "primary_motion": "reports/design-discovery/primary-motion.json",
+        "secondary_motion": "reports/design-discovery/secondary-motion.json"
+      }
+    },
     "site_design_approved": false,
     "site_plan_validated": false
   },

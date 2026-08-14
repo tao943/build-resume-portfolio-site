@@ -72,13 +72,49 @@
     "candidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "label", "tradeoffs"],
+      "required": [
+        "id",
+        "label",
+        "fit",
+        "risks",
+        "tradeoffs",
+        "compatibility",
+        "responsive_fallback",
+        "accessibility_notes",
+        "source_ids"
+      ],
       "properties": {
         "id": {"type": "string", "minLength": 1},
         "label": {"type": "string", "minLength": 1},
+        "fit": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "risks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
         "tradeoffs": {
           "type": "array",
           "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "compatibility": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "responsive_fallback": {"type": "string", "minLength": 1},
+        "accessibility_notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
           "items": {"type": "string", "minLength": 1}
         }
       }
@@ -131,6 +167,7 @@
       "additionalProperties": false,
       "required": [
         "status",
+        "discovery_report",
         "candidates",
         "recommended_candidate_id",
         "tentative_selection_ids",
@@ -140,6 +177,10 @@
       ],
       "properties": {
         "status": {"const": "confirmed"},
+        "discovery_report": {
+          "type": "string",
+          "pattern": "^\\.resume-site-work/reports/design-discovery/(structure|typography|color|media|primary-motion|secondary-motion)\\.json$"
+        },
         "candidates": {
           "type": "array",
           "minItems": 2,
@@ -178,10 +219,11 @@
     "skippedMedia": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "skip_reason"],
+      "required": ["status", "skip_reason", "approval"],
       "properties": {
         "status": {"const": "skipped"},
-        "skip_reason": {"type": "string", "minLength": 1}
+        "skip_reason": {"type": "string", "minLength": 1},
+        "approval": {"$ref": "#/$defs/approval"}
       }
     }
   }
