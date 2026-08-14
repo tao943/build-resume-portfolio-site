@@ -87,6 +87,12 @@ CONTENT_WORKFLOW_FILES = (
     "scripts/write_resume_site_input.py",
 )
 
+DESIGN_DISCOVERY_FILES = (
+    "references/design-discovery-schema.json",
+    "scripts/validate_design_discovery.py",
+    "scripts/portfolio_design_search.py",
+)
+
 STAGE_RESOURCES = {
     "content-preparation": ("content-workflow",),
     "discovery": (
@@ -95,6 +101,7 @@ STAGE_RESOURCES = {
         "visual-style-preview-contract",
         "visual-companion",
         "design-catalog",
+        "design-discovery",
     ),
     "planning": (
         "site-planning-contract",
@@ -103,6 +110,7 @@ STAGE_RESOURCES = {
     "integrated": (
         "generate-integrated-site",
         "design-catalog",
+        "design-discovery",
         "aesthetic-quality-loop",
         "audit-screenshot",
         "repair-local-issues",
@@ -285,6 +293,7 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
             "visual-companion",
             "aesthetic-quality-loop",
             "content-workflow",
+            "design-discovery",
         )
         if mode == "skeleton"
         else STAGE_RESOURCES[stage]
@@ -355,6 +364,32 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                 except (OSError, UnicodeError, json.JSONDecodeError) as error:
                     resource_errors.append(
                         f"invalid_content_workflow_file: {relative}: {error}"
+                    )
+            resource_ready = not resource_errors
+        elif resource_id == "design-discovery":
+            resource_errors = []
+            for relative in DESIGN_DISCOVERY_FILES:
+                path = skill_root / relative
+                if not path.is_file():
+                    resource_errors.append(
+                        f"missing_design_discovery_file: {relative}"
+                    )
+                    continue
+                try:
+                    text = path.read_text(encoding="utf-8").strip()
+                    if not text:
+                        resource_errors.append(
+                            f"empty_design_discovery_file: {relative}"
+                        )
+                    elif path.suffix == ".json" and not isinstance(
+                        json.loads(text), dict
+                    ):
+                        resource_errors.append(
+                            f"invalid_design_discovery_file: {relative}"
+                        )
+                except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                    resource_errors.append(
+                        f"invalid_design_discovery_file: {relative}: {error}"
                     )
             resource_ready = not resource_errors
         else:

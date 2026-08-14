@@ -181,6 +181,11 @@ def write_complete_skeleton(root: Path) -> None:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
+    for relative in DESIGN_DISCOVERY_FILES:
+        source = SKILL_ROOT / relative
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
 
 
 
