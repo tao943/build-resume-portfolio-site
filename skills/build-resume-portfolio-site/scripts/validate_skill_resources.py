@@ -70,6 +70,8 @@ CONTENT_WORKFLOW_FILES = (
     "references/content-implementation-plan-schema.json",
     "references/content-package-contract.md",
     "references/content-planning-contract.md",
+    "references/content-quality-gate.md",
+    "references/content-quality-review-schema.json",
     "references/evidence-schema.json",
     "references/fact-verification-rules.md",
     "references/jd-customization-rules.md",
@@ -83,6 +85,7 @@ CONTENT_WORKFLOW_FILES = (
     "scripts/validate_content_handoff.py",
     "scripts/validate_content_implementation_plan.py",
     "scripts/validate_content_package.py",
+    "scripts/validate_content_quality_review.py",
     "scripts/validate_jd_match.py",
     "scripts/write_resume_site_input.py",
 )

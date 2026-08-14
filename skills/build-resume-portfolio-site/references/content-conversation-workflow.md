@@ -24,7 +24,10 @@ Skip questions whose facts are explicit and high confidence. If a question is op
 - Fact approval: user confirms or corrects a factual item.
 - Content-strategy approval: user explicitly selects the narrative approach.
 - Copy approval: user accepts a proposed rewrite.
-- Website handoff: only after the package status is `approved`.
+- Content-quality validation: write `content-quality-review.json` with the exact
+  selected wording and conversational approval, then validate it.
+- Website handoff: only after the quality report validates and package status is
+  `approved`.
 
 Never treat silence, a vague acknowledgement, or a request to continue as approval of a factual claim.
 Content-strategy approval never implies copy approval.

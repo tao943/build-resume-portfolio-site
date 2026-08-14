@@ -45,11 +45,17 @@ The required handoff is:
 .resume-site-work/reports/content-provenance.json
 .resume-site-work/reports/content-design-spec.json
 .resume-site-work/reports/content-implementation-plan.json
+.resume-site-work/reports/content-quality-review.json
 ```
+
+The quality review must pass `scripts/validate_content_quality_review.py`, and
+its reviewed block IDs must exactly match the keys in `approved-copy.json`.
 
 When a JD is supplied, also write and validate
 `.resume-site-work/reports/jd-match.json`. It is a role-specific matching layer,
-not a source of new facts.
+not a source of new facts. Content preflight compares its matched and unmatched
+requirement IDs with `content-quality-review.json` before returning
+`CONTENT_READY`.
 
 ## Consumption rules
 

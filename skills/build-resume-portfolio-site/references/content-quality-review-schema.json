@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContentQualityReview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "review_status",
+    "jd_review",
+    "ats_review",
+    "blocked_claims",
+    "blocks",
+    "copy_approval"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "review_status": {"const": "approved"},
+    "jd_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "matched_requirement_ids", "unmatched_requirement_ids"],
+      "properties": {
+        "present": {"type": "boolean"},
+        "matched_requirement_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "unmatched_requirement_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "ats_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completed", "plain_text_safe", "standard_headings", "keyword_stuffing_absent", "hidden_text_absent", "truthful_keyword_use", "notes"],
+      "properties": {
+        "completed": {"const": true},
+        "plain_text_safe": {"const": true},
+        "standard_headings": {"const": true},
+        "keyword_stuffing_absent": {"const": true},
+        "hidden_text_absent": {"const": true},
+        "truthful_keyword_use": {"const": true},
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "blocked_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim", "reason"],
+        "properties": {
+          "claim": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/block"}
+    },
+    "copy_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "source", "approved_block_ids", "evidence_quote"],
+      "properties": {
+        "status": {"const": "user_approved"},
+        "source": {"const": "conversation"},
+        "approved_block_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "evidence_quote": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "$defs": {
+    "idList": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "strongerVersion": {
+      "type": ["object", "null"],
+      "required": ["copy", "fact_ids", "evidence_ids"],
+      "properties": {
+        "copy": {"type": "string", "minLength": 1},
+        "fact_ids": {"allOf": [{"$ref": "#/$defs/idList"}, {"minItems": 1}]},
+        "evidence_ids": {"allOf": [{"$ref": "#/$defs/idList"}, {"minItems": 1}]}
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["kind", "text", "fact_ids", "evidence_ids", "reason", "unsupported_metrics_removed"],
+      "properties": {
+        "kind": {"enum": ["evidenced", "qualitative_fallback"]},
+        "text": {"type": "string", "minLength": 1},
+        "fact_ids": {"$ref": "#/$defs/idList"},
+        "evidence_ids": {"$ref": "#/$defs/idList"},
+        "reason": {"type": "string"},
+        "unsupported_metrics_removed": {"type": "boolean"}
+      }
+    },
+    "block": {
+      "type": "object",
+      "required": ["block_id", "source_section", "original_copy", "recommended_copy", "stronger_version", "selected_version", "action", "method", "scope", "result", "fact_ids", "evidence_ids", "jd_requirement_ids", "integrity_review", "approval_status"],
+      "properties": {
+        "block_id": {"type": "string", "minLength": 1},
+        "source_section": {"type": "string", "minLength": 1},
+        "original_copy": {"type": "string"},
+        "recommended_copy": {"type": "string", "minLength": 1},
+        "stronger_version": {"$ref": "#/$defs/strongerVersion"},
+        "selected_version": {"enum": ["recommended", "stronger"]},
+        "action": {"type": "string", "minLength": 1},
+        "method": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "result": {"$ref": "#/$defs/result"},
+        "fact_ids": {"allOf": [{"$ref": "#/$defs/idList"}, {"minItems": 1}]},
+        "evidence_ids": {"allOf": [{"$ref": "#/$defs/idList"}, {"minItems": 1}]},
+        "jd_requirement_ids": {"$ref": "#/$defs/idList"},
+        "integrity_review": {
+          "type": "object",
+          "required": ["ownership_supported", "result_supported", "no_invented_claims", "no_unmatched_jd_claims"],
+          "properties": {
+            "ownership_supported": {"const": true},
+            "result_supported": {"const": true},
+            "no_invented_claims": {"const": true},
+            "no_unmatched_jd_claims": {"const": true}
+          }
+        },
+        "approval_status": {"const": "user_approved"}
+      }
+    }
+  }
+}
