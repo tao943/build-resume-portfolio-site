@@ -96,6 +96,9 @@ VALID_BASELINE = {
 
 
 class ValidateDesignDiscoveryTests(unittest.TestCase):
+    def test_valid_baseline_report_passes(self) -> None:
+        self.assertEqual(validate(deepcopy(VALID_BASELINE)), [])
+
     def test_valid_category_report_passes(self) -> None:
         self.assertEqual(validate(deepcopy(VALID_CATEGORY)), [])
 
