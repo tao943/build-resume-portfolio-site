@@ -4,10 +4,10 @@
   "title": "Portfolio design intelligence",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "mode", "query", "candidate_directions", "selected_direction_id", "guardrails", "react_guidelines", "provenance"],
+  "required": ["schema_version", "mode", "query", "guardrails", "react_guidelines", "provenance"],
   "properties": {
     "schema_version": {"const": 1},
-    "mode": {"enum": ["recommend", "enrich"]},
+    "mode": {"enum": ["recommend", "enrich", "approved-discovery"]},
     "query": {
       "type": "object",
       "additionalProperties": false,
@@ -25,6 +25,8 @@
     "guardrails": {"type": "array", "items": {"type": "string"}},
     "react_guidelines": {"type": "array", "items": {"type": "string"}},
     "reference_evidence_priority": {"type": "boolean"},
+    "baseline": {"type": "object"},
+    "approved_decisions": {"$ref": "#/$defs/approvedDecisions"},
     "provenance": {
       "type": "object",
       "additionalProperties": false,
@@ -36,6 +38,13 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "approved-discovery"}}},
+      "then": {"required": ["baseline", "approved_decisions"]},
+      "else": {"required": ["candidate_directions", "selected_direction_id"]}
+    }
+  ],
   "$defs": {
     "direction": {
       "type": "object",
@@ -62,6 +71,46 @@
         "fit_reasons": {"type": "array", "items": {"type": "string"}},
         "risks": {"type": "array", "items": {"type": "string"}},
         "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    },
+    "discoveryCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "fit", "risks", "tradeoffs", "compatibility", "responsive_fallback", "accessibility_notes", "source_ids"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "fit": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "risks": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "tradeoffs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "compatibility": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "responsive_fallback": {"type": "string", "minLength": 1},
+        "accessibility_notes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "approvedDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "selected_candidate_ids", "selected_candidates", "discovery_report"],
+      "properties": {
+        "status": {"enum": ["confirmed", "skipped"]},
+        "selected_candidate_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "selected_candidates": {"type": "array", "items": {"$ref": "#/$defs/discoveryCandidate"}},
+        "discovery_report": {"type": "string", "pattern": "^\\.resume-site-work/reports/design-discovery/(structure|typography|color|media|primary-motion|secondary-motion)\\.json$"}
+      }
+    },
+    "approvedDecisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structure", "typography", "color", "media", "primary_motion", "secondary_motion"],
+      "properties": {
+        "structure": {"$ref": "#/$defs/approvedDecision"},
+        "typography": {"$ref": "#/$defs/approvedDecision"},
+        "color": {"$ref": "#/$defs/approvedDecision"},
+        "media": {"$ref": "#/$defs/approvedDecision"},
+        "primary_motion": {"$ref": "#/$defs/approvedDecision"},
+        "secondary_motion": {"$ref": "#/$defs/approvedDecision"}
       }
     }
   }

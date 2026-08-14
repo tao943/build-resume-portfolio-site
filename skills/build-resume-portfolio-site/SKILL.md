@@ -221,18 +221,23 @@ integration, preview promotion, snapshots, and publication.
 
 1. Validate `integrated` resources and set `stage=design_contract_compiling`.
 2. Read `prompts/01-generate-integrated-site.md`.
-3. Generate `reports/content-map.json` only from normalized facts and approved
-   copy. Before React generation, run:
+3. Reuse the discovery-stage `reports/content-map.json`, validated baseline,
+   six category reports, and approved site design spec. Compile them before
+   React generation:
 
 ```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
-  --input ".resume-site-work\reports\content-map.json" `
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" aggregate `
+  --content-map ".resume-site-work\reports\content-map.json" `
+  --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
+  --reports-dir ".resume-site-work\reports\design-discovery" `
+  --site-design-spec ".resume-site-work\reports\site-design-spec.json" `
   --output ".resume-site-work\reports\design-intelligence.json"
 ```
 
-   Treat `reports\design-intelligence.json` as soft guidance. Translate the
-   approved decisions into `reports/creative-direction.json` and validate it;
-   the report may add implementation detail but cannot reopen user choices.
+   The aggregate is fixed approved input, not a new recommendation. Do not rerun
+   generic catalog recommendation here. Translate its selected candidates into
+   `reports/creative-direction.json` and validate it; implementation may resolve
+   open details but cannot reopen or contradict user choices.
 4. Compile the approved design specification, design intelligence, and creative
    direction into a temporary sibling for `reports/design-contract.json`. Follow
    `references/design-contract.md`, validate the temporary report, and atomically

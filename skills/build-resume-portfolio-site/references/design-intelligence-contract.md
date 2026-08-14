@@ -18,6 +18,12 @@ Enrichment mode additionally accepts an approved `StyleBrief`. Visible
 reference evidence has priority over Catalog aesthetics. Catalog accessibility,
 responsive, privacy, and implementation guardrails remain mandatory.
 
+Approved-discovery mode consumes the validated baseline, all six validated
+category reports, and the approved site design specification. It copies only
+the candidates selected in the conversation, preserving their report paths and
+catalog source IDs. It is the canonical generation input and cannot recommend a
+different direction or reopen a decision.
+
 ## Candidate rules
 
 - Return exactly three candidates in recommendation mode.
@@ -30,6 +36,10 @@ responsive, privacy, and implementation guardrails remain mandatory.
   explicit retry or user selection.
 - Do not silently invent fixed fallback directions when the Catalog cannot
   provide three valid candidates.
+- In approved-discovery mode, require every category report, require explicit
+  conversational approval, and verify every selected ID exists in that report.
+  A skipped media decision retains its validated report and approval but has no
+  selected candidate.
 
 ## Persistence
 
@@ -37,6 +47,11 @@ Write the report to `.resume-site-work/reports/design-intelligence.json` using
 a temporary sibling file and atomic replacement. Preserve
 `selected_direction_id` through later stages. Record attempted direction IDs
 when a prototype is rejected.
+
+For integrated generation, write one `approved-discovery` aggregate from the
+persisted baseline and category reports. Do not rerun `recommend`; the aggregate
+preserves the exact approved IDs, selected candidate records, discovery-report
+paths, guardrails, React guidance, and catalog provenance.
 
 ## Privacy
 
