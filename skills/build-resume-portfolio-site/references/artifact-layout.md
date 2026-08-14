@@ -33,6 +33,10 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- site-implementation-plan.json # files, dependencies, checks, rollback
 |   |-- content-map.json
 |   |-- content-provenance.json
+|   |-- content-design-spec.json
+|   |-- content-implementation-plan.json
+|   |-- content-quality-review.json # evidence, writing, ATS, JD, and copy approval gate
+|   |-- jd-match.json               # only when a JD is supplied
 |   |-- creative-direction.json    # fixed floor, open ceiling, and selected layout family
 |   |-- design-contract.json       # compiled observable design and acceptance commitments
 |   |-- multi-agent-implementation.json # only when multi-agent execution is authorized
@@ -56,10 +60,9 @@ conversation reply may be recorded in the schema-version-3 site design
 specification. Category Galleries are independent rather than cumulative.
 Stopping a local session preserves its gallery for review.
 
-The three content files under `input/` plus
-`reports/content-provenance.json` are owned by
-the bundled content workflow. The website builder validates and consumes
-them; it does not rewrite them.
+The three content files under `input/` plus the content strategy, plan, quality,
+provenance, and optional JD reports are owned by the bundled content workflow.
+The website builder validates and consumes them; it does not rewrite them.
 
 `reports/media-inventory.json` has the workspace-owned shape `{"schema_version": 1, "assets": [...]}`. It is always created before media-direction report validation; use the explicit empty inventory `{"schema_version": 1, "assets": []}` when no media is authorized. Every asset records a stable `id`, `factual_meaning`, and a non-empty `immutable_facts` list; `role` and `source` are optional. The media-direction report validator uses this inventory as the only authorization and factual-preservation source.
 

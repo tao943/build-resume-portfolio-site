@@ -19,6 +19,10 @@ project, and retain the last valid source snapshot.
    `references/content-planning-contract.md`,
    `references/content-package-contract.md`,
    `references/fact-verification-rules.md`,
+   `references/content-quality-gate.md`,
+   `references/writing-coach-rules.md`,
+   `references/star-and-impact-rubric.md`,
+   `references/ats-safety-checklist.md`,
    `references/jd-customization-rules.md`,
    `references/site-brainstorming-contract.md`,
    `references/visual-style-preview-contract.md`,
@@ -76,13 +80,30 @@ invalid, or when the user supplies a new resume, JD, claim, or copy correction.
 6. Write `reports/content-implementation-plan.json` with TODO tasks, fact/evidence
    links, exact output files, blocked claims, and verification. Validate it before
    drafting copy.
-7. Read `prompts/optimize-content-copy.md`, draft evidence-linked copy, and wait
-   for explicit final copy approval. A request to continue or earlier approval
-   does not approve the wording.
-8. Write the versioned handoff files listed in
+7. Before drafting, read `references/content-quality-gate.md`,
+   `references/writing-coach-rules.md`, `references/star-and-impact-rubric.md`,
+   and `references/ats-safety-checklist.md` completely. When a JD exists, also
+   apply `references/jd-customization-rules.md` and use only matched JD rows.
+   Read `prompts/optimize-content-copy.md`. For every experience and project
+   block, review action, method, scope, result treatment, fact/evidence IDs,
+   ownership, and JD relevance. Produce one recommended version and an optional
+   stronger version only when separately supported; record unsupported or
+   overstated alternatives as blocked claims.
+8. Write `.resume-site-work/reports/content-quality-review.json`, show the exact
+   proposed wording, and wait for explicit final copy approval. A request to
+   continue, earlier approval, browser activity, or strategy/TODO approval does
+   not approve the wording. Record the conversational approval and validate:
+
+```powershell
+python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
+  ".resume-site-work\reports\content-quality-review.json"
+```
+
+   Do not write `approved-copy.json` until this command exits `0`.
+9. Write the versioned handoff files listed in
    `references/content-package-contract.md`, plus `jd-match.json` when applicable.
-   Rerun content and JD validators, then rerun preflight. Enter website discovery
-   only after `CONTENT_READY`.
+   Rerun content-quality, content, and JD validators, then rerun preflight. Enter
+   website discovery only after `CONTENT_READY`.
 
 ## Full discovery gate
 
@@ -302,4 +323,4 @@ architecture. If scope expands, stop and return to full discovery.
 - Never publish reference-only media or fabricate facts, metrics, people, or
   project images.
 - Preserve the last valid preview and immutable source snapshot on failure.
-- No external Superpowers skill is required at runtime.
+- No external sub-Skill is required at runtime.

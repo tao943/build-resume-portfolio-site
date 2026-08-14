@@ -9,6 +9,7 @@ The skill owns content preparation and writes only these files:
 .resume-site-work/reports/content-provenance.json
 .resume-site-work/reports/content-design-spec.json
 .resume-site-work/reports/content-implementation-plan.json
+.resume-site-work/reports/content-quality-review.json
 .resume-site-work/reports/jd-match.json (when a JD is supplied)
 ```
 
@@ -20,6 +21,12 @@ The package must remain versioned. A confirmed package may not be overwritten wi
 `content-implementation-plan.json` records evidence-linked work before copy
 drafting. Neither report is factual evidence, and strategy approval is not
 final copy approval.
+
+`content-quality-review.json` records the writing-coach, STAR, ATS, evidence,
+ownership, result, and optional JD checks for every approved experience and
+project block. It must pass `scripts/validate_content_quality_review.py` after
+explicit conversational copy approval and before `approved-copy.json` is
+written. A changed block invalidates its review and approval.
 
 `jd-match.json` remains a separate role-specific report. Each JD requirement
 records its exact phrase, normalized concept, category, and priority. Each match

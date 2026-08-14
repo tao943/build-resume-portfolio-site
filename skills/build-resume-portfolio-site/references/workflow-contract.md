@@ -12,6 +12,7 @@ content_preflight
 -> content_strategy_waiting_confirmation
 -> content_plan_generating
 -> content_copy_waiting_confirmation
+-> content_quality_validating
 -> design_structure_selecting
 -> design_typography_selecting
 -> design_color_selecting
@@ -36,9 +37,16 @@ decline affects only that category.
 
 Missing or invalid content stays inside this Skill. The bundled content phase
 establishes fact/evidence records, optional JD matching, explicit strategy
-approval, a validated content plan, and explicit copy approval. Only a validated
-`CONTENT_READY` handoff transitions to website design. JD `unmatched` items stay
+approval, a validated content plan, explicit copy approval, and a validated
+content-quality review. Only a validated `CONTENT_READY` handoff transitions to
+website design. JD `unmatched` items stay
 unmatched unless the user supplies evidence; they never become generated facts.
+
+```text
+content_copy_waiting_confirmation --approve exact wording--> content_quality_validating
+content_quality_validating --quality and handoff validate--> design_structure_selecting
+content_quality_validating --invalid or copy changes--> content_copy_waiting_confirmation
+```
 
 `requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
 the schema-v3 design specification. Then:

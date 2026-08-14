@@ -8,6 +8,14 @@ from pathlib import Path
 from typing import Any
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from validate_content_quality_review import validate as validate_content_quality_review
+from validate_jd_match import validate as validate_jd_match
+
+
 FACT_SECTIONS = {"basics", "work", "education", "projects", "skills", "links"}
 HASH_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 
@@ -17,6 +25,14 @@ def _read_json(path: Path) -> tuple[Any | None, str | None]:
         return json.loads(path.read_text(encoding="utf-8")), None
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         return None, f"cannot read {path.name}: {exc}"
+
+
+def _non_empty_string_list(value: object) -> bool:
+    return (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(item, str) and bool(item.strip()) for item in value)
+    )
 
 
 def _validate_package_shape(package: Any) -> list[str]:
@@ -61,6 +77,7 @@ def validate_workspace(workspace_root: Path) -> tuple[int, list[str]]:
         "normalized": work_root / "input" / "normalized-resume.json",
         "approved": work_root / "input" / "approved-copy.json",
         "provenance": work_root / "reports" / "content-provenance.json",
+        "quality": work_root / "reports" / "content-quality-review.json",
     }
     missing = [str(path.relative_to(workspace_root)) for path in paths.values() if not path.is_file()]
     if missing:
@@ -82,6 +99,33 @@ def validate_workspace(workspace_root: Path) -> tuple[int, list[str]]:
     if shape_errors:
         return 1, shape_errors
 
+    quality_errors = validate_content_quality_review(payloads["quality"])
+    if quality_errors:
+        return 1, [f"content-quality-review.json: {error}" for error in quality_errors]
+
+    quality_jd = payloads["quality"]["jd_review"]
+    if quality_jd["present"] is True:
+        jd_path = work_root / "reports" / "jd-match.json"
+        if not jd_path.is_file():
+            return 2, ["missing handoff file: .resume-site-work/reports/jd-match.json"]
+        jd_match, read_error = _read_json(jd_path)
+        if read_error:
+            return 1, [read_error]
+        jd_errors = validate_jd_match(jd_match)
+        if jd_errors:
+            return 1, [f"jd-match.json: {error}" for error in jd_errors]
+        actual_matched = {
+            row["jd_item_id"]
+            for row in jd_match["matches"]
+            if row["status"] != "unmatched"
+        }
+        actual_unmatched = set(jd_match["unmatched_requirement_ids"])
+        if (
+            set(quality_jd["matched_requirement_ids"]) != actual_matched
+            or set(quality_jd["unmatched_requirement_ids"]) != actual_unmatched
+        ):
+            return 1, ["content quality JD classification does not match jd-match.json"]
+
     handoff = package["handoff"]
     if handoff.get("status") != "approved":
         return 2, ["handoff status is not approved"]
@@ -98,8 +142,42 @@ def validate_workspace(workspace_root: Path) -> tuple[int, list[str]]:
         if block.get("approval_status") != "user_approved":
             errors.append(f"approved_copy.{key} is not user_approved")
         fact_ids = block.get("fact_ids")
-        if not isinstance(fact_ids, list) or not fact_ids:
+        if not _non_empty_string_list(fact_ids):
             errors.append(f"approved_copy.{key} has no fact_ids")
+
+    reviewed_blocks = {
+        block["block_id"]: block
+        for block in payloads["quality"]["blocks"]
+        if isinstance(block, dict) and isinstance(block.get("block_id"), str)
+    }
+    reviewed_block_ids = set(reviewed_blocks)
+    if reviewed_block_ids != set(package["approved_copy"]):
+        errors.append(
+            "content quality reviewed block IDs must exactly match approved_copy keys"
+        )
+    else:
+        for block_id, approved_block in package["approved_copy"].items():
+            if not isinstance(approved_block, dict):
+                continue
+            review = reviewed_blocks[block_id]
+            if review["selected_version"] == "stronger":
+                selected = review["stronger_version"]
+                expected_text = selected["copy"]
+                expected_fact_ids = selected["fact_ids"]
+            else:
+                expected_text = review["recommended_copy"]
+                expected_fact_ids = review["fact_ids"]
+            if approved_block.get("text") != expected_text:
+                errors.append(
+                    f"approved_copy.{block_id}.text does not match approved reviewed copy"
+                )
+            approved_fact_ids = approved_block.get("fact_ids")
+            if not _non_empty_string_list(approved_fact_ids) or set(
+                approved_fact_ids
+            ) != set(expected_fact_ids):
+                errors.append(
+                    f"approved_copy.{block_id}.fact_ids do not match approved reviewed copy"
+                )
 
     manifest = payloads["manifest"]
     if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
