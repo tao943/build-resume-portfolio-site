@@ -24,8 +24,30 @@ STYLE_LENSES = (
     "portfolio modular bento project showcase",
     "portfolio bold immersive experimental typography",
 )
+CATEGORY_DOMAINS = {
+    "structure": ("landing", "style", "product", "ux"),
+    "typography": ("typography", "style", "ux"),
+    "color": ("color", "style", "ux"),
+    "media": ("style", "product", "landing", "ux"),
+    "primary_motion": ("motion", "style", "landing", "ux"),
+    "secondary_motion": ("motion", "react", "ux"),
+}
+DOMAIN_ID_KEYS = {
+    "landing": "Pattern Name",
+    "style": "Style Category",
+    "product": "Product Type",
+    "typography": "Font Pairing Name",
+    "color": "Product Type",
+    "motion": "Category",
+    "react": "Guideline",
+    "ux": "Issue",
+}
 WORD_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9+.#-]{1,30}")
 _VENDOR_CORE: ModuleType | None = None
+
+
+class DesignCatalogInsufficient(RuntimeError):
+    """Raised when a bounded catalog query cannot supply two candidates."""
 
 
 def _load_vendor_core() -> ModuleType:
@@ -135,6 +157,19 @@ def _search(domain: str, query: str, count: int = 8) -> list[dict[str, str]]:
     if "error" in result:
         raise RuntimeError(_string(result["error"]))
     return [dict(item) for item in result.get("results", [])]
+
+
+def _search_logical_domain(
+    domain: str, query: str, count: int = 8
+) -> list[dict[str, str]]:
+    if domain == "motion":
+        return _search("gsap", query, count)
+    if domain == "react":
+        result = _load_vendor_core().search_stack(query, "react", count)
+        if "error" in result:
+            raise RuntimeError(_string(result["error"]))
+        return [dict(item) for item in result.get("results", [])]
+    return _search(domain, query, count)
 
 
 def _source_id(domain: str, row: Mapping[str, object], key: str) -> str:
@@ -280,6 +315,192 @@ def recommend(content_map: Mapping[str, object]) -> dict[str, object]:
     }
 
 
+def _approved_decision_ids(decisions: Mapping[str, object]) -> list[str]:
+    result: list[str] = []
+    for category in CATEGORY_DOMAINS:
+        decision = _mapping(decisions.get(category))
+        approval = _mapping(decision.get("approval"))
+        if approval.get("status") != "user_approved":
+            continue
+        result.extend(
+            _string(item)
+            for item in _sequence(decision.get("selected_candidate_ids"))
+            if _string(item)
+        )
+    return result
+
+
+def _category_query_context(
+    content_map: Mapping[str, object],
+    baseline: Mapping[str, object],
+    decisions: Mapping[str, object],
+) -> dict[str, object]:
+    profile = _content_profile(content_map)
+    return {
+        **profile,
+        "baseline_direction_id": _string(baseline.get("selected_direction_id")),
+        "approved_decision_ids": _approved_decision_ids(decisions),
+    }
+
+
+def build_baseline(
+    content_map: Mapping[str, object],
+    reference_selection: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    report = recommend(content_map)
+    report["mode"] = "baseline"
+    report["report_type"] = "baseline"
+    report["reference_selection_ids"] = _unique_tokens(
+        _safe_tokens(reference_selection or {}), limit=8
+    )
+    return report
+
+
+def _row_label(domain: str, row: Mapping[str, object]) -> str:
+    return _string(row.get(DOMAIN_ID_KEYS[domain]), domain)
+
+
+def _row_notes(row: Mapping[str, object]) -> list[str]:
+    keys = (
+        "Best For",
+        "Description",
+        "Do",
+        "Notes",
+        "Key Considerations",
+        "Effects & Animation",
+        "Mood/Style Keywords",
+        "Guideline",
+        "Performance Notes",
+    )
+    return [_string(row.get(key)) for key in keys if _string(row.get(key))]
+
+
+def _category_candidate(
+    category: str,
+    index: int,
+    rows: Mapping[str, Mapping[str, object]],
+    inherited_ids: Sequence[str],
+) -> dict[str, object]:
+    source_ids = [
+        _source_id(domain, row, DOMAIN_ID_KEYS[domain])
+        for domain, row in rows.items()
+        if row
+    ]
+    labels = [_row_label(domain, row) for domain, row in rows.items() if row]
+    notes = [note for row in rows.values() for note in _row_notes(row)]
+    accessibility = [
+        note
+        for note in notes
+        if any(
+            term in note.casefold()
+            for term in ("access", "contrast", "focus", "motion", "touch")
+        )
+    ][:3]
+    return {
+        "id": f"{category}-{index + 1}",
+        "label": " · ".join(labels[:2]),
+        "fit": notes[:2] or [f"Catalog fit for {category}"],
+        "risks": notes[2:4]
+        or ["Verify content fit and implementation cost"],
+        "tradeoffs": notes[4:6]
+        or ["Balance expression, readability, and cost"],
+        "compatibility": list(inherited_ids),
+        "responsive_fallback": (
+            "Preserve semantic order in a single-column document flow"
+        ),
+        "accessibility_notes": accessibility
+        or ["Verify focus, contrast, touch, and reduced-motion behavior"],
+        "source_ids": source_ids,
+    }
+
+
+def _category_candidates(
+    category: str,
+    query: str,
+    inherited_ids: Sequence[str],
+) -> list[dict[str, object]]:
+    domains = CATEGORY_DOMAINS[category]
+    rows_by_domain = {
+        domain: _search_logical_domain(domain, query, 8) for domain in domains
+    }
+    available = min((len(rows) for rows in rows_by_domain.values()), default=0)
+    return [
+        _category_candidate(
+            category,
+            index,
+            {domain: rows[index] for domain, rows in rows_by_domain.items()},
+            inherited_ids,
+        )
+        for index in range(min(available, 3))
+    ]
+
+
+def search_category(
+    category: str,
+    content_map: Mapping[str, object],
+    baseline: Mapping[str, object],
+    decisions: Mapping[str, object],
+) -> dict[str, object]:
+    if category not in CATEGORY_DOMAINS:
+        raise ValueError(f"unsupported design category: {category}")
+    if not isinstance(content_map, Mapping):
+        raise ValueError("content map must be a JSON object")
+    if not isinstance(baseline, Mapping):
+        raise ValueError("baseline must be a JSON object")
+    if not isinstance(decisions, Mapping):
+        raise ValueError("decisions must be a JSON object")
+
+    context = _category_query_context(content_map, baseline, decisions)
+    inherited_ids = list(context["approved_decision_ids"])
+    full_query = _query_text(
+        context,
+        " ".join(
+            [
+                category,
+                _string(context["baseline_direction_id"]),
+                *inherited_ids,
+            ]
+        ),
+    )
+    candidates = _category_candidates(category, full_query, inherited_ids)
+    if len(candidates) < 2:
+        broad_query = " ".join(
+            filter(
+                None,
+                (
+                    _string(context["role"]),
+                    _string(context["industry"]),
+                    _string(context["content_density"]),
+                    _string(context["media_profile"]),
+                    _string(context["baseline_direction_id"]),
+                    *inherited_ids,
+                    category,
+                ),
+            )
+        )
+        candidates = _category_candidates(category, broad_query, inherited_ids)
+    if len(candidates) < 2:
+        raise DesignCatalogInsufficient(
+            "design_catalog_insufficient: "
+            f"category={category}; domains={','.join(CATEGORY_DOMAINS[category])}; "
+            f"found={len(candidates)}; required=2"
+        )
+    return {
+        "schema_version": 1,
+        "report_type": "category",
+        "category": category,
+        "query_context": context,
+        "domains_searched": list(CATEGORY_DOMAINS[category]),
+        "inherited_decision_ids": inherited_ids,
+        "candidates": candidates,
+        "recommended_candidate_id": candidates[0]["id"],
+        "provenance": {
+            "upstream": UPSTREAM,
+            "catalog_version": validate_catalog(CATALOG_ROOT).catalog_version,
+        },
+    }
+
+
 def enrich(style_brief: Mapping[str, object], content_map: Mapping[str, object]) -> dict[str, object]:
     if not isinstance(style_brief, Mapping):
         raise ValueError("style brief must be a JSON object")
@@ -366,16 +587,48 @@ def main(argv: Sequence[str] | None = None) -> int:
     enrich_parser.add_argument("--input", type=Path, required=True)
     enrich_parser.add_argument("--content-map", type=Path, required=True)
     enrich_parser.add_argument("--output", type=Path, required=True)
+    baseline_parser = subparsers.add_parser("baseline")
+    baseline_parser.add_argument("--content-map", type=Path, required=True)
+    baseline_parser.add_argument("--reference-selection", type=Path)
+    baseline_parser.add_argument("--output", type=Path, required=True)
+    category_parser = subparsers.add_parser("category")
+    category_parser.add_argument(
+        "--category", choices=tuple(CATEGORY_DOMAINS), required=True
+    )
+    category_parser.add_argument("--content-map", type=Path, required=True)
+    category_parser.add_argument("--baseline", type=Path, required=True)
+    category_parser.add_argument("--decisions", type=Path, required=True)
+    category_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "recommend":
             result = recommend(_read_json_object(args.input, "content map"))
-        else:
+        elif args.command == "enrich":
             result = enrich(
                 _read_json_object(args.input, "style brief"),
                 _read_json_object(args.content_map, "content map"),
             )
+        elif args.command == "baseline":
+            reference_selection = (
+                _read_json_object(args.reference_selection, "reference selection")
+                if args.reference_selection
+                else None
+            )
+            result = build_baseline(
+                _read_json_object(args.content_map, "content map"),
+                reference_selection,
+            )
+        else:
+            result = search_category(
+                args.category,
+                _read_json_object(args.content_map, "content map"),
+                _read_json_object(args.baseline, "baseline"),
+                _read_json_object(args.decisions, "decisions"),
+            )
         _atomic_write_json(args.output, result)
+    except DesignCatalogInsufficient as error:
+        print(str(error), file=sys.stderr)
+        return 3
     except ValueError as error:
         print(str(error), file=sys.stderr)
         return 2
