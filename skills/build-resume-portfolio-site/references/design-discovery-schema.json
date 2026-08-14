@@ -4,6 +4,7 @@
   "title": "Database-first portfolio design discovery report",
   "oneOf": [
     { "$ref": "#/$defs/baseline" },
+    { "$ref": "#/$defs/antiTemplateBaseline" },
     { "$ref": "#/$defs/categoryReport" }
   ],
   "$defs": {
@@ -37,10 +38,12 @@
         { "$ref": "#/$defs/queryProfile" },
         {
           "type": "object",
-          "required": ["baseline_direction_id", "approved_decision_ids"],
+          "required": ["baseline_direction_id", "approved_decision_ids", "anti_template_baseline_id", "anti_template_terms"],
           "properties": {
             "baseline_direction_id": { "$ref": "#/$defs/nonEmptyString" },
-            "approved_decision_ids": { "$ref": "#/$defs/stringList" }
+            "approved_decision_ids": { "$ref": "#/$defs/stringList" },
+            "anti_template_baseline_id": { "$ref": "#/$defs/nonEmptyString" },
+            "anti_template_terms": { "$ref": "#/$defs/nonEmptyStringList" }
           }
         }
       ],
@@ -91,7 +94,8 @@
       "type": "object",
       "required": [
         "id", "label", "fit", "risks", "tradeoffs", "compatibility",
-        "responsive_fallback", "accessibility_notes", "source_ids"
+        "responsive_fallback", "accessibility_notes", "source_ids",
+        "anti_template_evaluation"
       ],
       "properties": {
         "id": { "$ref": "#/$defs/nonEmptyString" },
@@ -102,7 +106,18 @@
         "compatibility": { "$ref": "#/$defs/stringList" },
         "responsive_fallback": { "$ref": "#/$defs/nonEmptyString" },
         "accessibility_notes": { "$ref": "#/$defs/nonEmptyStringList" },
-        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+        "source_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "anti_template_evaluation": {
+          "type": "object",
+          "required": ["baseline_rule_ids", "obligation_ids", "relationship", "rationale"],
+          "properties": {
+            "baseline_rule_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+            "obligation_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+            "relationship": { "enum": ["strengthens", "preserves", "conflicts"] },
+            "rationale": { "$ref": "#/$defs/nonEmptyString" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
@@ -132,11 +147,77 @@
       },
       "additionalProperties": false
     },
+    "antiTemplateRule": {
+      "type": "object",
+      "required": ["id", "criterion", "evidence_ids"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "criterion": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "categoryObligation": {
+      "type": "object",
+      "required": ["id", "preserve", "avoid", "evidence_ids"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "preserve": { "$ref": "#/$defs/nonEmptyString" },
+        "avoid": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" }
+      },
+      "additionalProperties": false
+    },
+    "antiTemplateBaseline": {
+      "type": "object",
+      "required": [
+        "schema_version", "id", "report_type", "mode", "status",
+        "query_context", "evidence_ids", "visual_protagonist",
+        "content_form_thesis", "composition_hypothesis",
+        "signature_device_candidates", "template_independence_claim",
+        "anti_template_rules", "category_obligations", "provenance"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "report_type": { "const": "anti_template_baseline" },
+        "mode": { "const": "anti-template-baseline" },
+        "status": { "const": "provisional_unapproved" },
+        "query_context": { "$ref": "#/$defs/queryProfile" },
+        "evidence_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "visual_protagonist": { "$ref": "#/$defs/nonEmptyString" },
+        "content_form_thesis": { "$ref": "#/$defs/nonEmptyString" },
+        "composition_hypothesis": { "$ref": "#/$defs/nonEmptyString" },
+        "signature_device_candidates": { "$ref": "#/$defs/nonEmptyStringList" },
+        "template_independence_claim": { "$ref": "#/$defs/nonEmptyString" },
+        "anti_template_rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/antiTemplateRule" }
+        },
+        "category_obligations": {
+          "type": "object",
+          "required": ["structure", "typography", "color", "media", "primary_motion", "secondary_motion"],
+          "properties": {
+            "structure": { "$ref": "#/$defs/categoryObligation" },
+            "typography": { "$ref": "#/$defs/categoryObligation" },
+            "color": { "$ref": "#/$defs/categoryObligation" },
+            "media": { "$ref": "#/$defs/categoryObligation" },
+            "primary_motion": { "$ref": "#/$defs/categoryObligation" },
+            "secondary_motion": { "$ref": "#/$defs/categoryObligation" }
+          },
+          "additionalProperties": false
+        },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      },
+      "additionalProperties": false
+    },
     "categoryReport": {
       "type": "object",
       "required": [
         "schema_version", "report_type", "category", "query_context",
-        "domains_searched", "inherited_decision_ids", "candidates",
+        "domains_searched", "inherited_decision_ids", "anti_template_baseline_id",
+        "anti_template_rule_ids", "category_obligation_id", "candidates",
         "recommended_candidate_id", "provenance"
       ],
       "properties": {
@@ -148,6 +229,9 @@
         "query_context": { "$ref": "#/$defs/queryContext" },
         "domains_searched": { "$ref": "#/$defs/nonEmptyStringList" },
         "inherited_decision_ids": { "$ref": "#/$defs/stringList" },
+        "anti_template_baseline_id": { "$ref": "#/$defs/nonEmptyString" },
+        "anti_template_rule_ids": { "$ref": "#/$defs/nonEmptyStringList" },
+        "category_obligation_id": { "$ref": "#/$defs/nonEmptyString" },
         "candidates": {
           "type": "array",
           "minItems": 2,

@@ -18,11 +18,12 @@ Enrichment mode additionally accepts an approved `StyleBrief`. Visible
 reference evidence has priority over Catalog aesthetics. Catalog accessibility,
 responsive, privacy, and implementation guardrails remain mandatory.
 
-Approved-discovery mode consumes the validated baseline, all six validated
-category reports, and the approved site design specification. It copies only
-the candidates selected in the conversation, preserving their report paths and
-catalog source IDs. It is the canonical generation input and cannot recommend a
-different direction or reopen a decision.
+Approved-discovery mode consumes the validated database baseline, the validated
+provisional anti-template baseline, all six validated category reports, and the
+approved site design specification. It copies only the candidates selected in
+the conversation, preserving their report paths, catalog source IDs, and
+anti-template evaluations. It is the canonical generation input and cannot
+recommend a different direction or reopen a decision.
 
 ## Candidate rules
 
@@ -40,6 +41,10 @@ different direction or reopen a decision.
   conversational approval, and verify every selected ID exists in that report.
   A skipped media decision retains its validated report and approval but has no
   selected candidate.
+- Require every category report to reference the same anti-template baseline.
+  A conflicting candidate may be presented as an explicit trade-off but cannot
+  be the default recommendation. Aggregation fails when the trace is missing or
+  inconsistent.
 
 ## Persistence
 
@@ -49,9 +54,16 @@ a temporary sibling file and atomic replacement. Preserve
 when a prototype is rejected.
 
 For integrated generation, write one `approved-discovery` aggregate from the
-persisted baseline and category reports. Do not rerun `recommend`; the aggregate
-preserves the exact approved IDs, selected candidate records, discovery-report
-paths, guardrails, React guidance, and catalog provenance.
+persisted baselines and category reports. Do not rerun `recommend`; the
+aggregate preserves the exact approved IDs, selected candidate records,
+discovery-report paths, anti-template evaluations, guardrails, React guidance,
+and catalog provenance.
+
+Set `anti_template_resolution_required: true`. Creative-direction compilation
+must resolve every provisional rule as `adopted`, `refined`, or
+`rejected_by_approved_choice`, and link that resolution to the approved category
+evidence. A provisional hypothesis is never approval and cannot authorize React
+source edits.
 
 ## Privacy
 

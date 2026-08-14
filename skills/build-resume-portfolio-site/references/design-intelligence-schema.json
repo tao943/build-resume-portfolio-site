@@ -26,6 +26,8 @@
     "react_guidelines": {"type": "array", "items": {"type": "string"}},
     "reference_evidence_priority": {"type": "boolean"},
     "baseline": {"type": "object"},
+    "anti_template_baseline": {"type": "object"},
+    "anti_template_resolution_required": {"const": true},
     "approved_decisions": {"$ref": "#/$defs/approvedDecisions"},
     "provenance": {
       "type": "object",
@@ -41,7 +43,7 @@
   "allOf": [
     {
       "if": {"properties": {"mode": {"const": "approved-discovery"}}},
-      "then": {"required": ["baseline", "approved_decisions"]},
+      "then": {"required": ["baseline", "anti_template_baseline", "anti_template_resolution_required", "approved_decisions"]},
       "else": {"required": ["candidate_directions", "selected_direction_id"]}
     }
   ],
@@ -76,7 +78,7 @@
     "discoveryCandidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "label", "fit", "risks", "tradeoffs", "compatibility", "responsive_fallback", "accessibility_notes", "source_ids"],
+      "required": ["id", "label", "fit", "risks", "tradeoffs", "compatibility", "responsive_fallback", "accessibility_notes", "source_ids", "anti_template_evaluation"],
       "properties": {
         "id": {"type": "string", "minLength": 1},
         "label": {"type": "string", "minLength": 1},
@@ -86,7 +88,18 @@
         "compatibility": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "responsive_fallback": {"type": "string", "minLength": 1},
         "accessibility_notes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "anti_template_evaluation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["baseline_rule_ids", "obligation_ids", "relationship", "rationale"],
+          "properties": {
+            "baseline_rule_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+            "obligation_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+            "relationship": {"enum": ["strengthens", "preserves", "conflicts"]},
+            "rationale": {"type": "string", "minLength": 1}
+          }
+        }
       }
     },
     "approvedDecision": {

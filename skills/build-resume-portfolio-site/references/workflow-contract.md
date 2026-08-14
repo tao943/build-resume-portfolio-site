@@ -15,6 +15,8 @@ content_preflight
 -> content_quality_validating
 -> design_baseline_generating
 -> design_baseline_ready
+-> anti_template_baseline_generating
+-> anti_template_baseline_ready
 -> design_structure_querying -> design_structure_selecting
 -> design_typography_querying -> design_typography_selecting
 -> design_color_querying -> design_color_selecting
@@ -39,10 +41,16 @@ decline affects only that category.
 
 `CONTENT_READY` first creates the privacy-safe content map. Baseline generation
 queries the vendored catalog and must validate before structure querying begins.
-Each category querying state consumes the same baseline plus every prior
-approved decision ID, emits a validated source-linked report, and only then
-enters selection. `design_catalog_insufficient` freezes selection and preserves
-the last valid reports; it never permits fabricated fallback candidates.
+Before structure querying, the anti-template baseline transaction turns the
+selected database direction and privacy-safe content profile into provisional,
+evidence-linked hypotheses for the visual protagonist, content-to-form thesis,
+signature devices, template independence, and six category obligations. It
+must validate with `status=provisional_unapproved`; it is not a selection,
+approval, confirmation gate, or source-edit authorization. Each category
+querying state consumes both baselines plus every prior approved decision ID,
+emits a validated source-linked report, and only then enters selection.
+`design_catalog_insufficient` freezes selection and preserves the last valid
+reports; it never permits fabricated fallback candidates.
 
 Missing or invalid content stays inside this Skill. The bundled content phase
 establishes fact/evidence records, optional JD matching, explicit strategy
@@ -54,6 +62,8 @@ unmatched unless the user supplies evidence; they never become generated facts.
 ```text
 content_copy_waiting_confirmation --approve exact wording--> content_quality_validating
 content_quality_validating --quality and handoff validate--> design_baseline_generating
+design_baseline_ready --provisional baseline validates--> anti_template_baseline_ready
+anti_template_baseline_ready --begin structure retrieval--> design_structure_querying
 content_quality_validating --invalid or copy changes--> content_copy_waiting_confirmation
 ```
 
@@ -80,8 +90,9 @@ returns to the strategy gate without automatic fallback.
 The integrated transaction is the first React generation:
 
 1. Restore the empty/new baseline or the last confirmed artifact for regeneration.
-2. Consume approved content, six decisions, readable TODO plan, JSON plan,
-   design intelligence, creative direction, and authorized-media inventory.
+2. Consume approved content, both discovery baselines, six decisions, readable
+   TODO plan, JSON plan, design intelligence, creative direction, and
+   authorized-media inventory.
 3. Compile and validate `reports/design-contract.json`; this internal artifact
    adds no approval gate and must precede the first React source edit.
 4. Edit only `.resume-site-work/site` and obey the validated design contract.
@@ -116,7 +127,9 @@ A core reversal invalidates that decision's downstream evidence, final
 requirements approval, TODO plan approval, and JSON implementation plan.
 The revised category report and every later category report must be regenerated
 in order so their inherited decision IDs remain truthful. Earlier reports remain
-valid and are not rerun.
+valid and are not rerun. A change to content, audience, selected database
+direction, visual protagonist, or content-to-form thesis invalidates the
+anti-template baseline and every category report.
 
 ## Content preflight
 
@@ -159,7 +172,9 @@ or interaction architecture returns to full discovery.
 Build-state schema version `4` remains active. Older confirmed artifacts may use
 a validated bounded fast-change route. Schema-version-2 design reports remain
 readable evidence but do not satisfy new full discovery; schema-version-1 plans
-do not satisfy TODO plan approval. Never fabricate migrated approvals.
+do not satisfy TODO plan approval. An in-progress discovery without a validated
+anti-template baseline must regenerate from `design_baseline_ready`; never
+fabricate the provisional artifact or migrated approvals.
 
 ## Optional APIHz media transaction
 

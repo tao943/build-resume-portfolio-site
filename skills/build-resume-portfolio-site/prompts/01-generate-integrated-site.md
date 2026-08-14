@@ -20,7 +20,10 @@ Read and preserve:
 - `reports/site-todo-plan.md` as the user-approved readable plan;
 - `reports/site-implementation-plan.json` schema version 2;
 - `reports/design-intelligence.json` in `approved-discovery` mode as the
-  database-backed baseline and fixed selected-candidate evidence;
+  database-backed baseline, provisional anti-template baseline, resolved
+  anti-template trace, and fixed selected-candidate evidence;
+- validated `reports/creative-direction.json` as the approved-choice
+  resolution of every provisional anti-template rule;
 - validated `reports/design-contract.json` as observable implementation and
   acceptance commitments;
 - `reports/media-inventory.json` when authorized media exists.
@@ -31,6 +34,9 @@ or treat an unselected candidate as implementation freedom. Open details inside
 the approved candidates remain implementation freedom only when they do not
 contradict the six confirmed decisions, responsive fallbacks, accessibility
 notes, or source-linked constraints.
+Do not treat `provisional_unapproved` as user approval. Implement only the
+anti-template commitments resolved through approved category evidence in the
+validated creative direction and final design contract.
 
 ## Integrated implementation
 

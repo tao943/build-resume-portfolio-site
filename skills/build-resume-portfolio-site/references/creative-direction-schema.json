@@ -14,7 +14,8 @@
     "concept_prototype",
     "responsive_freedom",
     "motion_freedom",
-    "review_questions"
+    "review_questions",
+    "anti_template_resolutions"
   ],
   "properties": {
     "schema_version": {"const": 1},
@@ -125,6 +126,22 @@
       "minItems": 3,
       "items": {"type": "string", "minLength": 1},
       "uniqueItems": true
+    },
+    "anti_template_resolutions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "status", "approved_candidate_ids", "evidence_ids", "rationale"],
+        "properties": {
+          "rule_id": {"type": "string", "minLength": 1},
+          "status": {"enum": ["adopted", "refined", "rejected_by_approved_choice"]},
+          "approved_candidate_ids": {"$ref": "#/$defs/nonEmptyStringList"},
+          "evidence_ids": {"$ref": "#/$defs/nonEmptyStringList"},
+          "rationale": {"type": "string", "minLength": 1}
+        }
+      }
     }
   },
   "$defs": {

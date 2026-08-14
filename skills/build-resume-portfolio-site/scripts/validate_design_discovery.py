@@ -51,6 +51,12 @@ CANDIDATE_LIST_FIELDS = (
     "accessibility_notes",
     "source_ids",
 )
+ANTI_TEMPLATE_TEXT_FIELDS = (
+    "visual_protagonist",
+    "content_form_thesis",
+    "composition_hypothesis",
+    "template_independence_claim",
+)
 
 
 def _string(value: Any) -> bool:
@@ -140,6 +146,17 @@ def _validate_category(payload: dict[str, Any]) -> list[str]:
     if not _strings(inherited):
         errors.append("inherited_decision_ids must be a string list")
 
+    baseline_id = payload.get("anti_template_baseline_id")
+    if not _string(baseline_id):
+        errors.append("category requires anti_template_baseline_id")
+    known_rule_ids = payload.get("anti_template_rule_ids")
+    if not _strings(known_rule_ids, non_empty=True):
+        errors.append("category requires anti_template_rule_ids")
+        known_rule_ids = []
+    obligation_id = payload.get("category_obligation_id")
+    if not _string(obligation_id):
+        errors.append("category requires category_obligation_id")
+
     candidates = payload.get("candidates")
     if not isinstance(candidates, list) or len(candidates) < 2:
         errors.append("category requires at least two candidates")
@@ -167,10 +184,107 @@ def _validate_category(payload: dict[str, Any]) -> list[str]:
             errors.append(f"candidate {candidate_id} compatibility must be a string list")
         if not _string(candidate.get("responsive_fallback")):
             errors.append(f"candidate {candidate_id} requires responsive_fallback")
+        evaluation = candidate.get("anti_template_evaluation")
+        if not isinstance(evaluation, dict):
+            errors.append(
+                f"candidate {candidate_id} requires anti_template_evaluation"
+            )
+            continue
+        candidate_rule_ids = evaluation.get("baseline_rule_ids")
+        if not _strings(candidate_rule_ids, non_empty=True) or not set(
+            candidate_rule_ids
+        ) <= set(known_rule_ids):
+            errors.append(
+                f"candidate {candidate_id} references unknown anti-template rules"
+            )
+        obligation_ids = evaluation.get("obligation_ids")
+        if (
+            not _strings(obligation_ids, non_empty=True)
+            or obligation_id not in obligation_ids
+        ):
+            errors.append(
+                f"candidate {candidate_id} must reference the category obligation"
+            )
+        if evaluation.get("relationship") not in {
+            "strengthens",
+            "preserves",
+            "conflicts",
+        }:
+            errors.append(
+                f"candidate {candidate_id} has invalid anti-template relationship"
+            )
+        if not _string(evaluation.get("rationale")):
+            errors.append(
+                f"candidate {candidate_id} requires anti-template rationale"
+            )
     if len(ids) != len(set(ids)):
         errors.append("candidate IDs must be unique")
     if payload.get("recommended_candidate_id") not in ids:
         errors.append("recommendation must reference a candidate")
+    errors.extend(_validate_provenance(payload.get("provenance")))
+    return errors
+
+
+def _validate_anti_template_baseline(payload: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if payload.get("mode") != "anti-template-baseline":
+        errors.append("anti-template baseline mode must be anti-template-baseline")
+    if payload.get("status") != "provisional_unapproved":
+        errors.append("anti-template baseline must remain provisional_unapproved")
+    if not _string(payload.get("id")):
+        errors.append("anti-template baseline requires an ID")
+    if not _strings(payload.get("evidence_ids"), non_empty=True):
+        errors.append("anti-template baseline requires evidence_ids")
+    for field in ANTI_TEMPLATE_TEXT_FIELDS:
+        if not _string(payload.get(field)):
+            errors.append(f"anti-template baseline requires {field}")
+    if not _strings(payload.get("signature_device_candidates"), non_empty=True):
+        errors.append("anti-template baseline requires signature_device_candidates")
+
+    rules = payload.get("anti_template_rules")
+    if not isinstance(rules, list) or not rules:
+        errors.append("anti-template baseline requires anti_template_rules")
+        rules = []
+    rule_ids: list[str] = []
+    for index, rule in enumerate(rules):
+        if not isinstance(rule, dict):
+            errors.append(f"anti-template rule[{index}] must be an object")
+            continue
+        rule_id = rule.get("id")
+        if not _string(rule_id):
+            errors.append(f"anti-template rule[{index}] requires an ID")
+        else:
+            rule_ids.append(rule_id)
+        if not _string(rule.get("criterion")):
+            errors.append(f"anti-template rule {rule_id or index} requires criterion")
+        if not _strings(rule.get("evidence_ids"), non_empty=True):
+            errors.append(
+                f"anti-template rule {rule_id or index} requires evidence_ids"
+            )
+    if len(rule_ids) != len(set(rule_ids)):
+        errors.append("anti-template rule IDs must be unique")
+
+    obligations = payload.get("category_obligations")
+    if not isinstance(obligations, dict) or set(obligations) != set(EXPECTED_DOMAINS):
+        errors.append("anti-template baseline requires exactly six category obligations")
+        obligations = {}
+    obligation_ids: list[str] = []
+    for category, obligation in obligations.items():
+        if not isinstance(obligation, dict):
+            errors.append(f"category obligation {category} must be an object")
+            continue
+        obligation_id = obligation.get("id")
+        if not _string(obligation_id):
+            errors.append(f"category obligation {category} requires an ID")
+        else:
+            obligation_ids.append(obligation_id)
+        for field in ("preserve", "avoid"):
+            if not _string(obligation.get(field)):
+                errors.append(f"category obligation {category} requires {field}")
+        if not _strings(obligation.get("evidence_ids"), non_empty=True):
+            errors.append(f"category obligation {category} requires evidence_ids")
+    if len(obligation_ids) != len(set(obligation_ids)):
+        errors.append("category obligation IDs must be unique")
     errors.extend(_validate_provenance(payload.get("provenance")))
     return errors
 
@@ -191,10 +305,14 @@ def validate(payload: Any, expected_type: str | None = None) -> list[str]:
     errors.extend(_privacy_errors(query_payload, {"name"}))
     if report_type == "baseline":
         errors.extend(_validate_baseline(payload))
+    elif report_type == "anti_template_baseline":
+        errors.extend(_validate_anti_template_baseline(payload))
     elif report_type == "category":
         errors.extend(_validate_category(payload))
     else:
-        errors.append("report_type must be baseline or category")
+        errors.append(
+            "report_type must be baseline, anti_template_baseline, or category"
+        )
     return errors
 
 
@@ -203,7 +321,10 @@ def main() -> int:
         description="Validate a database-first design discovery report."
     )
     parser.add_argument("report", type=Path)
-    parser.add_argument("--expected-type", choices=("baseline", "category"))
+    parser.add_argument(
+        "--expected-type",
+        choices=("baseline", "anti_template_baseline", "category"),
+    )
     args = parser.parse_args()
     try:
         payload = json.loads(args.report.read_text(encoding="utf-8"))

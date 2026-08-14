@@ -135,17 +135,36 @@ python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
    If a reference selection exists, also pass `--reference-selection`. On
    success set `stage=design_baseline_ready`; on catalog insufficiency stop and
    report the exact missing evidence instead of inventing a direction.
-4. Initialize `reports/design-decisions-working.json`. Before presenting each
-   category, run the matching query below. Every later query reads all prior
-   conversationally approved IDs through `inherited_decision_ids`:
+4. Before the structure question, set
+   `stage=anti_template_baseline_generating`, compile the database baseline into
+   a provisional project-specific visual thesis, and validate it:
 
 ```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category structure --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\structure.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category typography --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\typography.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category color --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\color.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category media --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\media.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category primary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\primary-motion.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\secondary-motion.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" anti-template-baseline `
+  --content-map ".resume-site-work\reports\content-map.json" `
+  --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
+  --output ".resume-site-work\reports\design-discovery\anti-template-baseline.json"
+python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
+  ".resume-site-work\reports\design-discovery\anti-template-baseline.json" `
+  --expected-type anti_template_baseline
+```
+
+   On success set `stage=anti_template_baseline_ready`. This provisional
+   artifact does not select any of the six categories or authorize React source
+   edits. The provisional baseline is not approval.
+   Browser preview and user choice remain per-category approvals.
+5. Initialize `reports/design-decisions-working.json`. Before presenting each
+   category, run the matching query below. Every later query reads all prior
+   conversationally approved IDs through `inherited_decision_ids`, and every
+   query evaluates candidates against the same anti-template baseline:
+
+```powershell
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category structure --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\structure.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category typography --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\typography.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category color --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\color.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category media --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\media.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category primary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\primary-motion.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\secondary-motion.json"
 ```
 
    These are six sequential transactions, not one batch: run only the current
@@ -154,29 +173,29 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category seco
    persist the approved selection before running the next command. A report
    without non-empty `source_ids`, or with fewer than two candidates, cannot be
    presented as database output.
-5. Ask one question at a time and complete these categories in exact order:
+6. Ask one question at a time and complete these categories in exact order:
    overall structure, typography, color system, conditional media treatment,
    primary motion, and secondary motion.
-6. For every enabled category, compare candidates and recommend one with fit,
+7. For every enabled category, compare candidates and recommend one with fit,
    risk, and trade-offs. Then separately ask whether to open the browser
    comparison before requesting the user's choice.
-7. On acceptance, follow `visual-style-preview-contract.md`, create an
+8. On acceptance, follow `visual-style-preview-contract.md`, create an
    independent display-only `gallery.html`, run `launch.cjs --open`, and give
    the user the complete authenticated URL plus the absolute static HTML fallback.
    On decline, record the decline and continue text-only. Previous
    consent never applies to the next category.
-8. After the preview or decline, receive the user's selection and final category
+9. After the preview or decline, receive the user's selection and final category
    confirmation in the conversation. Approval remains in the conversation:
    browser visits, reloads, screenshots, and launch events do not select,
    approve, or advance state.
-9. Media may be skipped only with an explicit reason and conversational
+10. Media may be skipped only with an explicit reason and conversational
    approval. Select exactly one
    primary-motion system. Secondary motion may contain multiple compatible
    effects without a fixed numeric cap.
-10. Summarize all decisions and mandatory responsive, accessibility,
+11. Summarize all decisions and mandatory responsive, accessibility,
    coarse-pointer, fallback, and reduced-motion constraints. Obtain final
    requirements confirmation.
-11. Write schema-version-3
+12. Write schema-version-3
    `.resume-site-work/reports/site-design-spec.json` and validate it:
 
 ```powershell
@@ -242,23 +261,27 @@ integration, preview promotion, snapshots, and publication.
 
 1. Validate `integrated` resources and set `stage=design_contract_compiling`.
 2. Read `prompts/01-generate-integrated-site.md`.
-3. Reuse the discovery-stage `reports/content-map.json`, validated baseline,
-   six category reports, and approved site design spec. Compile them before
-   React generation:
+3. Reuse the discovery-stage `reports/content-map.json`, validated database and
+   anti-template baselines, six category reports, and approved site design spec.
+   Compile them before React generation:
 
 ```powershell
 python "$SKILL_ROOT\scripts\portfolio_design_search.py" aggregate `
   --content-map ".resume-site-work\reports\content-map.json" `
   --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
+  --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" `
   --reports-dir ".resume-site-work\reports\design-discovery" `
   --site-design-spec ".resume-site-work\reports\site-design-spec.json" `
   --output ".resume-site-work\reports\design-intelligence.json"
 ```
 
    The aggregate is fixed approved input, not a new recommendation. Do not rerun
-   generic catalog recommendation here. Translate its selected candidates into
-   `reports/creative-direction.json` and validate it; implementation may resolve
-   open details but cannot reopen or contradict user choices.
+   generic catalog recommendation here. Translate its selected candidates and
+   resolve each provisional anti-template rule into
+   `reports/creative-direction.json`; validate it. Implementation may resolve
+   open details but cannot reopen or contradict user choices. Pass the aggregate
+   through the creative-direction validator's `--design-intelligence` input so
+   every provisional rule has exactly one approved-evidence resolution.
 4. Compile the approved design specification, design intelligence, and creative
    direction into a temporary sibling for `reports/design-contract.json`. Follow
    `references/design-contract.md`, validate the temporary report, and atomically

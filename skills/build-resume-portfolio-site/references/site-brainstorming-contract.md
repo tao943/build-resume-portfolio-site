@@ -8,8 +8,12 @@ visual thesis, interaction architecture, or implementation strategy.
 Inspect approved content, authorized media, references, existing state, and
 confirmed artifacts before asking questions. Build and validate the privacy-safe
 content map, then query the vendored design catalog for a three-direction
-baseline before the first question. Ask one decision-bearing question at a time
-and complete these decisions in order:
+baseline. Before the first question, compile and validate the provisional
+anti-template baseline that states the candidate visual protagonist,
+content-to-form thesis, composition hypothesis, signature devices, template
+independence claim, contextual failure rules, and one obligation per category.
+Ask one decision-bearing question at a time and complete these decisions in
+order:
 
 1. **Overall structure** — composition, hierarchy, navigation, and content density.
 2. **Typography** — type character, scale, rhythm, and reading texture.
@@ -34,8 +38,8 @@ and reduced motion are requirements, not optional style choices.
 For each enabled category:
 
 1. Set `design_<category>_querying`. Query the category's required catalog
-   domains using the baseline plus every prior conversationally approved
-   decision ID. Write and validate
+   domains using the database baseline, the provisional anti-template baseline,
+   and every prior conversationally approved decision ID. Write and validate
    `reports/design-discovery/<category>.json` before showing candidates.
 2. If retrieval returns fewer than two complete candidates or any candidate
    lacks `source_ids`, stop with `design_catalog_insufficient`; do not synthesize
@@ -43,7 +47,10 @@ For each enabled category:
 3. Set `design_<category>_selecting`. Compare two or three materially different candidates, except secondary
    motion may offer more compatible effects without a fixed numeric cap.
 4. Recommend one candidate or compatible set and state fit, risk, trade-offs,
-   compatibility, responsive fallback, accessibility notes, and catalog source IDs.
+   compatibility, responsive fallback, accessibility notes, catalog source IDs,
+   and whether it strengthens, preserves, or conflicts with the anti-template
+   baseline. A conflicting candidate may be shown as a labeled trade-off but
+   cannot be the default recommendation.
 5. Ask whether to open the browser comparison in a separate message before
    requesting a choice for this category.
 6. If accepted, follow `visual-style-preview-contract.md`; if declined, record
@@ -65,15 +72,20 @@ skipped, record the reason and do not offer a media preview.
 The exact domain sequence is structure=`landing/style/product/ux`,
 typography=`typography/style/ux`, color=`color/style/ux`,
 media=`style/product/landing/ux`, primary motion=`motion/style/landing/ux`, and
-secondary motion=`motion/react/ux`. Each query inherits the baseline direction
-and all prior approved decision IDs; it never uses names, contact details, raw
-resume paragraphs, or project secrets.
+secondary motion=`motion/react/ux`. Each query inherits both baselines and all
+prior approved decision IDs; it never uses names, contact details, raw resume
+paragraphs, or project secrets. The provisional baseline has
+`status=provisional_unapproved`: browser activity, preview consent, and the
+artifact itself never select or approve a category.
 
 After final requirements confirmation, write schema-version-3
 `.resume-site-work/reports/site-design-spec.json` and validate it before
 planning. A changed core decision invalidates only downstream category reports,
 final requirements approval, TODO approval, and the implementation plan. Rerun
 those downstream database queries with the revised inherited choices.
+Changing content, audience, the selected baseline direction, visual
+protagonist, or content-to-form thesis invalidates the provisional baseline and
+all six downstream reports.
 
 Do not create or edit React source during discovery or planning.
 
