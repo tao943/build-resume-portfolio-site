@@ -17,7 +17,13 @@ def _candidates(prefix: str, count: int = 2) -> list[dict[str, object]]:
         {
             "id": f"{prefix}-{index}",
             "label": f"{prefix.title()} {index}",
+            "fit": [f"{prefix} fit {index}"],
+            "risks": [f"{prefix} risk {index}"],
             "tradeoffs": [f"{prefix} tradeoff {index}"],
+            "compatibility": [],
+            "responsive_fallback": "Preserve semantic single-column order",
+            "accessibility_notes": ["Preserve focus, contrast, and motion preferences"],
+            "source_ids": [f"style:{prefix}-{index}"],
         }
         for index in range(1, count + 1)
     ]
@@ -43,6 +49,10 @@ def confirmed_decision(
     }
     return {
         "status": "confirmed",
+        "discovery_report": (
+            ".resume-site-work/reports/design-discovery/"
+            f"{category}.json"
+        ),
         "candidates": candidates,
         "recommended_candidate_id": candidates[0]["id"],
         "tentative_selection_ids": [candidates[0]["id"]],
@@ -82,6 +92,11 @@ def valid_spec() -> dict[str, object]:
             "media": {
                 "status": "skipped",
                 "skip_reason": "no authorized media",
+                "approval": {
+                    "status": "user_approved",
+                    "source": "explicit_user",
+                    "channel": "conversation",
+                },
             },
             "primary_motion": confirmed_decision("primary-motion"),
             "secondary_motion": secondary,
@@ -210,6 +225,20 @@ class SiteDesignSpecValidatorTests(unittest.TestCase):
         result = self.run_validator(payload)
         self.assertEqual(result.returncode, 1)
         self.assertIn("schema_version must be 3", result.stdout)
+
+    def test_confirmed_candidate_requires_source_ids(self) -> None:
+        payload = valid_spec()
+        del payload["decisions"]["structure"]["candidates"][0]["source_ids"]
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("structure candidate[0] requires source_ids", result.stdout)
+
+    def test_confirmed_decision_requires_discovery_report(self) -> None:
+        payload = valid_spec()
+        del payload["decisions"]["typography"]["discovery_report"]
+        result = self.run_validator(payload)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("typography requires a discovery report", result.stdout)
 
 
 if __name__ == "__main__":
