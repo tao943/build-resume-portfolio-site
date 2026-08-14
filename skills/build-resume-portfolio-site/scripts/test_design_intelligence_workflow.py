@@ -13,6 +13,12 @@ from validate_skill_resources import STAGE_RESOURCES, validate_resources
 
 
 class DesignIntelligenceWorkflowTests(unittest.TestCase):
+    def test_generation_workflow_does_not_rerun_generic_recommend(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        generation = skill.split("## Generate one integrated website", 1)[1]
+        self.assertNotIn('portfolio_design_search.py" recommend', generation)
+        self.assertIn('portfolio_design_search.py" aggregate', generation)
+
     def test_database_baseline_precedes_first_structure_question(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         baseline = skill.index('portfolio_design_search.py" baseline')

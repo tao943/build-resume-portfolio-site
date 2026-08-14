@@ -72,6 +72,41 @@ def load_search_module():
 
 
 class PortfolioDesignSearchTests(unittest.TestCase):
+    def test_aggregate_preserves_all_approved_category_ids(self) -> None:
+        module = load_search_module()
+        baseline = module.build_baseline(CONTENT_MAP)
+        decisions: dict[str, object] = {}
+        reports: dict[str, object] = {}
+        for category in module.CATEGORY_DOMAINS:
+            report = module.search_category(
+                category, CONTENT_MAP, baseline, decisions
+            )
+            reports[category] = report
+            selected = report["recommended_candidate_id"]
+            decisions[category] = {
+                "selected_candidate_ids": [selected],
+                "discovery_report": (
+                    ".resume-site-work/reports/design-discovery/"
+                    + category.replace("_", "-")
+                    + ".json"
+                ),
+                "approval": {"status": "user_approved"},
+            }
+
+        result = module.aggregate_discovery(
+            CONTENT_MAP, baseline, reports, {"decisions": decisions}
+        )
+
+        self.assertEqual(result["mode"], "approved-discovery")
+        self.assertEqual(
+            set(result["approved_decisions"]), set(module.CATEGORY_DOMAINS)
+        )
+        for category, decision in decisions.items():
+            self.assertEqual(
+                result["approved_decisions"][category]["selected_candidate_ids"],
+                decision["selected_candidate_ids"],
+            )
+
     def test_build_baseline_runs_before_category_search_and_is_privacy_safe(self) -> None:
         module = load_search_module()
 
@@ -127,6 +162,22 @@ class PortfolioDesignSearchTests(unittest.TestCase):
                 module.search_category("color", CONTENT_MAP, baseline, {})
         finally:
             module._search = original
+
+    def test_primary_motion_uses_motion_catalog_vocabulary(self) -> None:
+        module = load_search_module()
+        baseline = module.build_baseline(CONTENT_MAP)
+
+        report = module.search_category(
+            "primary_motion", CONTENT_MAP, baseline, {}
+        )
+
+        self.assertGreaterEqual(len(report["candidates"]), 2)
+        self.assertTrue(
+            all(
+                any(source.startswith("motion:") for source in candidate["source_ids"])
+                for candidate in report["candidates"]
+            )
+        )
 
     def test_recommend_returns_three_distinct_privacy_safe_directions(self) -> None:
         module = load_search_module()
