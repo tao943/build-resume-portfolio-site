@@ -14,9 +14,10 @@
   "decisions": {
     "structure": {
       "status": "confirmed",
+      "discovery_report": ".resume-site-work/reports/design-discovery/structure.json",
       "candidates": [
-        {"id": "editorial", "label": "Editorial", "tradeoffs": ["dense rhythm"]},
-        {"id": "cinematic", "label": "Cinematic", "tradeoffs": ["media dependent"]}
+        {"id": "editorial", "label": "Editorial", "fit": ["content first"], "risks": ["dense rhythm"], "tradeoffs": ["dense rhythm"], "compatibility": [], "responsive_fallback": "single column", "accessibility_notes": ["preserve reading order"], "source_ids": ["style:editorial"]},
+        {"id": "cinematic", "label": "Cinematic", "fit": ["visual narrative"], "risks": ["media dependent"], "tradeoffs": ["media dependent"], "compatibility": [], "responsive_fallback": "single column", "accessibility_notes": ["preserve reading order"], "source_ids": ["style:cinematic"]}
       ],
       "recommended_candidate_id": "editorial",
       "tentative_selection_ids": ["editorial"],
@@ -26,9 +27,10 @@
     },
     "typography": {
       "status": "confirmed",
+      "discovery_report": ".resume-site-work/reports/design-discovery/typography.json",
       "candidates": [
-        {"id": "serif", "label": "Editorial serif", "tradeoffs": ["formal"]},
-        {"id": "sans", "label": "Technical sans", "tradeoffs": ["less expressive"]}
+        {"id": "serif", "label": "Editorial serif", "fit": ["editorial hierarchy"], "risks": ["formal"], "tradeoffs": ["formal"], "compatibility": ["editorial"], "responsive_fallback": "system serif stack", "accessibility_notes": ["readable line length"], "source_ids": ["typography:editorial-serif"]},
+        {"id": "sans", "label": "Technical sans", "fit": ["technical clarity"], "risks": ["less expressive"], "tradeoffs": ["less expressive"], "compatibility": ["editorial"], "responsive_fallback": "system sans stack", "accessibility_notes": ["readable line length"], "source_ids": ["typography:technical-sans"]}
       ],
       "recommended_candidate_id": "serif",
       "tentative_selection_ids": ["serif"],
@@ -38,9 +40,10 @@
     },
     "color": {
       "status": "confirmed",
+      "discovery_report": ".resume-site-work/reports/design-discovery/color.json",
       "candidates": [
-        {"id": "ink-yellow", "label": "Ink and yellow", "tradeoffs": ["strong contrast"]},
-        {"id": "paper-red", "label": "Paper and red", "tradeoffs": ["warmer"]}
+        {"id": "ink-yellow", "label": "Ink and yellow", "fit": ["high contrast"], "risks": ["accent restraint"], "tradeoffs": ["strong contrast"], "compatibility": ["editorial", "serif"], "responsive_fallback": "same semantic tokens", "accessibility_notes": ["verify contrast"], "source_ids": ["color:ink-yellow"]},
+        {"id": "paper-red", "label": "Paper and red", "fit": ["warm editorial"], "risks": ["red semantics"], "tradeoffs": ["warmer"], "compatibility": ["editorial", "serif"], "responsive_fallback": "same semantic tokens", "accessibility_notes": ["verify contrast"], "source_ids": ["color:paper-red"]}
       ],
       "recommended_candidate_id": "ink-yellow",
       "tentative_selection_ids": ["ink-yellow"],
@@ -48,12 +51,13 @@
       "preview": {"offered": true, "response": "declined", "delivery": "not-requested", "artifact": null},
       "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}
     },
-    "media": {"status": "skipped", "skip_reason": "no authorized media"},
+    "media": {"status": "skipped", "skip_reason": "no authorized media", "approval": {"status": "user_approved", "source": "explicit_user", "channel": "conversation"}},
     "primary_motion": {
       "status": "confirmed",
+      "discovery_report": ".resume-site-work/reports/design-discovery/primary-motion.json",
       "candidates": [
-        {"id": "section-reveal", "label": "Section reveal", "tradeoffs": ["restrained"]},
-        {"id": "scroll-narrative", "label": "Scroll narrative", "tradeoffs": ["more controller ownership"]}
+        {"id": "section-reveal", "label": "Section reveal", "fit": ["content pacing"], "risks": ["hidden content"], "tradeoffs": ["restrained"], "compatibility": ["editorial", "serif", "ink-yellow"], "responsive_fallback": "content visible without motion", "accessibility_notes": ["reduced motion"], "source_ids": ["motion:scroll-reveal"]},
+        {"id": "scroll-narrative", "label": "Scroll narrative", "fit": ["project storytelling"], "risks": ["controller complexity"], "tradeoffs": ["more controller ownership"], "compatibility": ["editorial", "serif", "ink-yellow"], "responsive_fallback": "static narrative flow", "accessibility_notes": ["reduced motion"], "source_ids": ["motion:scroll-narrative"]}
       ],
       "recommended_candidate_id": "section-reveal",
       "tentative_selection_ids": ["section-reveal"],
@@ -63,10 +67,11 @@
     },
     "secondary_motion": {
       "status": "confirmed",
+      "discovery_report": ".resume-site-work/reports/design-discovery/secondary-motion.json",
       "candidates": [
-        {"id": "card-feedback", "label": "Card feedback", "tradeoffs": ["pointer specific"]},
-        {"id": "text-reveal", "label": "Text reveal", "tradeoffs": ["timing coordination"]},
-        {"id": "media-parallax", "label": "Media parallax", "tradeoffs": ["mobile fallback"]}
+        {"id": "card-feedback", "label": "Card feedback", "fit": ["interaction feedback"], "risks": ["pointer specific"], "tradeoffs": ["pointer specific"], "compatibility": ["section-reveal"], "responsive_fallback": "static focus state", "accessibility_notes": ["keyboard equivalent"], "source_ids": ["motion:hover-feedback"]},
+        {"id": "text-reveal", "label": "Text reveal", "fit": ["editorial pacing"], "risks": ["timing coordination"], "tradeoffs": ["timing coordination"], "compatibility": ["section-reveal"], "responsive_fallback": "text immediately visible", "accessibility_notes": ["reduced motion"], "source_ids": ["motion:text-reveal"]},
+        {"id": "media-parallax", "label": "Media parallax", "fit": ["depth"], "risks": ["motion sensitivity"], "tradeoffs": ["mobile fallback"], "compatibility": ["section-reveal"], "responsive_fallback": "static media", "accessibility_notes": ["reduced motion"], "source_ids": ["motion:media-parallax"]}
       ],
       "recommended_candidate_id": "card-feedback",
       "tentative_selection_ids": ["card-feedback"],
