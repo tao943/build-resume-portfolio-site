@@ -8,10 +8,12 @@ from unittest.mock import patch
 
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
+SKILL_ROOT = SCRIPTS_DIR.parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import portfolio_design_search as search  # noqa: E402
+import validate_creative_direction as creative_validator  # noqa: E402
 import validate_design_discovery as discovery_validator  # noqa: E402
 
 
@@ -104,6 +106,74 @@ def _approved_design_spec() -> dict[str, object]:
             }
             for category in search.CATEGORY_DOMAINS
         }
+    }
+
+
+def _creative_direction() -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "creative_thesis": "Project decisions become the visible design system.",
+        "experience_priority": ["Project evidence", "Engineering judgment"],
+        "creative_freedom": {
+            "fixed": ["Preserve approved project evidence"],
+            "open": {
+                "composition": ["Asymmetric evidence narrative"],
+                "layout_patterns": ["Persistent project index"],
+                "motion_language": ["Progressive narrative motion"],
+                "visual_metaphor": ["Decision trail"],
+                "surface_treatment": ["High-contrast editorial surfaces"],
+            },
+            "avoid": ["Equal-weight generic cards"],
+        },
+        "layout_candidates": [
+            {
+                "id": "layout-1",
+                "family": "editorial",
+                "fit": "Makes evidence primary.",
+                "risks": ["Needs careful mobile ordering."],
+                "responsive_fallback": "Keep the project index before details.",
+            },
+            {
+                "id": "layout-2",
+                "family": "split narrative",
+                "fit": "Separates decisions from results.",
+                "risks": ["May require more scrolling."],
+                "responsive_fallback": "Stack paired evidence in semantic order.",
+            },
+        ],
+        "selected_candidate_id": "layout-1",
+        "selection_rationale": "Best preserves the approved evidence hierarchy.",
+        "concept_prototype": {
+            "visual_protagonist": "The project decision trail.",
+            "composition_commitment": "An asymmetric indexed narrative.",
+            "type_color_character": "Editorial contrast with restrained accent.",
+            "representative_interaction_state": "Active project index state.",
+            "template_independence_test": "The index remains recognizable without motion.",
+            "deferred_to_later": ["Final media crop details"],
+        },
+        "responsive_freedom": {
+            "must_preserve": ["Project index prominence"],
+            "may_adapt": ["Column count"],
+        },
+        "motion_freedom": {
+            "purpose": "Reveal causal project progression.",
+            "allowed": ["Index-linked transitions"],
+            "avoid": ["Uniform section reveals"],
+        },
+        "review_questions": [
+            "Is the project evidence dominant?",
+            "Does the index remain recognizable?",
+            "Does motion clarify progression?",
+        ],
+        "anti_template_resolutions": [
+            {
+                "rule_id": "anti-template.no-equal-card-grid",
+                "status": "adopted",
+                "approved_candidate_ids": ["structure-1"],
+                "evidence_ids": ["style:editorial-1"],
+                "rationale": "The approved structure uses unequal evidence hierarchy.",
+            }
+        ],
     }
 
 
@@ -238,6 +308,64 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
                 mismatched,
                 _approved_design_spec(),
             )
+
+    def test_skill_generates_anti_template_baseline_before_structure(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8").replace(
+            "\r\n", "\n"
+        )
+        creative_contract = (
+            SKILL_ROOT / "references" / "creative-direction-contract.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertLess(
+            skill.index("anti_template_baseline_generating"),
+            skill.index("--category structure"),
+        )
+        self.assertIn(
+            'anti-template-baseline.json" `\n  --expected-type anti_template_baseline',
+            skill,
+        )
+        self.assertGreaterEqual(skill.count("--anti-template-baseline"), 7)
+        self.assertIn("provisional_unapproved", creative_contract)
+        self.assertIn(
+            "The provisional baseline is not approval", skill
+        )
+        self.assertIn(
+            "Browser preview and user choice remain per-category approvals", skill
+        )
+
+    def test_creative_direction_requires_resolved_anti_template_rules(self) -> None:
+        report = _creative_direction()
+        expected_rules = {"anti-template.no-equal-card-grid"}
+        self.assertEqual(
+            creative_validator.validate(report, expected_rule_ids=expected_rules), []
+        )
+
+        missing = copy.deepcopy(report)
+        del missing["anti_template_resolutions"]
+        self.assertIn(
+            "missing root fields: anti_template_resolutions",
+            creative_validator.validate(missing, expected_rule_ids=expected_rules),
+        )
+
+        invalid = copy.deepcopy(report)
+        invalid["anti_template_resolutions"][0]["status"] = "unreviewed"
+        self.assertIn(
+            "anti_template_resolutions[0] has invalid status",
+            creative_validator.validate(invalid, expected_rule_ids=expected_rules),
+        )
+
+        incomplete = copy.deepcopy(report)
+        self.assertIn(
+            "anti-template resolutions do not match provisional rules",
+            creative_validator.validate(
+                incomplete,
+                expected_rule_ids={
+                    "anti-template.no-equal-card-grid",
+                    "anti-template.signature-remains-visible",
+                },
+            ),
+        )
 
 
 if __name__ == "__main__":

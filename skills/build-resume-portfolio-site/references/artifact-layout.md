@@ -40,6 +40,7 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- design-decisions-working.json # approved IDs accumulated during discovery
 |   |-- design-discovery/
 |   |   |-- baseline.json
+|   |   |-- anti-template-baseline.json # provisional thesis before structure choice
 |   |   |-- structure.json
 |   |   |-- typography.json
 |   |   |-- color.json
@@ -100,12 +101,17 @@ creative-direction report may translate the approved design spec into
 implementation detail but may not contradict it.
 
 `reports/design-discovery/baseline.json` records the three database-backed
-directions created before the first visual question. Each category report
-records its exact catalog domains, privacy-safe query context, inherited prior
-decision IDs, candidates, recommendation, and source IDs. The working decision
-file contains only approved candidate IDs and conversational approval metadata;
-it is the inheritance input for the next category and has no independent
-approval semantics.
+directions created before the first visual question.
+`reports/design-discovery/anti-template-baseline.json` is generated immediately
+afterward and before the structure question. It records evidence-linked,
+project-specific hypotheses and six category obligations with
+`status=provisional_unapproved`. It cannot select a category, replace
+conversation approval, or authorize React edits. Each category report records
+its exact catalog domains, privacy-safe query context, inherited prior decision
+IDs, anti-template evaluation, candidates, recommendation, and source IDs. The
+working decision file contains only approved candidate IDs and conversational
+approval metadata; it is the inheritance input for the next category and has
+no independent approval semantics.
 
 `reports/multi-agent-implementation.json` exists only when the user explicitly
 selects parallel multi-Agent implementation. It records the parallel-wave
@@ -127,6 +133,7 @@ Initialize `build-state.json` with this minimum shape:
   "discovery": {
     "design_discovery": {
       "baseline": "reports/design-discovery/baseline.json",
+      "anti_template_baseline": "reports/design-discovery/anti-template-baseline.json",
       "categories": {
         "structure": "reports/design-discovery/structure.json",
         "typography": "reports/design-discovery/typography.json",

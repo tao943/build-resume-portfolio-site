@@ -21,6 +21,12 @@ Create the report after the approved `site-design-spec.json` and
 `design-intelligence.json`, and before the first React source edit. Translate
 the approved website decision and normalized facts without contradicting its
 fixed constraints, selected family, or avoid rules.
+The approved-discovery input also contains a
+`provisional_unapproved` anti-template baseline. Resolve every provisional rule
+as `adopted`, `refined`, or `rejected_by_approved_choice`, citing the approved
+category candidate and evidence that justifies the resolution. This converts
+early hypotheses into final commitments; it does not reopen a choice or create
+another approval gate.
 Candidate vocabulary may include Kinetic Marquee, Horizontal Pan, Coverflow
 Carousel, Drag-to-Pan Grid, Sticky Stack, Split-Screen Scroll, Hover Image
 Trail, and Parallax Tilt Card, but the vocabulary is a search space rather than
@@ -30,7 +36,8 @@ Write `.resume-site-work/reports/creative-direction.json` and validate it:
 
 ```powershell
 python "$SKILL_ROOT\scripts\validate_creative_direction.py" `
-  ".resume-site-work\reports\creative-direction.json"
+  ".resume-site-work\reports\creative-direction.json" `
+  --design-intelligence ".resume-site-work\reports\design-intelligence.json"
 ```
 
 Continue only on exit `0`.
@@ -59,6 +66,7 @@ design contract must exist before the first React source edit.
 - `concept_prototype`: the first-version visual commitments.
 - responsive and motion freedoms.
 - observable `review_questions`.
+- anti-template baseline resolutions linked to approved category evidence.
 
 Fixed, open, and avoid entries must not overlap. Open entries describe intent
 and possibility, not pixel dimensions, exact grids, JSX, HTML, class names, or

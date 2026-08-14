@@ -20,6 +20,7 @@ ROOT_FIELDS = {
     "responsive_freedom",
     "motion_freedom",
     "review_questions",
+    "anti_template_resolutions",
 }
 OPEN_FIELDS = {
     "composition",
@@ -95,7 +96,9 @@ def _walk(value: Any, path: str = "$") -> list[tuple[str, Any]]:
     return items
 
 
-def validate(report: Any) -> list[str]:
+def validate(
+    report: Any, expected_rule_ids: set[str] | None = None
+) -> list[str]:
     errors: list[str] = []
     if not isinstance(report, dict):
         return ["report must be a JSON object"]
@@ -113,6 +116,59 @@ def validate(report: Any) -> list[str]:
         errors.append("selection_rationale must be a non-empty string")
     if not _string_list(report["review_questions"], minimum=3):
         errors.append("review_questions needs at least three unique entries")
+
+    resolutions = report["anti_template_resolutions"]
+    resolution_rule_ids: set[str] = set()
+    if not isinstance(resolutions, list) or not resolutions:
+        errors.append("anti_template_resolutions must be a non-empty list")
+    else:
+        required_resolution_fields = {
+            "rule_id",
+            "status",
+            "approved_candidate_ids",
+            "evidence_ids",
+            "rationale",
+        }
+        for index, resolution in enumerate(resolutions):
+            if not isinstance(resolution, dict) or set(resolution) != required_resolution_fields:
+                errors.append(
+                    f"anti_template_resolutions[{index}] has invalid fields"
+                )
+                continue
+            rule_id = resolution["rule_id"]
+            if not _string(rule_id):
+                errors.append(
+                    f"anti_template_resolutions[{index}] requires rule_id"
+                )
+            elif rule_id in resolution_rule_ids:
+                errors.append(f"duplicate anti-template resolution: {rule_id}")
+            else:
+                resolution_rule_ids.add(rule_id)
+            if resolution["status"] not in {
+                "adopted",
+                "refined",
+                "rejected_by_approved_choice",
+            }:
+                errors.append(
+                    f"anti_template_resolutions[{index}] has invalid status"
+                )
+            if not _string_list(resolution["approved_candidate_ids"]):
+                errors.append(
+                    f"anti_template_resolutions[{index}] requires approved_candidate_ids"
+                )
+            if not _string_list(resolution["evidence_ids"]):
+                errors.append(
+                    f"anti_template_resolutions[{index}] requires evidence_ids"
+                )
+            if not _string(resolution["rationale"]):
+                errors.append(
+                    f"anti_template_resolutions[{index}] requires rationale"
+                )
+    if (
+        expected_rule_ids is not None
+        and resolution_rule_ids != expected_rule_ids
+    ):
+        errors.append("anti-template resolutions do not match provisional rules")
 
     freedom = report["creative_freedom"]
     fixed: list[str] = []
@@ -259,6 +315,7 @@ def main() -> int:
         description="Validate a portfolio creative-direction report."
     )
     parser.add_argument("report", type=Path)
+    parser.add_argument("--design-intelligence", type=Path)
     args = parser.parse_args()
     try:
         payload = json.loads(args.report.read_text(encoding="utf-8"))
@@ -269,7 +326,27 @@ def main() -> int:
         print(f"ERROR: could not read report: {exc}")
         return 1
 
-    errors = validate(payload)
+    expected_rule_ids: set[str] | None = None
+    if args.design_intelligence:
+        try:
+            design_intelligence = json.loads(
+                args.design_intelligence.read_text(encoding="utf-8")
+            )
+            rules = design_intelligence["anti_template_baseline"][
+                "anti_template_rules"
+            ]
+            expected_rule_ids = {
+                item["id"]
+                for item in rules
+                if isinstance(item, dict) and _string(item.get("id"))
+            }
+            if not expected_rule_ids:
+                raise ValueError("anti-template rules are empty")
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+            print(f"ERROR: could not read design intelligence: {exc}")
+            return 1
+
+    errors = validate(payload, expected_rule_ids=expected_rule_ids)
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

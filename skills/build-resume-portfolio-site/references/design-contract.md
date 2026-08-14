@@ -42,10 +42,14 @@ the last valid preview and snapshot.
 - `motion` defines exactly one primary system plus compatible secondary effects,
   purpose, controller ownership, reduced motion, coarse pointer, and fallbacks.
 - `anti_template_rules` contains contextual, observable failure detectors.
+  Compile them from `creative-direction.anti_template_resolutions`; every
+  provisional rule must be adopted, refined, or explicitly rejected by an
+  approved choice before contract validation.
 - `acceptance_checks` keeps identity fit and aesthetic quality separate and also
   covers accessibility, responsive integrity, and runtime safety.
 - `traceability` links every design section to approved decision IDs and
-  creative-direction paths.
+  creative-direction paths, including the evidence for each anti-template
+  resolution.
 
 Every rule has a stable `rule_id`, criterion, required evidence IDs, and
 severity. Use exact tokens when they implement an approved or accessibility

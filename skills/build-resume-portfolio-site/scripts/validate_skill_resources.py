@@ -52,10 +52,13 @@ VISUAL_COMPANION_FILES = (
 )
 
 AESTHETIC_QUALITY_FILES = (
+    "references/creative-direction-contract.md",
+    "references/creative-direction-schema.json",
     "references/design-contract.md",
     "references/design-contract-schema.json",
     "references/visual-audit-schema.json",
     "scripts/validate_design_contract.py",
+    "scripts/validate_creative_direction.py",
     "scripts/validate_visual_audit.py",
 )
 
@@ -95,6 +98,21 @@ DESIGN_DISCOVERY_FILES = (
     "scripts/validate_design_discovery.py",
     "scripts/portfolio_design_search.py",
 )
+DESIGN_DISCOVERY_REQUIRED_MARKERS = {
+    "references/design-discovery-schema.json": (
+        '"anti_template_baseline"',
+        '"antiTemplateBaseline"',
+    ),
+    "scripts/validate_design_discovery.py": (
+        '"anti_template_baseline"',
+        "_validate_anti_template_baseline",
+    ),
+    "scripts/portfolio_design_search.py": (
+        "build_anti_template_baseline",
+        'add_parser("anti-template-baseline")',
+        '"--anti-template-baseline"',
+    ),
+}
 
 STAGE_RESOURCES = {
     "content-preparation": ("content-workflow",),
@@ -390,6 +408,14 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                         resource_errors.append(
                             f"invalid_design_discovery_file: {relative}"
                         )
+                    for marker in DESIGN_DISCOVERY_REQUIRED_MARKERS.get(
+                        relative, ()
+                    ):
+                        if marker not in text:
+                            resource_errors.append(
+                                "missing_design_discovery_marker: "
+                                f"{relative}: {marker}"
+                            )
                 except (OSError, UnicodeError, json.JSONDecodeError) as error:
                     resource_errors.append(
                         f"invalid_design_discovery_file: {relative}: {error}"
