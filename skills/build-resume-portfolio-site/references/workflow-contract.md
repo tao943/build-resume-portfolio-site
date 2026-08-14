@@ -53,7 +53,7 @@ unmatched unless the user supplies evidence; they never become generated facts.
 
 ```text
 content_copy_waiting_confirmation --approve exact wording--> content_quality_validating
-content_quality_validating --quality and handoff validate--> design_structure_selecting
+content_quality_validating --quality and handoff validate--> design_baseline_generating
 content_quality_validating --invalid or copy changes--> content_copy_waiting_confirmation
 ```
 
