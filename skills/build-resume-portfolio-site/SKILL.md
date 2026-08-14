@@ -107,7 +107,7 @@ python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
 
 ## Full discovery gate
 
-Use the full route for a new site or a change to audience, overall structure,
+Use the full route for a new site or a change to audience, site composition,
 visual thesis, interaction architecture, or implementation strategy.
 
 1. Validate `discovery` resources.
@@ -117,28 +117,66 @@ visual thesis, interaction architecture, or implementation strategy.
    generated `reference-library/contact-sheets`, record chosen evidence in
    `reports/reference-selection.json`, respect `style_only` usage, and render
    local evidence with absolute Markdown image paths.
-3. Ask one question at a time and complete these categories in exact order:
+3. Generate `.resume-site-work/reports/content-map.json` only from normalized
+   facts and approved copy. Keep only the privacy-safe role, industry, content
+   density, media profile, and skill/topic keywords used by design retrieval.
+   Before asking the first design question, set
+   `stage=design_baseline_generating` and run:
+
+```powershell
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" baseline `
+  --content-map ".resume-site-work\reports\content-map.json" `
+  --output ".resume-site-work\reports\design-discovery\baseline.json"
+python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
+  ".resume-site-work\reports\design-discovery\baseline.json" `
+  --expected-type baseline
+```
+
+   If a reference selection exists, also pass `--reference-selection`. On
+   success set `stage=design_baseline_ready`; on catalog insufficiency stop and
+   report the exact missing evidence instead of inventing a direction.
+4. Initialize `reports/design-decisions-working.json`. Before presenting each
+   category, run the matching query below. Every later query reads all prior
+   conversationally approved IDs through `inherited_decision_ids`:
+
+```powershell
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category structure --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\structure.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category typography --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\typography.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category color --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\color.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category media --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\media.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category primary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\primary-motion.json"
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\secondary-motion.json"
+```
+
+   These are six sequential transactions, not one batch: run only the current
+   category command, validate its report with `validate_design_discovery.py
+   --expected-type category`, present only its database-backed candidates, then
+   persist the approved selection before running the next command. A report
+   without non-empty `source_ids`, or with fewer than two candidates, cannot be
+   presented as database output.
+5. Ask one question at a time and complete these categories in exact order:
    overall structure, typography, color system, conditional media treatment,
    primary motion, and secondary motion.
-4. For every enabled category, compare candidates and recommend one with fit,
+6. For every enabled category, compare candidates and recommend one with fit,
    risk, and trade-offs. Then separately ask whether to open the browser
    comparison before requesting the user's choice.
-5. On acceptance, follow `visual-style-preview-contract.md`, create an
+7. On acceptance, follow `visual-style-preview-contract.md`, create an
    independent display-only `gallery.html`, run `launch.cjs --open`, and give
    the user the complete authenticated URL plus the absolute static HTML fallback.
    On decline, record the decline and continue text-only. Previous
    consent never applies to the next category.
-6. After the preview or decline, receive the user's selection and final category
+8. After the preview or decline, receive the user's selection and final category
    confirmation in the conversation. Approval remains in the conversation:
    browser visits, reloads, screenshots, and launch events do not select,
    approve, or advance state.
-7. Media may be skipped only with an explicit reason. Select exactly one
+9. Media may be skipped only with an explicit reason and conversational
+   approval. Select exactly one
    primary-motion system. Secondary motion may contain multiple compatible
    effects without a fixed numeric cap.
-8. Summarize all decisions and mandatory responsive, accessibility,
+10. Summarize all decisions and mandatory responsive, accessibility,
    coarse-pointer, fallback, and reduced-motion constraints. Obtain final
    requirements confirmation.
-9. Write schema-version-3
+11. Write schema-version-3
    `.resume-site-work/reports/site-design-spec.json` and validate it:
 
 ```powershell

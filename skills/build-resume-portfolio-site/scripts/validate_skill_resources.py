@@ -97,6 +97,7 @@ STAGE_RESOURCES = {
         "site-design-spec-schema",
         "visual-style-preview-contract",
         "visual-companion",
+        "design-catalog",
     ),
     "planning": (
         "site-planning-contract",
