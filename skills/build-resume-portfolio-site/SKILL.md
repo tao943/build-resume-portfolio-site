@@ -107,7 +107,7 @@ python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
 
 ## Full discovery gate
 
-Use the full route for a new site or a change to audience, site composition,
+Use the full route for a new site or a change to audience, overall structure,
 visual thesis, interaction architecture, or implementation strategy.
 
 1. Validate `discovery` resources.
@@ -135,7 +135,7 @@ python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
    If a reference selection exists, also pass `--reference-selection`. On
    success set `stage=design_baseline_ready`; on catalog insufficiency stop and
    report the exact missing evidence instead of inventing a direction.
-4. Before the structure question, set
+4. Before delegating structure, set
    `stage=anti_template_baseline_generating`, compile the database baseline into
    a provisional project-specific visual thesis, and validate it:
 
@@ -152,14 +152,14 @@ python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
    On success set `stage=anti_template_baseline_ready`. This provisional
    artifact does not select any of the six categories or authorize React source
    edits. The provisional baseline is not approval.
-   Browser preview and user choice remain per-category approvals.
+   Browser preview and user choice remain approvals for the five user-selected
+   categories. Structure selection itself remains an internal Agent decision.
 5. Initialize `reports/design-decisions-working.json`. Before presenting each
    category, run the matching query below. Every later query reads all prior
    conversationally approved IDs through `inherited_decision_ids`, and every
    query evaluates candidates against the same anti-template baseline:
 
 ```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category structure --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\structure.json"
 python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category typography --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\typography.json"
 python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category color --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\color.json"
 python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category media --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\media.json"
@@ -167,15 +167,16 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category prim
 python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\secondary-motion.json"
 ```
 
-   These are six sequential transactions, not one batch: run only the current
+   These are five sequential transactions, not one batch: run only the current
    category command, validate its report with `validate_design_discovery.py
    --expected-type category`, present only its database-backed candidates, then
    persist the approved selection before running the next command. A report
    without non-empty `source_ids`, or with fewer than two candidates, cannot be
    presented as database output.
-6. Ask one question at a time and complete these categories in exact order:
-   overall structure, typography, color system, conditional media treatment,
-   primary motion, and secondary motion.
+6. Record structure as Agent-delegated with `visual-impact` priority, universal
+   scope, `fit-novelty-wildcard` exploration, and direct generation. Do not ask
+   the user to choose a seed. Ask one question at a time for typography, color
+   system, conditional media treatment, primary motion, and secondary motion.
 7. For every enabled category, compare candidates and recommend one with fit,
    risk, and trade-offs. Then separately ask whether to open the browser
    comparison before requesting the user's choice.
@@ -195,7 +196,7 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category seco
 11. Summarize all decisions and mandatory responsive, accessibility,
    coarse-pointer, fallback, and reduced-motion constraints. Obtain final
    requirements confirmation.
-12. Write schema-version-3
+12. Write schema-version-4
    `.resume-site-work/reports/site-design-spec.json` and validate it:
 
 ```powershell
@@ -262,26 +263,29 @@ integration, preview promotion, snapshots, and publication.
 1. Validate `integrated` resources and set `stage=design_contract_compiling`.
 2. Read `prompts/01-generate-integrated-site.md`.
 3. Reuse the discovery-stage `reports/content-map.json`, validated database and
-   anti-template baselines, six category reports, and approved site design spec.
-   Compile them before React generation:
+   anti-template baselines, five approved category reports, and site design
+   spec. Generate the private structural directions before React generation:
 
 ```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" aggregate `
-  --content-map ".resume-site-work\reports\content-map.json" `
+python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
+  --input ".resume-site-work\reports\content-map.json" `
   --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
   --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" `
-  --reports-dir ".resume-site-work\reports\design-discovery" `
   --site-design-spec ".resume-site-work\reports\site-design-spec.json" `
+  --generation-id "<stable-generation-id>" `
+  --history ".resume-site-work\history\visual-fingerprints.json" `
   --output ".resume-site-work\reports\design-intelligence.json"
 ```
 
-   The aggregate is fixed approved input, not a new recommendation. Do not rerun
-   generic catalog recommendation here. Translate its selected candidates and
-   resolve each provisional anti-template rule into
-   `reports/creative-direction.json`; validate it. Implementation may resolve
-   open details but cannot reopen or contradict user choices. Pass the aggregate
-   through the creative-direction validator's `--design-intelligence` input so
-   every provisional rule has exactly one approved-evidence resolution.
+   Omit `--history` when it does not exist. Privately compare complete `fit`,
+   `novelty`, and `wildcard` directions. The script recommendation is evidence;
+   the Agent records the final direction, rejected reasons, blocking floors,
+   selected topology, variation choices, novelty brief, and a resolution for
+   every provisional anti-template rule in schema-version-2
+   `reports/creative-direction.json`. Validate it with
+   `--design-intelligence`. Do not expose these candidates as a new user gate or
+   implement losing directions. The choice cannot contradict the five approved
+   visual categories.
 4. Compile the approved design specification, design intelligence, and creative
    direction into a temporary sibling for `reports/design-contract.json`. Follow
    `references/design-contract.md`, validate the temporary report, and atomically

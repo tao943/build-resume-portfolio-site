@@ -42,6 +42,13 @@ identity fit. Both reviews cite captures and approved contract paths.
 
 ## Contextual anti-template checks
 
+Apply four layers: global portfolio-cliche rules, the selected seed's
+anti-degeneracy rules, the history-derived novelty brief, and evidence from real
+desktop/mobile screenshots. Explicitly review whether the selected topology is
+still recognizable, the visual protagonist dominates the first viewport, the
+mobile transformation preserves the reading mechanism, and the composition
+works with motion disabled. A palette or font swap is not structural novelty.
+
 Anti-template checks are contract-aware quality detectors, not universal style
 bans. Record a failure only when a treatment conflicts with the approved
 contract, becomes indiscriminate repetition, or causes an observable quality or

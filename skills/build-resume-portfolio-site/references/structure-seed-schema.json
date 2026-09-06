@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "High-impact structure seed catalog",
+  "type": "object",
+  "required": ["schema_version", "catalog_version", "seeds"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "catalog_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "seeds": {"type": "array", "minItems": 8, "maxItems": 12}
+  }
+}

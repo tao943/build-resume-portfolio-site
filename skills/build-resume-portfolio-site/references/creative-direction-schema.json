@@ -18,7 +18,7 @@
     "anti_template_resolutions"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "creative_thesis": {"type": "string", "minLength": 1},
     "experience_priority": {
       "type": "array",
@@ -121,6 +121,33 @@
         "avoid": {"$ref": "#/$defs/nonEmptyStringList"}
       }
     },
+    "structure_selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["origin", "structure_seed_id", "topology", "invariants", "variation_choices", "responsive_transformations", "anti_degeneracy_rules", "motion_slots"],
+      "properties": {
+        "origin": {"enum": ["seed", "wildcard", "reference"]},
+        "structure_seed_id": {"type": ["string", "null"]},
+        "topology": {"type": "object", "minProperties": 1},
+        "invariants": {"$ref": "#/$defs/nonEmptyStringList"},
+        "variation_choices": {"$ref": "#/$defs/nonEmptyStringList"},
+        "responsive_transformations": {"$ref": "#/$defs/nonEmptyStringList"},
+        "anti_degeneracy_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "motion_slots": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
+    "agent_selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["script_recommended_direction_id", "final_direction_id", "pairwise_rationale", "rejected_direction_reasons", "blocking_floors_confirmed", "override_criterion"],
+      "properties": {
+        "script_recommended_direction_id": {"type": "string", "minLength": 1},
+        "final_direction_id": {"type": "string", "minLength": 1},
+        "pairwise_rationale": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "rejected_direction_reasons": {"type": "object", "minProperties": 2},
+        "blocking_floors_confirmed": {"const": true},
+        "override_criterion": {"type": ["string", "null"]}
+      }
+    },
+    "novelty_brief": {"$ref": "#/$defs/nonEmptyStringList"},
     "review_questions": {
       "type": "array",
       "minItems": 3,
@@ -144,6 +171,7 @@
       }
     }
   },
+  "allOf": [{"if": {"properties": {"schema_version": {"const": 2}}}, "then": {"required": ["structure_selection", "agent_selection", "novelty_brief"]}}],
   "$defs": {
     "nonEmptyStringList": {
       "type": "array",

@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 from typing import Sequence
 
 from validate_design_catalog import validate_catalog as validate_design_catalog
+from validate_structure_seeds import validate_catalog as validate_structure_seed_catalog
 
 
 PROMPT_SPECS = {
@@ -54,12 +55,19 @@ VISUAL_COMPANION_FILES = (
 AESTHETIC_QUALITY_FILES = (
     "references/creative-direction-contract.md",
     "references/creative-direction-schema.json",
+    "assets/structure-seeds/catalog.json",
+    "references/structure-seed-contract.md",
+    "references/structure-seed-schema.json",
+    "references/visual-fingerprint-contract.md",
+    "references/visual-fingerprint-schema.json",
     "references/design-contract.md",
     "references/design-contract-schema.json",
     "references/visual-audit-schema.json",
     "scripts/validate_design_contract.py",
     "scripts/validate_creative_direction.py",
     "scripts/validate_visual_audit.py",
+    "scripts/validate_structure_seeds.py",
+    "scripts/structure_seed_selector.py",
 )
 
 CONTENT_WORKFLOW_FILES = (
@@ -368,6 +376,15 @@ def validate_resources(skill_root: Path, mode: str, stage: str | None, workspace
                 for relative in AESTHETIC_QUALITY_FILES
                 if not (skill_root / relative).is_file()
             ]
+            if not resource_errors:
+                try:
+                    seed_value = json.loads((skill_root / "assets/structure-seeds/catalog.json").read_text(encoding="utf-8"))
+                    resource_errors.extend(
+                        f"invalid_structure_seed_catalog: {error}"
+                        for error in validate_structure_seed_catalog(seed_value)
+                    )
+                except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                    resource_errors.append(f"invalid_structure_seed_catalog: {error}")
             resource_ready = not resource_errors
         elif resource_id == "content-workflow":
             resource_errors = []

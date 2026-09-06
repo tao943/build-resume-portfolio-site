@@ -69,8 +69,7 @@ and never advances state. It also never counts as selection. Do not repeatedly
 offer a category after the user declines its preview. When media is explicitly
 skipped, record the reason and do not offer a media preview.
 
-The exact domain sequence is structure=`landing/style/product/ux`,
-typography=`typography/style/ux`, color=`color/style/ux`,
+The user-selected domain sequence is typography=`typography/style/ux`, color=`color/style/ux`,
 media=`style/product/landing/ux`, primary motion=`motion/style/landing/ux`, and
 secondary motion=`motion/react/ux`. Each query inherits both baselines and all
 prior approved decision IDs; it never uses names, contact details, raw resume
@@ -78,7 +77,12 @@ paragraphs, or project secrets. The provisional baseline has
 `status=provisional_unapproved`: browser activity, preview consent, and the
 artifact itself never select or approve a category.
 
-After final requirements confirmation, write schema-version-3
+Structure is recorded as Agent-delegated and is selected privately from two
+feasible seed-derived directions plus one wildcard after planning. It receives
+the same provisional anti-template obligations but adds no structure preview or
+approval gate.
+
+After final requirements confirmation, write schema-version-4
 `.resume-site-work/reports/site-design-spec.json` and validate it before
 planning. A changed core decision invalidates only downstream category reports,
 final requirements approval, TODO approval, and the implementation plan. Rerun

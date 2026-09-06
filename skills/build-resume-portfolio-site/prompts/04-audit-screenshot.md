@@ -18,7 +18,8 @@ Exercise media loading, media ready, and media error behavior;
 verify the Poster fallback remains meaningful. Audit or validation failure must
 preserve the last-valid-preview.
 
-Write schema-version-1 `reports/visual-audit.json` with:
+Write `reports/visual-audit.json` using schema version 1 for a legacy design
+contract or schema version 2 for a structure-seed design contract, with:
 
 - `captures` containing stable evidence IDs and local capture paths;
 - `deterministic_checks` linked to a known `rule_id`, `evidence_refs`, and
@@ -29,6 +30,12 @@ Write schema-version-1 `reports/visual-audit.json` with:
 - `findings` for every observable defect;
 - `interaction_states_checked`; and
 - an `overall_status` at least as severe as every dimension and finding.
+
+For schema-version-2 design contracts, also audit selected structure identity,
+seed anti-degeneracy invariants, visual-protagonist dominance, history-derived
+novelty, mobile topology transformation, and the static/reduced-motion state.
+Treat palette-only novelty and motion-dependent hierarchy as repairable or
+blocking failures according to the design contract.
 
 Identity fit and aesthetic quality are independent. Neither can compensate for
 failure of the other. A numerical score is diagnostic only when its rubric and

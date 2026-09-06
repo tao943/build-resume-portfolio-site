@@ -15,6 +15,16 @@ an open ceiling:
 It is not a template, source-code payload, or component tree.
 It is not a new workflow stage or confirmation gate.
 
+For schema version 2 recommendation workflows, the design-intelligence script
+supplies three complete candidates and only a
+`script_recommended_direction_id`. The Agent owns the final decision in this
+report. Record `structure_selection`, `agent_selection`, and `novelty_brief`,
+then validate with `--design-intelligence`. The final ID must exist and pass
+every blocking floor. An override is valid only with a non-empty semantic
+`override_criterion`. A seed contributes topology, invariants, responsive
+transformations, anti-degeneracy rules, and compatible motion slots—not visual
+styling or concrete animation.
+
 ## Creation
 
 Create the report after the approved `site-design-spec.json` and

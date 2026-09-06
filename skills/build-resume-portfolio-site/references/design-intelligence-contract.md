@@ -1,71 +1,48 @@
-# Design Intelligence Contract
+# Design intelligence contract
 
-## Purpose
+`design-intelligence.json` is a privacy-safe decision artifact, not a template,
+component tree, JSX payload, or source generator.
 
-`design-intelligence.json` is a compact, privacy-safe design decision artifact.
-It guides an LLM that still creates the React + Vite composition directly. It
-is not a template, component tree, JSX payload, HTML payload, or source-code
-generator.
+## Discovery baselines
 
-## Inputs
+Before any visual decision, `baseline` mode queries the vendored design catalog.
+`anti-template-baseline` mode then creates provisional, evidence-linked rules
+for protagonist, content-to-form thesis, signature devices, template
+independence, and category obligations. Its `provisional_unapproved` status is
+never user approval or source-edit authorization.
 
-Recommendation mode may use role/category, industry, project domains,
-technology categories, content counts, media availability, and explicit style
-preferences. It must ignore names, contact details, addresses, raw resume
-paragraphs, and project/client secrets.
+Typography, color, media, primary motion, and secondary motion category reports
+must inherit the same baseline and anti-template IDs. Visible reference evidence
+has priority over catalog aesthetics. Structure is not a user category in new
+schema-v4 workflows.
 
-Enrichment mode additionally accepts an approved `StyleBrief`. Visible
-reference evidence has priority over Catalog aesthetics. Catalog accessibility,
-responsive, privacy, and implementation guardrails remain mandatory.
+## Structural recommendation
 
-Approved-discovery mode consumes the validated database baseline, the validated
-provisional anti-template baseline, all six validated category reports, and the
-approved site design specification. It copies only the candidates selected in
-the conversation, preserving their report paths, catalog source IDs, and
-anti-template evaluations. It is the canonical generation input and cannot
-recommend a different direction or reopen a decision.
+Recommendation mode uses structural counts, content-density bands, authorized
+media classes, delivery constraints, and workspace-local visual history. It
+must not use job title, industry, name, contact data, raw resume text, or secret
+project details to select structure.
 
-## Candidate rules
+Return exactly three coherent first-viewport directions: `fit` uses the highest
+quality feasible seed; `novelty` uses a distinct feasible seed with strong
+historical distance; `wildcard` uses a constrained primitive topology at least
+`0.35` from every named seed. Each direction declares topology, visual world,
+protagonist, energy curve, responsive/static plan, risks, compatible motion
+slots, and blocking floors.
 
-- Return exactly three candidates in recommendation mode.
-- Use three distinct style families.
-- Every pair must differ in at least two of style family, composition, and
-  surface language.
-- Keep color, typography, layout, surface, and media advice coherent inside
-  each candidate.
-- Select the highest-fit candidate initially and retain the other two for
-  explicit retry or user selection.
-- Do not silently invent fixed fallback directions when the Catalog cannot
-  provide three valid candidates.
-- In approved-discovery mode, require every category report, require explicit
-  conversational approval, and verify every selected ID exists in that report.
-  A skipped media decision retains its validated report and approval but has no
-  selected candidate.
-- Require every category report to reference the same anti-template baseline.
-  A conflicting candidate may be presented as an explicit trade-off but cannot
-  be the default recommendation. Aggregation fails when the trace is missing or
-  inconsistent.
+The report embeds the validated database and provisional anti-template
+baselines plus the approved schema-v4 site-design spec. The script writes
+`script_recommended_direction_id` and pairwise metrics only. The Agent makes the
+final choice in `creative-direction.json`, resolves every provisional rule, and
+may override the script only with a recorded semantic criterion after all
+blocking floors pass. This adds no user confirmation gate and cannot contradict
+the five user-approved visual categories.
 
-## Persistence
+Enrichment mode preserves visible reference-evidence priority and emits a
+reference-derived direction without claiming seed provenance.
 
-Write the report to `.resume-site-work/reports/design-intelligence.json` using
-a temporary sibling file and atomic replacement. Preserve
-`selected_direction_id` through later stages. Record attempted direction IDs
-when a prototype is rejected.
+## Persistence and privacy
 
-For integrated generation, write one `approved-discovery` aggregate from the
-persisted baselines and category reports. Do not rerun `recommend`; the
-aggregate preserves the exact approved IDs, selected candidate records,
-discovery-report paths, anti-template evaluations, guardrails, React guidance,
-and catalog provenance.
-
-Set `anti_template_resolution_required: true`. Creative-direction compilation
-must resolve every provisional rule as `adopted`, `refined`, or
-`rejected_by_approved_choice`, and link that resolution to the approved category
-evidence. A provisional hypothesis is never approval and cannot authorize React
-source edits.
-
-## Privacy
-
-The persisted report may contain short design-query terms but never the full
-resume body, name, email, phone, address, full model prompt, or font binaries.
+Write atomically to `.resume-site-work/reports/design-intelligence.json`.
+Persisted output may contain short design-query terms but never a resume body,
+name, email, phone, address, full model prompt, font binary, or project secret.

@@ -16,37 +16,34 @@ Read and preserve:
 
 - `input/normalized-resume.json` as factual evidence;
 - `input/approved-copy.json` as visible-copy authority;
-- `reports/site-design-spec.json` schema version 3;
+- `reports/site-design-spec.json` schema version 4 for new full workflows, or
+  an unmigrated schema-version-3 report under its original approved semantics;
 - `reports/site-todo-plan.md` as the user-approved readable plan;
 - `reports/site-implementation-plan.json` schema version 2;
-- `reports/design-intelligence.json` in `approved-discovery` mode as the
-  database-backed baseline, provisional anti-template baseline, resolved
-  anti-template trace, and fixed selected-candidate evidence;
-- validated `reports/creative-direction.json` as the approved-choice
-  resolution of every provisional anti-template rule;
+- `reports/design-intelligence.json` schema version 2 with private fit,
+  novelty, and wildcard directions, the database/anti-template baselines, and a
+  script recommendation;
+- validated `reports/creative-direction.json` schema version 2 containing the
+  Agent's final selection and semantic rationale;
 - validated `reports/design-contract.json` as observable implementation and
   acceptance commitments;
 - `reports/media-inventory.json` when authorized media exists.
 
 Do not implement when final requirements or TODO plan approval is missing.
-Do not select a different catalog candidate, rerun a generic recommendation,
-or treat an unselected candidate as implementation freedom. Open details inside
-the approved candidates remain implementation freedom only when they do not
-contradict the six confirmed decisions, responsive fallbacks, accessibility
-notes, or source-linked constraints.
-Do not treat `provisional_unapproved` as user approval. Implement only the
-anti-template commitments resolved through approved category evidence in the
-validated creative direction and final design contract.
+Resolve every provisional anti-template rule through approved evidence while
+selecting structure; do not reinterpret the five user-approved visual categories.
 
 ## Integrated implementation
 
-Apply all confirmed decisions in the same source transaction:
+Apply all confirmed/delegated decisions in the same source transaction. Do not
+implement the two losing internal directions:
 
 - overall structure and content hierarchy;
 - typography roles, scale, rhythm, and reading texture;
 - color tokens, contrast, and semantic roles;
 - confirmed media treatment and local fallbacks, or the approved no-media path;
-- exactly one primary-motion system;
+- exactly one signature motion family, planned only after the static
+  composition is selected;
 - every selected compatible secondary effect.
 
 Implement every applicable `design-contract.json` commitment. Preserve its
@@ -55,6 +52,13 @@ surface, primary-motion, compatible-secondary-motion, responsive, and fallback
 rules. Treat `anti_template_rules` and `acceptance_checks` as observable output
 criteria, not optional inspiration. Content fit does not establish aesthetic
 quality, and decorative polish does not establish identity fit.
+
+The structural seed fixes only topology, reading mechanics, invariants,
+responsive transformation, anti-degeneracy rules, and compatible motion slots.
+Choose color, type, component expression, media treatment, visual protagonist,
+surface language, and concrete motion for this generation. Three.js is allowed
+only when it is the protagonist or narrative medium and passes every gate in
+`motion-production-contract.md`; never add it as generic background particles.
 
 Keep resume content in a centralized data module. Use semantic sections for
 hero, experience, projects, strengths, and contact, but let the confirmed

@@ -11,7 +11,19 @@ Stage 4 productionizes motion already justified by the confirmed media direction
 
 ## Required motion plan
 
-Write `reports/motion-plan.json` before source edits. Each item has a unique `id` and declares `source`, `target`, `purpose`, `controllers`, `dependencies`, `conflict_resolution`, `cleanup`, `mobile`, `reduced_motion`, and `fallback`. The plan records shared timelines or explicitly explains an isolated/conflicting controller.
+Choose the winning static composition before motion planning. Consume its
+semantic seed/wildcard motion slots, select at most one signature motion family,
+and reject effects that do not strengthen the selected topology. A motion slot
+is compatibility guidance, never a required effect.
+
+Write `reports/motion-plan.json` before motion source edits. Each item has a unique `id` and declares `source`, `target`, `purpose`, `controllers`, `dependencies`, `conflict_resolution`, `cleanup`, `mobile`, `reduced_motion`, and `fallback`. The plan records shared timelines or explicitly explains an isolated/conflicting controller.
+
+Three.js may be selected only when it is the visual protagonist or a necessary
+narrative medium, never generic background particles. The plan must then include
+a scene thesis, camera language, authorized/generated asset strategy, controller
+ownership, measured performance budget, coarse-pointer behavior, reduced-motion
+replacement, static fallback, and explicit dependency authorization. If any
+gate fails, retain the selected topology and use its CSS/2D/static fallback.
 
 ## Verification and snapshot
 

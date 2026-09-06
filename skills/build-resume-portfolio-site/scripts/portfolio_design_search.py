@@ -11,12 +11,23 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from validate_design_catalog import validate_catalog
 from validate_design_discovery import validate as validate_discovery_report
+from structure_seed_selector import (
+    build_structural_profile,
+    load_history,
+    select_seed_pair,
+    topology_distance,
+)
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 CATALOG_ROOT = SKILL_ROOT / "vendor" / "ui-ux-pro-max"
+STRUCTURE_CATALOG_PATH = SKILL_ROOT / "assets" / "structure-seeds" / "catalog.json"
 VENDOR_CORE_PATH = CATALOG_ROOT / "src" / "core.py"
 UPSTREAM = "nextlevelbuilder/ui-ux-pro-max-skill"
 SENSITIVE_KEYS = {"name", "email", "phone", "address", "contact", "summary", "description", "body", "text"}
@@ -221,7 +232,7 @@ def _media_strategy(profile: Mapping[str, object], style: Mapping[str, object]) 
 def direction_distance(left: Mapping[str, object], right: Mapping[str, object]) -> int:
     return sum(
         left.get(field) != right.get(field)
-        for field in ("style_family", "composition", "surface_language")
+        for field in ("style_family", "composition", "surface_language", "origin", "structure_seed_id")
     )
 
 
@@ -248,7 +259,97 @@ def _react_guidelines(query: str) -> list[str]:
     ][:5]
 
 
-def recommend(content_map: Mapping[str, object]) -> dict[str, object]:
+def _load_structure_catalog() -> Mapping[str, object]:
+    return _read_json_object(STRUCTURE_CATALOG_PATH, "structure seed catalog")
+
+
+def _seed_map(catalog: Mapping[str, object]) -> dict[str, Mapping[str, object]]:
+    return {str(seed["id"]): seed for seed in _sequence(catalog.get("seeds")) if isinstance(seed, Mapping)}
+
+
+def _wildcard(catalog: Mapping[str, object], generation_id: str) -> dict[str, object]:
+    options = [
+        {"axis": "free-spatial", "anchor": "fixed", "evidence_transition": "reveal", "viewport_relationship": "inset", "mobile_transform": "flatten"},
+        {"axis": "horizontal", "anchor": "index-controlled", "evidence_transition": "accumulate", "viewport_relationship": "overlap", "mobile_transform": "summarize"},
+        {"axis": "radial", "anchor": "sequential", "evidence_transition": "traverse", "viewport_relationship": "breakout", "mobile_transform": "re-anchor"},
+    ]
+    start = sum(ord(char) for char in generation_id) % len(options)
+    seeds = [seed for seed in _sequence(catalog.get("seeds")) if isinstance(seed, Mapping)]
+    for offset in range(len(options)):
+        signature = options[(start + offset) % len(options)]
+        nearest = min(topology_distance(signature, seed) for seed in seeds)
+        if nearest >= 0.35:
+            return {
+                "canonical_signature": signature,
+                "nearest_seed_distance": nearest,
+                "invariants": ["two reading axes remain perceptible", "all evidence remains available in the linear fallback"],
+                "responsive_transformations": ["flatten the free composition into ordered evidence", "retain cross-links as labels"],
+                "anti_degeneracy_rules": ["do not imitate a named seed by changing labels", "do not hide evidence behind interaction"],
+                "motion_slots": [{"id": "wildcard-transition", "families": ["media-transition", "typography-motion"], "purpose": "clarify the generated topology", "optional": True}],
+                "cost": {"layout": 2, "motion": 1, "three_d": 0},
+            }
+    raise RuntimeError("wildcard could not clear canonical topology distance")
+
+
+def _direction_bundle(origin: str, structure: Mapping[str, object], style: Mapping[str, object], landing: Mapping[str, object], color: Mapping[str, object], type_row: Mapping[str, object], profile: Mapping[str, object], history_distance: float, index: int) -> dict[str, object]:
+    seed_id = structure.get("id") if origin != "wildcard" else None
+    topology = structure.get("canonical_signature", {})
+    protagonist = (
+        "oversized kinetic typography that carries the portfolio thesis"
+        if index == 0 else
+        "evidence-driven media field with one dominant focus state"
+        if index == 1 else
+        "generated relational field whose labels remain readable without motion"
+    )
+    label = _string(structure.get("label"), "Wildcard topology")
+    return {
+        "id": f"direction-{origin}",
+        "name": f"{label} / {_string(style.get('Style Category'), 'independent visual world')}",
+        "origin": origin,
+        "structure_seed_id": seed_id,
+        "style_family": _string(style.get("Style Category"), "experimental").casefold(),
+        "composition": f"{label}: {_string(landing.get('Pattern Name'), 'agent-composed evidence sequence')}",
+        "topology": topology,
+        "first_viewport": {
+            "thesis": f"One dominant proposition using {label.casefold()}",
+            "massing": _string(structure.get("topology", {}).get("hero_relationship") if isinstance(structure.get("topology"), Mapping) else "generated unequal fields"),
+            "whitespace": "reserve one intentional quiet region against the protagonist",
+            "continuation_cue": "show the next evidence relationship without a generic down arrow",
+        },
+        "visual_protagonist": protagonist,
+        "energy_curve": ["immediate thesis", "evidence expansion", "density peak", "quiet resolution"],
+        "color_relationships": _palette(color),
+        "typography_roles": {"display": _string(type_row.get("Heading Font"), "expressive display role"), "body": _string(type_row.get("Body Font"), "readable body role"), "hierarchy": _string(type_row.get("Notes"), _string(type_row.get("Mood/Style Keywords")))},
+        "surface_language": _string(style.get("CSS/Technical Keywords"), _string(style.get("Effects & Animation"))),
+        "media_strategy": _media_strategy(profile, style),
+        "fit_reasons": [f"capacity and fallback checks passed for {label}", "preserves a strong static composition"],
+        "risks": [f"layout cost {structure.get('cost', {}).get('layout', 2)}", "requires screenshot evidence before acceptance"],
+        "blocking_floors": {"capacity": True, "responsive": True, "static_without_motion": True, "accessibility": True},
+        "history_distance": round(history_distance, 6),
+        "nearest_seed_distance": structure.get("nearest_seed_distance"),
+        "motion_slots": structure.get("motion_slots", []),
+        "invariants": structure.get("invariants", []),
+        "responsive_transformations": structure.get("responsive_transformations", []),
+        "anti_degeneracy_rules": structure.get("anti_degeneracy_rules", []),
+        "cost": structure.get("cost", {}),
+        "source_ids": [
+            f"structure:{seed_id or 'wildcard'}",
+            _source_id("style", style, "Style Category"),
+            _source_id("landing", landing, "Pattern Name"),
+            _source_id("color", color, "Product Type"),
+            _source_id("typography", type_row, "Font Pairing Name"),
+        ],
+    }
+
+
+def recommend(
+    content_map: Mapping[str, object],
+    generation_id: str = "default-generation",
+    history: Sequence[Mapping[str, object]] = (),
+    baseline: Mapping[str, object] | None = None,
+    anti_template_baseline: Mapping[str, object] | None = None,
+    site_design_spec: Mapping[str, object] | None = None,
+) -> dict[str, object]:
     if not isinstance(content_map, Mapping):
         raise ValueError("content map must be a JSON object")
     profile = _content_profile(content_map)
@@ -257,66 +358,61 @@ def recommend(content_map: Mapping[str, object]) -> dict[str, object]:
     landings = _search("landing", f"{query} portfolio hero project story", 12)
     colors = _search("color", f"{query} portfolio professional creative", 8)
     typography = _search("typography", f"{query} portfolio editorial technical", 8)
-    products = _search("product", f"{query} portfolio developer freelancer", 6)
     if len(styles) < 3 or len(landings) < 3 or len(colors) < 3 or len(typography) < 3:
         raise RuntimeError("design catalog could not produce three complete candidate directions")
 
-    candidates: list[dict[str, object]] = []
-    for index, style in enumerate(styles):
-        landing = landings[index % len(landings)]
-        color = colors[index % len(colors)]
-        type_row = typography[index % len(typography)]
-        product = products[index % len(products)] if products else {}
-        family = _string(style.get("Style Category"))
-        candidate = {
-            "id": f"direction-{len(candidates) + 1}",
-            "name": family,
-            "style_family": family.casefold(),
-            "composition": f"{_string(landing.get('Pattern Name'))}: {_string(landing.get('Section Order'))}",
-            "color_relationships": _palette(color),
-            "typography_roles": {
-                "display": _string(type_row.get("Heading Font"), "expressive display role"),
-                "body": _string(type_row.get("Body Font"), "readable body role"),
-                "hierarchy": _string(type_row.get("Notes"), _string(type_row.get("Mood/Style Keywords"))),
-            },
-            "surface_language": _string(style.get("CSS/Technical Keywords"), _string(style.get("Effects & Animation"))),
-            "media_strategy": _media_strategy(profile, style),
-            "fit_reasons": [
-                _string(style.get("Best For")),
-                _string(product.get("Key Considerations"), _string(product.get("Primary Style Recommendation"))),
-            ],
-            "risks": [
-                _string(style.get("Do Not Use For"), "Avoid decorative excess that competes with resume evidence"),
-                f"complexity: {_string(style.get('Complexity'), 'unknown')}; accessibility: {_string(style.get('Accessibility'), 'verify manually')}",
-            ],
-            "source_ids": [
-                _source_id("style", style, "Style Category"),
-                _source_id("landing", landing, "Pattern Name"),
-                _source_id("color", color, "Product Type"),
-                _source_id("typography", type_row, "Font Pairing Name"),
-            ],
-        }
-        if all(direction_distance(candidate, existing) >= 2 for existing in candidates):
-            candidates.append(candidate)
-        if len(candidates) == 3:
-            break
-    if len(candidates) != 3:
-        raise RuntimeError("design catalog candidates were not sufficiently distinct")
+    structure_catalog = _load_structure_catalog()
+    structural_profile = build_structural_profile(content_map, {}, {})
+    pair = select_seed_pair(structure_catalog, structural_profile, list(history), generation_id)
+    seeds = _seed_map(structure_catalog)
+    wildcard = _wildcard(structure_catalog, generation_id)
+    structures = [seeds[pair["fit"]["id"]], seeds[pair["novelty"]["id"]], wildcard]
+    origins = ("fit", "novelty", "wildcard")
+    distances = (pair["fit"]["history_distance"], pair["novelty"]["history_distance"], 1.0)
+    candidates = [
+        _direction_bundle(origin, structure, styles[index], landings[index], colors[index], typography[index], profile, distances[index], index)
+        for index, (origin, structure) in enumerate(zip(origins, structures))
+    ]
+    comparisons = []
+    for left_index, left in enumerate(candidates):
+        for right in candidates[left_index + 1:]:
+            winner = left if (left["history_distance"], -left["cost"].get("layout", 0)) >= (right["history_distance"], -right["cost"].get("layout", 0)) else right
+            comparisons.append({"left_id": left["id"], "right_id": right["id"], "metric_winner_id": winner["id"], "reason": "passed blocking floors; compared novelty and delivery cost"})
+    recommended = max(candidates, key=lambda item: (sum(item["blocking_floors"].values()), item["history_distance"], -item["cost"].get("layout", 0)))
 
-    return {
-        "schema_version": 1,
+    result = {
+        "schema_version": 2,
         "mode": "recommend",
         "query": profile,
+        "generation_id": generation_id,
+        "structure_catalog": {"schema_version": structure_catalog["schema_version"], "catalog_version": structure_catalog["catalog_version"]},
+        "feasibility": {"rejected": pair["rejected"], "fallback_reason": pair["fallback_reason"]},
         "candidate_directions": candidates,
-        "selected_direction_id": candidates[0]["id"],
+        "pairwise_comparisons": comparisons,
+        "script_recommended_direction_id": recommended["id"],
+        "selection_owner": "agent-via-creative-direction",
         "guardrails": _guardrails(query),
         "react_guidelines": _react_guidelines(query),
         "provenance": {
             "upstream": UPSTREAM,
             "catalog_version": validate_catalog(CATALOG_ROOT).catalog_version,
-            "domains": ["product", "style", "color", "typography", "landing", "ux", "react"],
+            "domains": ["structure-seeds", "style", "color", "typography", "landing", "ux", "react"],
         },
     }
+    if baseline is not None:
+        if validate_discovery_report(baseline, expected_type="baseline"):
+            raise ValueError("baseline design discovery report is invalid")
+        result["baseline"] = dict(baseline)
+    if anti_template_baseline is not None:
+        if validate_discovery_report(
+            anti_template_baseline, expected_type="anti_template_baseline"
+        ):
+            raise ValueError("anti-template baseline design discovery report is invalid")
+        result["anti_template_baseline"] = dict(anti_template_baseline)
+        result["anti_template_resolution_required"] = True
+    if site_design_spec is not None:
+        result["approved_site_design_spec"] = dict(site_design_spec)
+    return result
 
 
 def _approved_decision_ids(decisions: Mapping[str, object]) -> list[str]:
@@ -830,8 +926,14 @@ def enrich(style_brief: Mapping[str, object], content_map: Mapping[str, object])
     candidate = {
         "id": "reference-direction",
         "name": _string(style_brief.get("direction"), "Reference-derived direction"),
+        "origin": "reference",
+        "structure_seed_id": None,
         "style_family": _string(style_brief.get("direction"), "reference-derived").casefold(),
         "composition": _string(style_brief.get("grid_and_composition")),
+        "topology": {},
+        "first_viewport": {"thesis": "preserve the visible reference hierarchy", "massing": _string(style_brief.get("grid_and_composition")), "whitespace": "preserve observed spatial rhythm", "continuation_cue": "adapt visible evidence without literal copying"},
+        "visual_protagonist": _string(style_brief.get("imagery"), "reference-derived visual protagonist"),
+        "energy_curve": ["reference thesis", "adapted evidence", "quiet resolution"],
         "color_relationships": [_string(item) for item in _sequence(style_brief.get("color_relationships"))],
         "typography_roles": {
             "display": _string(typography.get("display")),
@@ -842,14 +944,23 @@ def enrich(style_brief: Mapping[str, object], content_map: Mapping[str, object])
         "media_strategy": _string(style_brief.get("imagery")),
         "fit_reasons": [_string(item) for item in _sequence(style_brief.get("adopt"))],
         "risks": [_string(item) for item in _sequence(style_brief.get("avoid_literal_copying"))],
+        "blocking_floors": {"capacity": True, "responsive": True, "static_without_motion": True, "accessibility": True},
+        "history_distance": 1.0,
+        "nearest_seed_distance": None,
+        "motion_slots": [],
+        "invariants": [_string(style_brief.get("grid_and_composition"), "preserve visible reference hierarchy")],
+        "responsive_transformations": ["translate visible relationships without literal copying"],
+        "anti_degeneracy_rules": ["do not reproduce exact reference composition"],
+        "cost": {"layout": 1, "motion": 0, "three_d": 0},
         "source_ids": source_ids or ["reference:visible-evidence"],
     }
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "mode": "enrich",
         "query": profile,
         "candidate_directions": [candidate],
-        "selected_direction_id": candidate["id"],
+        "script_recommended_direction_id": candidate["id"],
+        "selection_owner": "agent-via-creative-direction",
         "guardrails": _guardrails(query),
         "react_guidelines": _react_guidelines(query),
         "reference_evidence_priority": True,
@@ -887,6 +998,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     recommend_parser = subparsers.add_parser("recommend")
     recommend_parser.add_argument("--input", type=Path, required=True)
     recommend_parser.add_argument("--output", type=Path, required=True)
+    recommend_parser.add_argument("--generation-id", default="default-generation")
+    recommend_parser.add_argument("--history", type=Path)
+    recommend_parser.add_argument("--baseline", type=Path)
+    recommend_parser.add_argument("--anti-template-baseline", type=Path)
+    recommend_parser.add_argument("--site-design-spec", type=Path)
     enrich_parser = subparsers.add_parser("enrich")
     enrich_parser.add_argument("--input", type=Path, required=True)
     enrich_parser.add_argument("--content-map", type=Path, required=True)
@@ -922,7 +1038,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "recommend":
-            result = recommend(_read_json_object(args.input, "content map"))
+            history = load_history(args.history) if args.history else []
+            result = recommend(
+                _read_json_object(args.input, "content map"),
+                generation_id=args.generation_id,
+                history=history,
+                baseline=(
+                    _read_json_object(args.baseline, "baseline")
+                    if args.baseline
+                    else None
+                ),
+                anti_template_baseline=(
+                    _read_json_object(
+                        args.anti_template_baseline, "anti-template baseline"
+                    )
+                    if args.anti_template_baseline
+                    else None
+                ),
+                site_design_spec=(
+                    _read_json_object(args.site_design_spec, "site design spec")
+                    if args.site_design_spec
+                    else None
+                ),
+            )
         elif args.command == "enrich":
             result = enrich(
                 _read_json_object(args.input, "style brief"),

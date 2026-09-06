@@ -9,7 +9,21 @@
     "acceptance_checks", "traceability"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
+    "structure": {
+      "type": "object", "additionalProperties": false,
+      "required": ["origin", "seed_id", "topology", "invariants", "variation_choices", "responsive_transformations", "anti_degeneracy_rules", "compatible_motion_slots"],
+      "properties": {
+        "origin": {"enum": ["seed", "wildcard", "reference", "legacy"]},
+        "seed_id": {"type": ["string", "null"]},
+        "topology": {"$ref": "#/$defs/nonEmptyStringList"},
+        "invariants": {"$ref": "#/$defs/nonEmptyStringList"},
+        "variation_choices": {"$ref": "#/$defs/nonEmptyStringList"},
+        "responsive_transformations": {"$ref": "#/$defs/nonEmptyStringList"},
+        "anti_degeneracy_rules": {"$ref": "#/$defs/nonEmptyStringList"},
+        "compatible_motion_slots": {"$ref": "#/$defs/nonEmptyStringList"}
+      }
+    },
     "identity_strategy": {
       "type": "object", "additionalProperties": false,
       "required": ["audience", "narrative_priorities", "density", "content_form_relationships"],
@@ -108,13 +122,14 @@
         "type": "object", "additionalProperties": false,
         "required": ["contract_path", "source_decision_ids", "creative_direction_paths"],
         "properties": {
-          "contract_path": {"enum": ["identity_strategy", "signature", "layout", "typography", "color", "surface", "motion", "anti_template_rules", "acceptance_checks"]},
+          "contract_path": {"enum": ["structure", "identity_strategy", "signature", "layout", "typography", "color", "surface", "motion", "anti_template_rules", "acceptance_checks"]},
           "source_decision_ids": {"$ref": "#/$defs/nonEmptyStringList"},
           "creative_direction_paths": {"$ref": "#/$defs/nonEmptyStringList"}
         }
       }
     }
   },
+  "allOf": [{"if": {"properties": {"schema_version": {"const": 2}}}, "then": {"required": ["structure"]}}],
   "$defs": {
     "nonEmptyString": {"type": "string", "minLength": 1},
     "stringList": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/nonEmptyString"}},
