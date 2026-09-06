@@ -214,6 +214,24 @@ def _validate_media_decision(decision: Any) -> list[str]:
     )
 
 
+def _validate_delegated_structure(decision: Any) -> list[str]:
+    if not isinstance(decision, dict) or decision.get("status") != "agent_delegated":
+        return ["structure must be agent_delegated in schema version 4"]
+    errors: list[str] = []
+    if decision.get("priority") != "visual-impact":
+        errors.append("delegated structure priority must be visual-impact")
+    if decision.get("scope") != "universal":
+        errors.append("delegated structure scope must be universal")
+    if decision.get("exploration_policy") != "fit-novelty-wildcard":
+        errors.append("delegated structure exploration policy is invalid")
+    if decision.get("direct_generation") is not True:
+        errors.append("delegated structure must permit direct generation")
+    if "selected_seed_id" in decision or "selected_candidate_ids" in decision:
+        errors.append("delegated structure must not preselect a seed")
+    errors.extend(_validate_approval(decision.get("approval"), "structure delegation"))
+    return errors
+
+
 def validate(payload: Any) -> list[str]:
     if not isinstance(payload, dict):
         return ["site design spec must be a JSON object"]
@@ -223,8 +241,8 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
-    if payload["schema_version"] != 3:
-        errors.append("schema_version must be 3")
+    if payload["schema_version"] not in {3, 4}:
+        errors.append("schema_version must be 3 or 4")
     if payload["workflow_mode"] not in {"full", "fast-change"}:
         errors.append("workflow_mode must be full or fast-change")
     if (
@@ -248,7 +266,12 @@ def validate(payload: Any) -> list[str]:
         missing = set(DECISION_ORDER) - set(decisions)
         for category in sorted(missing):
             errors.append(f"decisions missing category: {category}")
-        for category in ("structure", "typography", "color"):
+        if "structure" in decisions:
+            if payload["schema_version"] == 4:
+                errors.extend(_validate_delegated_structure(decisions["structure"]))
+            else:
+                errors.extend(_validate_confirmed_decision("structure", decisions["structure"], allow_multiple=False))
+        for category in ("typography", "color"):
             if category in decisions:
                 errors.extend(
                     _validate_confirmed_decision(

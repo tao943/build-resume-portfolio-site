@@ -21,6 +21,7 @@ ROOT_FIELDS = {
     "acceptance_checks",
     "traceability",
 }
+V2_STRUCTURE_FIELDS = {"origin", "seed_id", "topology", "invariants", "variation_choices", "responsive_transformations", "anti_degeneracy_rules", "compatible_motion_slots"}
 DESIGN_SECTIONS = ROOT_FIELDS - {"schema_version", "traceability"}
 SECTION_FIELDS = {
     "identity_strategy": {
@@ -181,16 +182,33 @@ def validate(report: Any) -> list[str]:
     errors: list[str] = []
     if not isinstance(report, dict):
         return ["report must be a JSON object"]
-    if set(report) != ROOT_FIELDS:
-        missing = ROOT_FIELDS - set(report)
-        extra = set(report) - ROOT_FIELDS
+    version = report.get("schema_version")
+    expected_root = ROOT_FIELDS | ({"structure"} if version == 2 else set())
+    if set(report) != expected_root:
+        missing = expected_root - set(report)
+        extra = set(report) - expected_root
         if missing:
             errors.append("missing root fields: " + ", ".join(sorted(missing)))
         if extra:
             errors.append("unknown root fields: " + ", ".join(sorted(extra)))
         return errors
-    if report["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if version not in {1, 2}:
+        errors.append("schema_version must be 1 or 2")
+
+    design_sections = set(DESIGN_SECTIONS)
+    if version == 2:
+        design_sections.add("structure")
+        structure = report["structure"]
+        if not isinstance(structure, dict) or set(structure) != V2_STRUCTURE_FIELDS:
+            errors.append("structure must contain exactly the v2 structure fields")
+        else:
+            if structure.get("origin") not in {"seed", "wildcard", "reference", "legacy"}:
+                errors.append("structure.origin is invalid")
+            if structure.get("origin") == "seed" and not _string(structure.get("seed_id")):
+                errors.append("structure.seed_id is required for seed origin")
+            for field in V2_STRUCTURE_FIELDS - {"origin", "seed_id"}:
+                if not _string_list(structure.get(field)):
+                    errors.append(f"structure.{field} must be a non-empty unique string list")
 
     for section in SECTION_FIELDS:
         errors.extend(_validate_section(report, section))
@@ -240,14 +258,14 @@ def validate(report: Any) -> list[str]:
                 )
                 continue
             contract_path = item["contract_path"]
-            if not _string(contract_path) or contract_path not in DESIGN_SECTIONS:
+            if not _string(contract_path) or contract_path not in design_sections:
                 errors.append(f"unknown contract_path: {contract_path}")
             else:
                 covered.add(contract_path)
             for field in ("source_decision_ids", "creative_direction_paths"):
                 if not _string_list(item[field]):
                     errors.append(f"{path}.{field} must be a non-empty unique string list")
-    for section in sorted(DESIGN_SECTIONS - covered):
+    for section in sorted(design_sections - covered):
         errors.append(f"traceability must cover {section}")
 
     for path, value in _walk(report):

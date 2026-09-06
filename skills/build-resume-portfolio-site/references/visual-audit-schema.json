@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "candidate_id", "design_contract", "repair_round", "captures", "deterministic_checks", "dimension_reviews", "findings", "interaction_states_checked", "overall_status"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "candidate_id": {"$ref": "#/$defs/string"},
     "design_contract": {"$ref": "#/$defs/string"},
     "repair_round": {"type": "integer", "minimum": 0, "maximum": 2},
@@ -21,8 +21,19 @@
     },
     "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
     "interaction_states_checked": {"type": "array", "items": {"$ref": "#/$defs/interaction"}},
-    "overall_status": {"$ref": "#/$defs/status"}
+    "overall_status": {"$ref": "#/$defs/status"},
+    "structure_review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["seed_identity", "visual_protagonist", "mobile_transformation", "static_without_motion", "novelty_not_palette_only", "evidence_refs", "contract_paths"],
+      "properties": {
+        "seed_identity": {"const": "pass"}, "visual_protagonist": {"const": "pass"},
+        "mobile_transformation": {"const": "pass"}, "static_without_motion": {"const": "pass"},
+        "novelty_not_palette_only": {"const": "pass"},
+        "evidence_refs": {"$ref": "#/$defs/stringList"}, "contract_paths": {"$ref": "#/$defs/stringList"}
+      }
+    }
   },
+  "allOf": [{"if": {"properties": {"schema_version": {"const": 2}}}, "then": {"required": ["structure_review"]}}],
   "$defs": {
     "string": {"type": "string", "minLength": 1},
     "stringList": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/string"}},

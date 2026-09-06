@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portfolio visual fingerprint history",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "items"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "items": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/fingerprint"}}
+  },
+  "$defs": {
+    "fingerprint": {
+      "type": "object",
+      "required": ["schema_version", "generation_id", "structure_origin", "reading_axis", "hero_gravity", "visual_protagonist", "project_pattern", "color_strategy", "motion_family", "surface_language"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "generation_id": {"type": "string", "minLength": 1},
+        "structure_origin": {"enum": ["seed", "wildcard", "legacy"]},
+        "structure_seed": {"type": ["string", "null"]},
+        "reading_axis": {"type": "string", "minLength": 1},
+        "hero_gravity": {"type": "string", "minLength": 1},
+        "visual_protagonist": {"type": "string", "minLength": 1},
+        "project_pattern": {"type": "string", "minLength": 1},
+        "color_strategy": {"type": "string", "minLength": 1},
+        "motion_family": {"type": "string", "minLength": 1},
+        "surface_language": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -319,19 +319,19 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
 
         self.assertLess(
             skill.index("anti_template_baseline_generating"),
-            skill.index("--category structure"),
+            skill.index("portfolio_design_search.py\" recommend"),
         )
         self.assertIn(
             'anti-template-baseline.json" `\n  --expected-type anti_template_baseline',
             skill,
         )
-        self.assertGreaterEqual(skill.count("--anti-template-baseline"), 7)
+        self.assertGreaterEqual(skill.count("--anti-template-baseline"), 6)
         self.assertIn("provisional_unapproved", creative_contract)
         self.assertIn(
             "The provisional baseline is not approval", skill
         )
         self.assertIn(
-            "Browser preview and user choice remain per-category approvals", skill
+            "Structure selection itself remains an internal Agent decision", skill
         )
 
     def test_creative_direction_requires_resolved_anti_template_rules(self) -> None:

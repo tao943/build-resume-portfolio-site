@@ -2,6 +2,12 @@
 
 Plan motion before editing the React + Vite source. Record each effect's target, trigger, purpose, duration, easing, and reduced-motion behavior in `motion-plan.json`.
 
+Plan it only after the Agent has selected a complete static composition. Allow
+one signature motion family; supporting effects must share or explicitly
+isolate controller ownership. Seed motion slots declare compatibility only.
+Three.js requires the full gate in `motion-production-contract.md` and cannot be
+added as decorative background ambience.
+
 ## Allowed motion
 
 - Use restrained first-view entrance motion to clarify hierarchy.

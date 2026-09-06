@@ -21,6 +21,7 @@ ROOT_FIELDS = {
     "interaction_states_checked",
     "overall_status",
 }
+STRUCTURE_REVIEW_FIELDS = {"seed_identity", "visual_protagonist", "mobile_transformation", "static_without_motion", "novelty_not_palette_only", "evidence_refs", "contract_paths"}
 CAPTURE_FIELDS = {"id", "viewport", "state", "path"}
 CHECK_FIELDS = {"rule_id", "status", "evidence_refs", "contract_path", "note"}
 REVIEW_FIELDS = {"status", "verdict", "strengths", "evidence_refs", "contract_paths"}
@@ -118,16 +119,18 @@ def validate(audit: Any, design_contract: Any) -> list[str]:
     if not isinstance(audit, dict):
         return ["audit must be a JSON object"]
     errors: list[str] = []
-    if set(audit) != ROOT_FIELDS:
-        missing = ROOT_FIELDS - set(audit)
-        extra = set(audit) - ROOT_FIELDS
+    version = audit.get("schema_version")
+    expected_root = ROOT_FIELDS | ({"structure_review"} if version == 2 else set())
+    if set(audit) != expected_root:
+        missing = expected_root - set(audit)
+        extra = set(audit) - expected_root
         if missing:
             errors.append("missing root fields: " + ", ".join(sorted(missing)))
         if extra:
             errors.append("unknown root fields: " + ", ".join(sorted(extra)))
         return errors
-    if audit["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if version not in {1, 2}:
+        errors.append("schema_version must be 1 or 2")
     for field in ("candidate_id", "design_contract"):
         if not _string(audit[field]):
             errors.append(f"{field} must be a non-empty string")
@@ -155,6 +158,22 @@ def validate(audit: Any, design_contract: Any) -> list[str]:
             viewports.add(item["viewport"])
     for viewport in sorted(REQUIRED_VIEWPORTS - viewports):
         errors.append(f"captures must include {viewport} viewport evidence")
+
+    if version == 2:
+        review = audit["structure_review"]
+        if not isinstance(review, dict) or set(review) != STRUCTURE_REVIEW_FIELDS:
+            errors.append("structure_review must contain exactly the v2 structure evidence fields")
+        else:
+            for field in STRUCTURE_REVIEW_FIELDS - {"evidence_refs", "contract_paths"}:
+                if review.get(field) != "pass":
+                    errors.append(f"structure review must pass: {field}")
+            _validate_evidence(review.get("evidence_refs"), "structure_review.evidence_refs", capture_ids, errors)
+            if not _string_list(review.get("contract_paths")):
+                errors.append("structure_review.contract_paths must be non-empty")
+            else:
+                for contract_path in review["contract_paths"]:
+                    if not _contract_path_exists(design_contract, contract_path):
+                        errors.append(f"unknown contract_path at structure_review: {contract_path}")
 
     known_rules = _known_rules(design_contract)
     required_rank = 0

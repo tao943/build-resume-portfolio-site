@@ -7,6 +7,14 @@ into observable implementation commitments. Content establishes identity fit;
 it does not prove aesthetic quality. This report is internal build input, not a
 new user choice, approval gate, template, component tree, or source payload.
 
+Schema version 2 adds a `structure` section compiled from the Agent-selected
+direction. It carries only origin, seed ID when applicable, semantic topology,
+invariants, per-generation variation choices, responsive transformations,
+anti-degeneracy rules, and compatible motion slots. It must not import palette,
+font, component, asset, or concrete animation choices from the seed. Trace this
+section to `creative-direction.structure_selection`; compile concrete motion
+later and independently.
+
 ## Transaction
 
 Use this exact order after requirements, TODO-plan, and execution-strategy

@@ -17,7 +17,7 @@ content_preflight
 -> design_baseline_ready
 -> anti_template_baseline_generating
 -> anti_template_baseline_ready
--> design_structure_querying -> design_structure_selecting
+-> design_structure_delegated
 -> design_typography_querying -> design_typography_selecting
 -> design_color_querying -> design_color_selecting
 -> design_media_querying -> design_media_selecting OR design_media_skipped
@@ -34,20 +34,26 @@ content_preflight
 -> integrated_waiting_confirmation
 ```
 
-Every enabled design state compares candidates and offers its separate browser
+Every enabled user-selected design state compares candidates and offers its separate browser
 comparison before user selection. An optional independent Gallery supports the
 decision; selection and confirmation happen afterward in the conversation. A
 decline affects only that category.
 
+Schema-version-4 workflows delegate structure to the Agent with visual-impact
+priority and universal scope. After planning, the Agent privately compares
+`fit`, `novelty`, and `wildcard` directions and directly implements the winner.
+Existing schema-version-3 workspaces retain their approved structure unless
+explicitly migrated with `migrate_site_design_spec_v4.py`.
+
 `CONTENT_READY` first creates the privacy-safe content map. Baseline generation
-queries the vendored catalog and must validate before structure querying begins.
-Before structure querying, the anti-template baseline transaction turns the
+queries the vendored catalog and must validate before structure delegation.
+Before structure delegation, the anti-template baseline transaction turns the
 selected database direction and privacy-safe content profile into provisional,
 evidence-linked hypotheses for the visual protagonist, content-to-form thesis,
 signature devices, template independence, and six category obligations. It
 must validate with `status=provisional_unapproved`; it is not a selection,
-approval, confirmation gate, or source-edit authorization. Each category
-querying state consumes both baselines plus every prior approved decision ID,
+approval, confirmation gate, or source-edit authorization. Each user-selected
+category querying state consumes both baselines plus every prior approved decision ID,
 emits a validated source-linked report, and only then enters selection.
 `design_catalog_insufficient` freezes selection and preserves the last valid
 reports; it never permits fabricated fallback candidates.
@@ -63,12 +69,12 @@ unmatched unless the user supplies evidence; they never become generated facts.
 content_copy_waiting_confirmation --approve exact wording--> content_quality_validating
 content_quality_validating --quality and handoff validate--> design_baseline_generating
 design_baseline_ready --provisional baseline validates--> anti_template_baseline_ready
-anti_template_baseline_ready --begin structure retrieval--> design_structure_querying
+anti_template_baseline_ready --delegate structure--> design_structure_delegated
 content_quality_validating --invalid or copy changes--> content_copy_waiting_confirmation
 ```
 
 `requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
-the schema-v3 design specification. Then:
+the schema-v4 design specification. Then:
 
 ```text
 todo_plan_waiting_confirmation --approve--> implementation_strategy_waiting_confirmation
@@ -90,8 +96,9 @@ returns to the strategy gate without automatic fallback.
 The integrated transaction is the first React generation:
 
 1. Restore the empty/new baseline or the last confirmed artifact for regeneration.
-2. Consume approved content, both discovery baselines, six decisions, readable
-   TODO plan, JSON plan, design intelligence, creative direction, and
+2. Consume approved content, both discovery baselines, the delegated structure
+   policy, five approved decisions, readable TODO plan, JSON plan, design
+   intelligence, creative direction, and
    authorized-media inventory.
 3. Compile and validate `reports/design-contract.json`; this internal artifact
    adds no approval gate and must precede the first React source edit.

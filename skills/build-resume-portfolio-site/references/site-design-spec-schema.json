@@ -14,7 +14,7 @@
     "requirements_approval"
   ],
   "properties": {
-    "schema_version": {"const": 3},
+    "schema_version": {"enum": [3, 4]},
     "spec_id": {"type": "string", "minLength": 1},
     "workflow_mode": {"enum": ["full", "fast-change"]},
     "content_revision": {"type": "integer", "minimum": 1},
@@ -40,7 +40,12 @@
         "secondary_motion"
       ],
       "properties": {
-        "structure": {"$ref": "#/$defs/singleDecision"},
+        "structure": {
+          "oneOf": [
+            {"$ref": "#/$defs/singleDecision"},
+            {"$ref": "#/$defs/agentDelegatedStructure"}
+          ]
+        },
         "typography": {"$ref": "#/$defs/singleDecision"},
         "color": {"$ref": "#/$defs/singleDecision"},
         "media": {
@@ -66,7 +71,8 @@
         {"contains": {"const": "media-fallbacks"}}
       ]
     },
-    "requirements_approval": {"$ref": "#/$defs/approval"}
+    "requirements_approval": {"$ref": "#/$defs/approval"},
+    "migration": {"type": ["object", "null"]}
   },
   "$defs": {
     "candidate": {
@@ -216,6 +222,19 @@
       ]
     },
     "multipleDecision": {"$ref": "#/$defs/decisionBase"},
+    "agentDelegatedStructure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "priority", "scope", "exploration_policy", "direct_generation", "approval"],
+      "properties": {
+        "status": {"const": "agent_delegated"},
+        "priority": {"const": "visual-impact"},
+        "scope": {"const": "universal"},
+        "exploration_policy": {"const": "fit-novelty-wildcard"},
+        "direct_generation": {"const": true},
+        "approval": {"$ref": "#/$defs/approval"}
+      }
+    },
     "skippedMedia": {
       "type": "object",
       "additionalProperties": false,

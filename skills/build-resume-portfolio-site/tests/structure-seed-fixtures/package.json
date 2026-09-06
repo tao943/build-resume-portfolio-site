@@ -1,0 +1,1 @@
+{"name":"structure-seed-qa-fixture","private":true,"type":"module","scripts":{"build":"vite build"},"dependencies":{"react":"^18.3.0","react-dom":"^18.3.0"},"devDependencies":{"vite":"^5.4.0"}}

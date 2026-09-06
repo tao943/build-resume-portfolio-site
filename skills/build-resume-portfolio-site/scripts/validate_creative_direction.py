@@ -22,6 +22,7 @@ ROOT_FIELDS = {
     "review_questions",
     "anti_template_resolutions",
 }
+V2_FIELDS = {"structure_selection", "agent_selection", "novelty_brief"}
 OPEN_FIELDS = {
     "composition",
     "layout_patterns",
@@ -97,17 +98,21 @@ def _walk(value: Any, path: str = "$") -> list[tuple[str, Any]]:
 
 
 def validate(
-    report: Any, expected_rule_ids: set[str] | None = None
+    report: Any,
+    expected_rule_ids: set[str] | None = None,
+    design_intelligence: Any = None,
 ) -> list[str]:
     errors: list[str] = []
     if not isinstance(report, dict):
         return ["report must be a JSON object"]
 
-    missing = ROOT_FIELDS - set(report)
+    version = report.get("schema_version")
+    required_fields = ROOT_FIELDS | (V2_FIELDS if version == 2 else set())
+    missing = required_fields - set(report)
     if missing:
         return ["missing root fields: " + ", ".join(sorted(missing))]
-    if report["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if version not in {1, 2}:
+        errors.append("schema_version must be 1 or 2")
     if not _string(report["creative_thesis"]):
         errors.append("creative_thesis must be a non-empty string")
     if not _string_list(report["experience_priority"], minimum=2):
@@ -253,6 +258,47 @@ def validate(
     if not _string(selected) or selected not in candidate_ids:
         errors.append("selected_candidate_id must reference an existing candidate")
 
+    if version == 2:
+        structure = report.get("structure_selection")
+        required_structure = {"origin", "structure_seed_id", "topology", "invariants", "variation_choices", "responsive_transformations", "anti_degeneracy_rules", "motion_slots"}
+        if not isinstance(structure, dict) or set(structure) != required_structure:
+            errors.append("structure_selection must contain the v2 structure fields")
+        else:
+            if structure.get("origin") not in {"seed", "wildcard", "reference"}:
+                errors.append("structure_selection.origin is invalid")
+            for field in ("invariants", "variation_choices", "responsive_transformations", "anti_degeneracy_rules", "motion_slots"):
+                if not _string_list(structure.get(field)):
+                    errors.append(f"structure_selection.{field} must be non-empty")
+            if not isinstance(structure.get("topology"), dict) or not structure["topology"]:
+                errors.append("structure_selection.topology must be non-empty")
+        if not _string_list(report.get("novelty_brief")):
+            errors.append("novelty_brief must be non-empty")
+        agent = report.get("agent_selection")
+        required_agent = {"script_recommended_direction_id", "final_direction_id", "pairwise_rationale", "rejected_direction_reasons", "blocking_floors_confirmed", "override_criterion"}
+        if not isinstance(agent, dict) or set(agent) != required_agent:
+            errors.append("agent_selection must contain the v2 decision fields")
+        elif not isinstance(design_intelligence, dict):
+            errors.append("schema version 2 requires design intelligence")
+        else:
+            directions = design_intelligence.get("candidate_directions", [])
+            known = {item.get("id"): item for item in directions if isinstance(item, dict)}
+            final_id = agent.get("final_direction_id")
+            script_id = design_intelligence.get("script_recommended_direction_id")
+            if final_id != selected or final_id not in known:
+                errors.append("agent final direction must reference the selected design-intelligence candidate")
+            elif not all(known[final_id].get("blocking_floors", {}).values()):
+                errors.append("selected direction must pass all blocking floors")
+            if agent.get("script_recommended_direction_id") != script_id:
+                errors.append("agent selection must preserve script recommendation provenance")
+            if final_id != script_id and not _string(agent.get("override_criterion")):
+                errors.append("agent override requires override_criterion")
+            if agent.get("blocking_floors_confirmed") is not True:
+                errors.append("agent must confirm blocking floors")
+            if not _string_list(agent.get("pairwise_rationale"), minimum=2):
+                errors.append("agent selection needs pairwise rationale")
+            if not isinstance(agent.get("rejected_direction_reasons"), dict) or len(agent["rejected_direction_reasons"]) < 2:
+                errors.append("agent selection needs rejected direction reasons")
+
     concept = report["concept_prototype"]
     if not isinstance(concept, dict) or set(concept) != CONCEPT_FIELDS:
         errors.append(
@@ -327,26 +373,31 @@ def main() -> int:
         return 1
 
     expected_rule_ids: set[str] | None = None
+    intelligence = None
     if args.design_intelligence:
         try:
-            design_intelligence = json.loads(
+            intelligence = json.loads(
                 args.design_intelligence.read_text(encoding="utf-8")
             )
-            rules = design_intelligence["anti_template_baseline"][
-                "anti_template_rules"
-            ]
-            expected_rule_ids = {
-                item["id"]
-                for item in rules
-                if isinstance(item, dict) and _string(item.get("id"))
-            }
-            if not expected_rule_ids:
-                raise ValueError("anti-template rules are empty")
+            anti_template = intelligence.get("anti_template_baseline")
+            if isinstance(anti_template, dict):
+                rules = anti_template.get("anti_template_rules", [])
+                expected_rule_ids = {
+                    item["id"]
+                    for item in rules
+                    if isinstance(item, dict) and _string(item.get("id"))
+                }
+                if not expected_rule_ids:
+                    raise ValueError("anti-template rules are empty")
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
             print(f"ERROR: could not read design intelligence: {exc}")
             return 1
 
-    errors = validate(payload, expected_rule_ids=expected_rule_ids)
+    errors = validate(
+        payload,
+        expected_rule_ids=expected_rule_ids,
+        design_intelligence=intelligence,
+    )
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

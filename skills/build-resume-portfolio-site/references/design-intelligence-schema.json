@@ -1,37 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://resume-site-agent.local/schemas/design-intelligence-v1.json",
+  "$id": "https://resume-site-agent.local/schemas/design-intelligence-v2.json",
   "title": "Portfolio design intelligence",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "mode", "query", "guardrails", "react_guidelines", "provenance"],
+  "required": ["schema_version", "mode", "query", "candidate_directions", "script_recommended_direction_id", "selection_owner", "guardrails", "react_guidelines", "provenance"],
   "properties": {
-    "schema_version": {"const": 1},
-    "mode": {"enum": ["recommend", "enrich", "approved-discovery"]},
-    "query": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["role", "industry", "content_density", "media_profile", "keywords"],
-      "properties": {
-        "role": {"type": "string"},
-        "industry": {"type": "string"},
-        "content_density": {"enum": ["low", "medium", "high"]},
-        "media_profile": {"enum": ["none", "limited", "rich"]},
-        "keywords": {"type": "array", "maxItems": 24, "items": {"type": "string"}}
-      }
-    },
-    "candidate_directions": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"$ref": "#/$defs/direction"}},
-    "selected_direction_id": {"type": "string"},
-    "guardrails": {"type": "array", "items": {"type": "string"}},
-    "react_guidelines": {"type": "array", "items": {"type": "string"}},
-    "reference_evidence_priority": {"type": "boolean"},
+    "schema_version": {"const": 2},
+    "mode": {"enum": ["recommend", "enrich"]},
+    "generation_id": {"type": "string"},
+    "query": {"type": "object"},
+    "structure_catalog": {"type": "object"},
+    "feasibility": {"type": "object"},
     "baseline": {"type": "object"},
     "anti_template_baseline": {"type": "object"},
     "anti_template_resolution_required": {"const": true},
-    "approved_decisions": {"$ref": "#/$defs/approvedDecisions"},
+    "approved_site_design_spec": {"type": "object"},
+    "candidate_directions": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"$ref": "#/$defs/direction"}},
+    "pairwise_comparisons": {"type": "array", "items": {"type": "object"}},
+    "script_recommended_direction_id": {"type": "string", "minLength": 1},
+    "selection_owner": {"const": "agent-via-creative-direction"},
+    "guardrails": {"type": "array", "items": {"type": "string"}},
+    "react_guidelines": {"type": "array", "items": {"type": "string"}},
+    "reference_evidence_priority": {"type": "boolean"},
     "provenance": {
-      "type": "object",
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": false,
       "required": ["upstream", "catalog_version", "domains"],
       "properties": {
         "upstream": {"const": "nextlevelbuilder/ui-ux-pro-max-skill"},
@@ -40,90 +33,27 @@
       }
     }
   },
-  "allOf": [
-    {
-      "if": {"properties": {"mode": {"const": "approved-discovery"}}},
-      "then": {"required": ["baseline", "anti_template_baseline", "anti_template_resolution_required", "approved_decisions"]},
-      "else": {"required": ["candidate_directions", "selected_direction_id"]}
-    }
-  ],
   "$defs": {
     "direction": {
       "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "name", "style_family", "composition", "color_relationships", "typography_roles", "surface_language", "media_strategy", "fit_reasons", "risks", "source_ids"],
+      "required": ["id", "name", "origin", "structure_seed_id", "style_family", "composition", "topology", "first_viewport", "visual_protagonist", "energy_curve", "color_relationships", "typography_roles", "surface_language", "media_strategy", "fit_reasons", "risks", "blocking_floors", "history_distance", "motion_slots", "invariants", "responsive_transformations", "anti_degeneracy_rules", "cost", "source_ids"],
       "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string"},
-        "style_family": {"type": "string"},
-        "composition": {"type": "string"},
+        "id": {"type": "string", "minLength": 1}, "name": {"type": "string"},
+        "origin": {"enum": ["fit", "novelty", "wildcard", "reference"]},
+        "structure_seed_id": {"type": ["string", "null"]}, "style_family": {"type": "string"},
+        "composition": {"type": "string"}, "topology": {"type": "object"},
+        "first_viewport": {"type": "object"}, "visual_protagonist": {"type": "string"},
+        "energy_curve": {"type": "array", "minItems": 1, "items": {"type": "string"}},
         "color_relationships": {"type": "array", "items": {"type": "string"}},
-        "typography_roles": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["display", "body", "hierarchy"],
-          "properties": {
-            "display": {"type": "string"},
-            "body": {"type": "string"},
-            "hierarchy": {"type": "string"}
-          }
-        },
-        "surface_language": {"type": "string"},
-        "media_strategy": {"type": "string"},
-        "fit_reasons": {"type": "array", "items": {"type": "string"}},
-        "risks": {"type": "array", "items": {"type": "string"}},
-        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
-      }
-    },
-    "discoveryCandidate": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "label", "fit", "risks", "tradeoffs", "compatibility", "responsive_fallback", "accessibility_notes", "source_ids", "anti_template_evaluation"],
-      "properties": {
-        "id": {"type": "string", "minLength": 1},
-        "label": {"type": "string", "minLength": 1},
-        "fit": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "risks": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "tradeoffs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "compatibility": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "responsive_fallback": {"type": "string", "minLength": 1},
-        "accessibility_notes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "anti_template_evaluation": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["baseline_rule_ids", "obligation_ids", "relationship", "rationale"],
-          "properties": {
-            "baseline_rule_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-            "obligation_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-            "relationship": {"enum": ["strengthens", "preserves", "conflicts"]},
-            "rationale": {"type": "string", "minLength": 1}
-          }
-        }
-      }
-    },
-    "approvedDecision": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["status", "selected_candidate_ids", "selected_candidates", "discovery_report"],
-      "properties": {
-        "status": {"enum": ["confirmed", "skipped"]},
-        "selected_candidate_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "selected_candidates": {"type": "array", "items": {"$ref": "#/$defs/discoveryCandidate"}},
-        "discovery_report": {"type": "string", "pattern": "^\\.resume-site-work/reports/design-discovery/(structure|typography|color|media|primary-motion|secondary-motion)\\.json$"}
-      }
-    },
-    "approvedDecisions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["structure", "typography", "color", "media", "primary_motion", "secondary_motion"],
-      "properties": {
-        "structure": {"$ref": "#/$defs/approvedDecision"},
-        "typography": {"$ref": "#/$defs/approvedDecision"},
-        "color": {"$ref": "#/$defs/approvedDecision"},
-        "media": {"$ref": "#/$defs/approvedDecision"},
-        "primary_motion": {"$ref": "#/$defs/approvedDecision"},
-        "secondary_motion": {"$ref": "#/$defs/approvedDecision"}
+        "typography_roles": {"type": "object"}, "surface_language": {"type": "string"},
+        "media_strategy": {"type": "string"}, "fit_reasons": {"type": "array", "items": {"type": "string"}},
+        "risks": {"type": "array", "items": {"type": "string"}}, "blocking_floors": {"type": "object"},
+        "history_distance": {"type": "number", "minimum": 0, "maximum": 1},
+        "nearest_seed_distance": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "motion_slots": {"type": "array"}, "invariants": {"type": "array", "items": {"type": "string"}},
+        "responsive_transformations": {"type": "array", "items": {"type": "string"}},
+        "anti_degeneracy_rules": {"type": "array", "items": {"type": "string"}},
+        "cost": {"type": "object"}, "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
       }
     }
   }

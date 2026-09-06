@@ -26,6 +26,8 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- desktop.png
 |   |-- tablet.png
 |   `-- mobile.png
+|-- history/
+|   `-- visual-fingerprints.json # accepted outputs only; idempotent by generation_id
 |-- reports/
 |   |-- workflow-route.json
 |   |-- site-design-spec.json     # explicit product/experience approval
@@ -55,6 +57,7 @@ Create all generated material under `.resume-site-work/` in the active user work
 |   |-- media-inventory.json       # trusted authorized-media facts and stable IDs
 |   |-- media-art-direction.json
 |   |-- visual-audit.json
+|   |-- visual-fingerprint.json   # winning result before accepted history write
 |   |-- capture-report.json
 |   `-- motion-plan.json
 |-- agent-reports/                # bounded task handoffs; no approval semantics
@@ -83,14 +86,22 @@ edit. It carries the creative thesis,
 review questions. It is not source code, a component tree, a new stage, or a
 confirmation artifact.
 
+Design intelligence schema v2 contains the private `fit`, `novelty`, and
+`wildcard` first-viewport directions plus a script recommendation. The final
+Agent decision lives in creative direction. Workspace-local visual history is
+written atomically only after final audit acceptance and is idempotent by
+`generation_id`.
+
 `reports/design-contract.json` is compiled from the approved site design,
 design intelligence, and creative direction before the first React source
 edit. It contains observable implementation and review rules, not another user
 approval. `reports/visual-audit.json` links browser captures and findings back
 to those rules. Neither report can select, confirm, or revise a design choice.
 
-`reports/site-design-spec.json` records all six category decisions and the
-final requirements approval. `reports/site-todo-plan.md` is the readable plan
+`reports/site-design-spec.json` v4 records Agent-delegated universal structure,
+the other five approved category decisions, and final requirements approval.
+Schema v3 remains valid for unmigrated existing workspaces.
+`reports/site-todo-plan.md` is the readable plan
 shown and explicitly approved in the conversation.
 `reports/site-implementation-plan.json` records that approval plus the
 plan-based recommendation, reasons, explicit conversational strategy selection,
