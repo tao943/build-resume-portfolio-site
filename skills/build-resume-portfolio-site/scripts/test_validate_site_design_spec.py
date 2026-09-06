@@ -17,7 +17,13 @@ def _candidates(prefix: str, count: int = 2) -> list[dict[str, object]]:
         {
             "id": f"{prefix}-{index}",
             "label": f"{prefix.title()} {index}",
+            "fit": [f"{prefix} fit {index}"],
+            "risks": [f"{prefix} risk {index}"],
             "tradeoffs": [f"{prefix} tradeoff {index}"],
+            "compatibility": [],
+            "responsive_fallback": "Preserve semantic order in one column.",
+            "accessibility_notes": ["Preserve focus and readable contrast."],
+            "source_ids": [f"style:{prefix}-{index}"],
         }
         for index in range(1, count + 1)
     ]
@@ -47,6 +53,10 @@ def confirmed_decision(
         "recommended_candidate_id": candidates[0]["id"],
         "tentative_selection_ids": [candidates[0]["id"]],
         "selected_candidate_ids": selected_ids,
+        "discovery_report": (
+            ".resume-site-work/reports/design-discovery/"
+            f"{category.replace('_', '-')}.json"
+        ),
         "preview": preview,
         "approval": {
             "status": "user_approved",
@@ -82,6 +92,11 @@ def valid_spec() -> dict[str, object]:
             "media": {
                 "status": "skipped",
                 "skip_reason": "no authorized media",
+                "approval": {
+                    "status": "user_approved",
+                    "source": "explicit_user",
+                    "channel": "conversation",
+                },
             },
             "primary_motion": confirmed_decision("primary-motion"),
             "secondary_motion": secondary,

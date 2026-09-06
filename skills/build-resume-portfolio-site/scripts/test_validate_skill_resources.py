@@ -50,6 +50,9 @@ VISUAL_COMPANION_FILES = (
     "scripts/visual_companion/stop.cjs",
 )
 AESTHETIC_QUALITY_FILES = (
+    "references/creative-direction-contract.md",
+    "references/creative-direction-schema.json",
+    "references/design-discovery-schema.json",
     "assets/structure-seeds/catalog.json",
     "references/structure-seed-contract.md",
     "references/structure-seed-schema.json",
@@ -59,9 +62,12 @@ AESTHETIC_QUALITY_FILES = (
     "references/design-contract-schema.json",
     "references/visual-audit-schema.json",
     "scripts/validate_design_contract.py",
+    "scripts/validate_creative_direction.py",
+    "scripts/validate_design_discovery.py",
     "scripts/validate_visual_audit.py",
     "scripts/validate_structure_seeds.py",
     "scripts/structure_seed_selector.py",
+    "scripts/portfolio_design_search.py",
 )
 CONTENT_WORKFLOW_FILES = (
     "prompts/extract-content-facts.md",
@@ -74,6 +80,8 @@ CONTENT_WORKFLOW_FILES = (
     "references/content-implementation-plan-schema.json",
     "references/content-package-contract.md",
     "references/content-planning-contract.md",
+    "references/content-quality-gate.md",
+    "references/content-quality-review-schema.json",
     "references/evidence-schema.json",
     "references/fact-verification-rules.md",
     "references/jd-customization-rules.md",
@@ -87,6 +95,7 @@ CONTENT_WORKFLOW_FILES = (
     "scripts/validate_content_handoff.py",
     "scripts/validate_content_implementation_plan.py",
     "scripts/validate_content_package.py",
+    "scripts/validate_content_quality_review.py",
     "scripts/validate_jd_match.py",
     "scripts/write_resume_site_input.py",
 )

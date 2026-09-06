@@ -82,6 +82,15 @@ def valid_report() -> dict:
             "Can every project be reached with keyboard and touch?",
             "Does reduced motion preserve the narrative hierarchy?",
         ],
+        "anti_template_resolutions": [
+            {
+                "rule_id": "anti-template.no-equal-card-grid",
+                "status": "adopted",
+                "approved_candidate_ids": ["kinetic-archive"],
+                "evidence_ids": ["style:kinetic-archive"],
+                "rationale": "The selected hierarchy avoids uniform cards.",
+            }
+        ],
     }
 
 

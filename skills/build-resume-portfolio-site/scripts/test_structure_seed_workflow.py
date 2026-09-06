@@ -13,7 +13,8 @@ class StructureSeedWorkflowTests(unittest.TestCase):
         for phrase in (
             "references/structure-seed-contract.md",
             "references/visual-fingerprint-contract.md",
-            "fit`, `novelty`, and `wildcard",
+            "`fit`,",
+            "`novelty`, and `wildcard`",
             "script_recommended_direction_id",
             "Do not expose the internal candidates as a new user gate",
             "schema-version-4",

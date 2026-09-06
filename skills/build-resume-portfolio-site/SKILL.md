@@ -28,6 +28,8 @@ project, and retain the last valid source snapshot.
    `references/visual-style-preview-contract.md`,
    `references/site-planning-contract.md`,
    `references/react-vite-output-contract.md`,
+   `references/structure-seed-contract.md`,
+   `references/visual-fingerprint-contract.md`,
    `references/design-intelligence-contract.md`,
    `references/creative-direction-contract.md`,
    `references/design-contract.md`,
@@ -278,12 +280,13 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
 ```
 
    Omit `--history` when it does not exist. Privately compare complete `fit`,
-   `novelty`, and `wildcard` directions. The script recommendation is evidence;
+   `novelty`, and `wildcard` directions. Treat
+   `script_recommended_direction_id` as evidence, not the final Agent choice;
    the Agent records the final direction, rejected reasons, blocking floors,
    selected topology, variation choices, novelty brief, and a resolution for
    every provisional anti-template rule in schema-version-2
    `reports/creative-direction.json`. Validate it with
-   `--design-intelligence`. Do not expose these candidates as a new user gate or
+   `--design-intelligence`. Do not expose the internal candidates as a new user gate or
    implement losing directions. The choice cannot contradict the five approved
    visual categories.
 4. Compile the approved design specification, design intelligence, and creative
