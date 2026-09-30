@@ -47,9 +47,8 @@ class CatalogReport(NamedTuple):
 
 
 def _sha256(path: Path) -> str:
-    payload = path.read_bytes()
-    if path.name in {"LICENSE.md", "UPSTREAM.md"}:
-        payload = payload.replace(b"\r\n", b"\n")
+    # Git may check out these text resources with either newline convention.
+    payload = path.read_bytes().replace(b"\r\n", b"\n")
     return hashlib.sha256(payload).hexdigest()
 
 
