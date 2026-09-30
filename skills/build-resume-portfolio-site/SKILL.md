@@ -11,7 +11,7 @@ project, and retain the last valid source snapshot.
 
 ## Start or resume
 
-1. Resolve `SKILL_ROOT` as this Skill directory.
+1. Resolve `SKILL_ROOT` as this Skill directory. The commands below use zsh/bash syntax; set `SKILL_ROOT` to its absolute path before running them. On Windows, translate the shell syntax to PowerShell.
 2. Read `references/workflow-contract.md`, `references/artifact-layout.md`,
    `references/content-preflight-routing-contract.md`,
    `references/content-brainstorming-contract.md`,
@@ -41,8 +41,8 @@ project, and retain the last valid source snapshot.
    schema-v3 design or schema-v2 planning approvals for older work.
 4. Apply content preflight for a new site, new resume/JD/claim, or copy change:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_content_handoff.py" --workspace-root "."
+```bash
+python3 "$SKILL_ROOT/scripts/validate_content_handoff.py" --workspace-root "."
 ```
 
    - `CONTENT_READY` continues to website discovery.
@@ -96,9 +96,9 @@ invalid, or when the user supplies a new resume, JD, claim, or copy correction.
    continue, earlier approval, browser activity, or strategy/TODO approval does
    not approve the wording. Record the conversational approval and validate:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
-  ".resume-site-work\reports\content-quality-review.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_content_quality_review.py" \
+  ".resume-site-work/reports/content-quality-review.json"
 ```
 
    Do not write `approved-copy.json` until this command exits `0`.
@@ -115,7 +115,7 @@ visual thesis, interaction architecture, or implementation strategy.
 1. Validate `discovery` resources.
 2. Inspect approved content, authorized media, references, and confirmed state.
    When a reference library is present, build or refresh its catalog with
-   `scripts\index_reference_library.py --workspace-root .`, inspect the
+   `scripts/index_reference_library.py --workspace-root .`, inspect the
    generated `reference-library/contact-sheets`, record chosen evidence in
    `reports/reference-selection.json`, respect `style_only` usage, and render
    local evidence with absolute Markdown image paths.
@@ -125,12 +125,12 @@ visual thesis, interaction architecture, or implementation strategy.
    Before asking the first design question, set
    `stage=design_baseline_generating` and run:
 
-```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" baseline `
-  --content-map ".resume-site-work\reports\content-map.json" `
-  --output ".resume-site-work\reports\design-discovery\baseline.json"
-python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
-  ".resume-site-work\reports\design-discovery\baseline.json" `
+```bash
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" baseline \
+  --content-map ".resume-site-work/reports/content-map.json" \
+  --output ".resume-site-work/reports/design-discovery/baseline.json"
+python3 "$SKILL_ROOT/scripts/validate_design_discovery.py" \
+  ".resume-site-work/reports/design-discovery/baseline.json" \
   --expected-type baseline
 ```
 
@@ -141,13 +141,13 @@ python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
    `stage=anti_template_baseline_generating`, compile the database baseline into
    a provisional project-specific visual thesis, and validate it:
 
-```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" anti-template-baseline `
-  --content-map ".resume-site-work\reports\content-map.json" `
-  --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
-  --output ".resume-site-work\reports\design-discovery\anti-template-baseline.json"
-python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
-  ".resume-site-work\reports\design-discovery\anti-template-baseline.json" `
+```bash
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" anti-template-baseline \
+  --content-map ".resume-site-work/reports/content-map.json" \
+  --baseline ".resume-site-work/reports/design-discovery/baseline.json" \
+  --output ".resume-site-work/reports/design-discovery/anti-template-baseline.json"
+python3 "$SKILL_ROOT/scripts/validate_design_discovery.py" \
+  ".resume-site-work/reports/design-discovery/anti-template-baseline.json" \
   --expected-type anti_template_baseline
 ```
 
@@ -161,12 +161,12 @@ python "$SKILL_ROOT\scripts\validate_design_discovery.py" `
    conversationally approved IDs through `inherited_decision_ids`, and every
    query evaluates candidates against the same anti-template baseline:
 
-```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category typography --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\typography.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category color --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\color.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category media --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\media.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category primary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\primary-motion.json"
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work\reports\content-map.json" --baseline ".resume-site-work\reports\design-discovery\baseline.json" --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" --decisions ".resume-site-work\reports\design-decisions-working.json" --output ".resume-site-work\reports\design-discovery\secondary-motion.json"
+```bash
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category typography --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/typography.json"
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category color --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/color.json"
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category media --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/media.json"
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category primary_motion --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/primary-motion.json"
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/secondary-motion.json"
 ```
 
    These are five sequential transactions, not one batch: run only the current
@@ -201,9 +201,9 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" category --category seco
 12. Write schema-version-4
    `.resume-site-work/reports/site-design-spec.json` and validate it:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_site_design_spec.py" `
-  ".resume-site-work\reports\site-design-spec.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_site_design_spec.py" \
+  ".resume-site-work/reports/site-design-spec.json"
 ```
 
 ## TODO and implementation-plan gate
@@ -247,9 +247,9 @@ After final requirements approval:
     rollback, and `versions/v1-integrated`.
 11. Validate the plan:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_site_implementation_plan.py" `
-  ".resume-site-work\reports\site-implementation-plan.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_site_implementation_plan.py" \
+  ".resume-site-work/reports/site-implementation-plan.json"
 ```
 
 Do not write the machine plan before final requirements approval, explicit TODO
@@ -268,15 +268,15 @@ integration, preview promotion, snapshots, and publication.
    anti-template baselines, five approved category reports, and site design
    spec. Generate the private structural directions before React generation:
 
-```powershell
-python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
-  --input ".resume-site-work\reports\content-map.json" `
-  --baseline ".resume-site-work\reports\design-discovery\baseline.json" `
-  --anti-template-baseline ".resume-site-work\reports\design-discovery\anti-template-baseline.json" `
-  --site-design-spec ".resume-site-work\reports\site-design-spec.json" `
-  --generation-id "<stable-generation-id>" `
-  --history ".resume-site-work\history\visual-fingerprints.json" `
-  --output ".resume-site-work\reports\design-intelligence.json"
+```bash
+python3 "$SKILL_ROOT/scripts/portfolio_design_search.py" recommend \
+  --input ".resume-site-work/reports/content-map.json" \
+  --baseline ".resume-site-work/reports/design-discovery/baseline.json" \
+  --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" \
+  --site-design-spec ".resume-site-work/reports/site-design-spec.json" \
+  --generation-id "<stable-generation-id>" \
+  --history ".resume-site-work/history/visual-fingerprints.json" \
+  --output ".resume-site-work/reports/design-intelligence.json"
 ```
 
    Omit `--history` when it does not exist. Privately compare complete `fit`,
@@ -294,9 +294,9 @@ python "$SKILL_ROOT\scripts\portfolio_design_search.py" recommend `
    `references/design-contract.md`, validate the temporary report, and atomically
    replace the canonical report only on success:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_design_contract.py" `
-  ".resume-site-work\reports\design-contract.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_design_contract.py" \
+  ".resume-site-work/reports/design-contract.json"
 ```
 
    Do not perform the first React source edit before this command exits `0`.
@@ -316,10 +316,10 @@ python "$SKILL_ROOT\scripts\validate_design_contract.py" `
    compatibility and controller ownership are the limits.
 7. Validate and build:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_vite_project.py" `
-  ".resume-site-work\site" --stage integrated
-npm run build
+```bash
+python3 "$SKILL_ROOT/scripts/validate_vite_project.py" \
+  ".resume-site-work/site" --stage integrated
+(cd .resume-site-work/site && npm run build)
 ```
 
 8. On success, atomically promote `site/dist` to `preview/dist`, capture desktop,
@@ -376,10 +376,10 @@ architecture. If scope expands, stop and return to full discovery.
 
 - The optional APIHz media transaction begins only on an explicit user request.
   Require `APIHZ_ID` and `APIHZ_KEY`, then run
-  `python "$SKILL_ROOT\scripts\apihz_media.py" search` into
-  `.resume-site-work\media-search`. Show the local `preview.html`, including GIF
+  `python3 "$SKILL_ROOT/scripts/apihz_media.py" search` into
+  `.resume-site-work/media-search`. Show the local `preview.html`, including GIF
   candidates, as rights-unverified evidence. Wait for candidate IDs, then use
-  `scripts\import_media_selection.py` for selected-only import. This is
+  `scripts/import_media_selection.py` for selected-only import. This is
   provider-failure isolation: failure changes no site, preview, approval,
   snapshot, or workflow state.
 - A later user-supplied local MP4/WebM may replace only an approved Poster/media

@@ -148,7 +148,8 @@ same bundled workflow repairs the package.
 
 ## Planning and strategy
 
-`site-design-spec.json` schema v3 is the user-approved requirements package.
+`site-design-spec.json` schema v4 is the user-approved requirements package
+for new full discovery; v3 remains valid for unmigrated existing workspaces.
 `site-todo-plan.md` is the readable plan explicitly approved in the
 conversation. `site-implementation-plan.json` schema v2 is the validated
 machine plan. All three precede React edits.

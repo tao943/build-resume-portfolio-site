@@ -178,6 +178,15 @@ def _creative_direction() -> dict[str, object]:
 
 
 class EarlyAntiTemplateBaselineTests(unittest.TestCase):
+    def test_generated_baseline_validates_before_anti_template_step(self) -> None:
+        baseline = search.build_baseline(_content_map())
+        self.assertEqual(discovery_validator.validate(baseline, "baseline"), [])
+        anti_template = search.build_anti_template_baseline(_content_map(), baseline)
+        self.assertEqual(
+            discovery_validator.validate(anti_template, "anti_template_baseline"),
+            [],
+        )
+
     def test_builds_valid_provisional_baseline(self) -> None:
         report = search.build_anti_template_baseline(_content_map(), _baseline())
 
@@ -322,7 +331,7 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
             skill.index("portfolio_design_search.py\" recommend"),
         )
         self.assertIn(
-            'anti-template-baseline.json" `\n  --expected-type anti_template_baseline',
+            'anti-template-baseline.json" \\\n  --expected-type anti_template_baseline',
             skill,
         )
         self.assertGreaterEqual(skill.count("--anti-template-baseline"), 6)

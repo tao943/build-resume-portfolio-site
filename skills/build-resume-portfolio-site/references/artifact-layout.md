@@ -69,7 +69,7 @@ Create all generated material under `.resume-site-work/` in the active user work
 `style-preview/` contains display-only discovery evidence. Its galleries are
 not React source, production previews, confirmed snapshots, or publishable
 site output. Browser activity has no approval semantics; only an explicit
-conversation reply may be recorded in the schema-version-3 site design
+conversation reply may be recorded in the schema-version-4 site design
 specification. Category Galleries are independent rather than cumulative.
 Stopping a local session preserves its gallery for review.
 
@@ -141,36 +141,20 @@ Initialize `build-state.json` with this minimum shape:
   "schema_version": 4,
   "skill_version": "1.2.0-react-vite",
   "workflow_mode": "full",
-  "discovery": {
-    "design_discovery": {
-      "baseline": "reports/design-discovery/baseline.json",
-      "anti_template_baseline": "reports/design-discovery/anti-template-baseline.json",
-      "categories": {
-        "structure": "reports/design-discovery/structure.json",
-        "typography": "reports/design-discovery/typography.json",
-        "color": "reports/design-discovery/color.json",
-        "media": "reports/design-discovery/media.json",
-        "primary_motion": "reports/design-discovery/primary-motion.json",
-        "secondary_motion": "reports/design-discovery/secondary-motion.json"
-      }
-    },
-    "site_design_approved": false,
-    "site_plan_validated": false
-  },
-  "stage": "prototype_generating",
+  "stage": "content_preflight",
   "editable_project": "site",
   "current_artifact": null,
   "current_preview": null,
   "last_confirmed_artifact": null,
-  "confirmations": {"prototype": false, "media_direction": false, "motion": false},
+  "discovery": {
+    "site_design_approved": false,
+    "site_plan_validated": false
+  },
   "resource_versions": {},
-  "selected_reference_ids": [],
-  "selected_media_direction_id": null,
-  "attempted_media_direction_ids": [],
   "visual_repair_round": 0,
   "user_feedback": [],
   "unresolved_defects": [],
-  "next_actions": ["generate_prototype"]
+  "next_actions": ["validate_content_handoff"]
 }
 ```
 

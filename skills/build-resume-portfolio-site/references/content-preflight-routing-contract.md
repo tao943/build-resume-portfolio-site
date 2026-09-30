@@ -24,8 +24,8 @@ confirmed content baseline in that case.
 
 Run from the active workspace:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_content_handoff.py" --workspace-root "."
+```bash
+python3 "$SKILL_ROOT/scripts/validate_content_handoff.py" --workspace-root "."
 ```
 
 - Exit `0`, `CONTENT_READY`: consume the approved package directly.

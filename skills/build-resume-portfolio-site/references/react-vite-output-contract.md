@@ -21,7 +21,7 @@ Equivalent component boundaries are allowed. The project must use React, React D
 
 ## Content and layout contract
 
-The first runnable prototype must contain:
+The first integrated website must contain:
 
 - a near-full-screen Hero with navigation, a primary heading, contact action, and safe video/media fallback;
 - a personal experience or about region with only supplied facts;
@@ -44,13 +44,13 @@ Do not fabricate resume facts, metrics, links, photos, screenshots, or remote vi
 
 Validate source before building:
 
-```powershell
-python <skill-root>/scripts/validate_vite_project.py .resume-site-work/site --stage prototype
+```bash
+python3 "$SKILL_ROOT/scripts/validate_vite_project.py" .resume-site-work/site --stage integrated
 ```
 
-Use `styled`, `refined`, or `motion` for later stages. Then run from `.resume-site-work/site/`:
+Then run from `.resume-site-work/site/`:
 
-```powershell
+```bash
 npm run build
 ```
 
