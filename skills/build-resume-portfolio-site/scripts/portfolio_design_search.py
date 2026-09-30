@@ -448,8 +448,13 @@ def build_baseline(
     reference_selection: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     report = recommend(content_map)
+    # Discovery reports use schema v1. The v2 recommendation is reused here
+    # only as the source of candidates; its recommendation is provisional.
+    report["schema_version"] = 1
     report["mode"] = "baseline"
     report["report_type"] = "baseline"
+    report["selected_direction_id"] = report["script_recommended_direction_id"]
+    report.pop("selection_owner", None)
     report["reference_selection_ids"] = _unique_tokens(
         _safe_tokens(reference_selection or {}), limit=8
     )

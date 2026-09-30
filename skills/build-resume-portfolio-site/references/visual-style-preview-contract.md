@@ -1,9 +1,10 @@
 # Visual Style Preview Contract
 
 Use this display-only transaction before the user selects a candidate for one
-enabled discovery category. Ask separately for every enabled category. The six
-supported category IDs are `structure`, `typography`, `color`, `media`,
+enabled discovery category. Ask separately for every enabled category. New
+schema-version-4 workflows offer five user-selected categories: `typography`, `color`, `media`,
 `primary-motion`, and `secondary-motion`.
+Schema-version-3 workspaces may retain the legacy `structure` category.
 
 Previews are independent, not cumulative. Each preview isolates its category
 against a neutral demonstration baseline. It is decision evidence, not reusable
@@ -38,7 +39,7 @@ Use `assets/visual-companion/gallery-shell.html` as structural guidance. Show:
 - relevant fit, risk, mobile, accessibility, fallback, and reduced-motion notes;
 - a visible instruction to return to the conversation to confirm or revise.
 
-Structure previews compare composition and hierarchy. Typography previews
+Legacy structure previews compare composition and hierarchy. Typography previews
 compare type and rhythm. Color previews compare color relationships. Media
 previews compare media treatment. Primary- and secondary-motion previews use
 small runnable samples, but contain no approval controls.
@@ -53,10 +54,10 @@ Do not create or modify `.resume-site-work/site` while producing a Gallery.
 
 Resolve `SKILL_ROOT`, then run only after the user accepted the current offer:
 
-```powershell
-node "$SKILL_ROOT\scripts\visual_companion\launch.cjs" `
-  --workspace-root "." `
-  --gallery ".resume-site-work\style-preview\drafts\<category>\<draft-id>\gallery.html" `
+```bash
+node "$SKILL_ROOT/scripts/visual_companion/launch.cjs" \
+  --workspace-root "." \
+  --gallery ".resume-site-work/style-preview/drafts/<category>/<draft-id>/gallery.html" \
   --open
 ```
 
@@ -69,16 +70,16 @@ the standalone HTML path. Never upload or publicly expose the Gallery.
 
 After display, ask the user to return to the conversation, select a candidate,
 and confirm, revise, or reject it. Record the decision-level `preview` and
-`approval` fields in the schema-version-3 design specification. A visit, reload,
+`approval` fields in the applicable design specification. A visit, reload,
 screenshot, or system browser launch is never selection or approval.
 
 ## Stop
 
 Stop only the exact verified session returned by the launcher:
 
-```powershell
-node "$SKILL_ROOT\scripts\visual_companion\stop.cjs" `
-  --workspace-root "." `
+```bash
+node "$SKILL_ROOT/scripts/visual_companion/stop.cjs" \
+  --workspace-root "." \
   --server-info "<returned-server-info-path>"
 ```
 

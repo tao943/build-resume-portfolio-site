@@ -46,9 +46,9 @@ browser activity, or a generic request to continue is not copy approval.
 After approval, record the conversational approval quote and the exact approved
 block IDs. Set `selected_version` to the wording the user approved, then run:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
-  ".resume-site-work\reports\content-quality-review.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_content_quality_review.py" \
+  ".resume-site-work/reports/content-quality-review.json"
 ```
 
 Write `approved-copy.json` only after this command exits `0`. Any copy change

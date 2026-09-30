@@ -30,9 +30,9 @@ site-design-spec.json + design-intelligence.json + creative-direction.json
 
 Run:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_design_contract.py" `
-  ".resume-site-work\reports\design-contract.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_design_contract.py" \
+  ".resume-site-work/reports/design-contract.json"
 ```
 
 Continue only on exit `0`. An invalid contract freezes React edits and preserves

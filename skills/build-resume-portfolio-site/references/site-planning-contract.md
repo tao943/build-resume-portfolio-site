@@ -1,6 +1,6 @@
 # Site Planning Contract
 
-Begin only after schema-version-3 `site-design-spec.json` validates and its
+Begin only after schema-version-4 `site-design-spec.json` validates and its
 final requirements confirmation is explicitly approved.
 
 ## Readable TODO plan

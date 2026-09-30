@@ -44,10 +44,10 @@ a required menu.
 
 Write `.resume-site-work/reports/creative-direction.json` and validate it:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_creative_direction.py" `
-  ".resume-site-work\reports\creative-direction.json" `
-  --design-intelligence ".resume-site-work\reports\design-intelligence.json"
+```bash
+python3 "$SKILL_ROOT/scripts/validate_creative_direction.py" \
+  ".resume-site-work/reports/creative-direction.json" \
+  --design-intelligence ".resume-site-work/reports/design-intelligence.json"
 ```
 
 Continue only on exit `0`.
