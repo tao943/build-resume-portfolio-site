@@ -69,8 +69,8 @@ Create all generated material under `.resume-site-work/` in the active user work
 `style-preview/` contains display-only discovery evidence. Its galleries are
 not React source, production previews, confirmed snapshots, or publishable
 site output. Browser activity has no approval semantics; only an explicit
-conversation reply may be recorded in the schema-version-3 site design
-specification. Category Galleries are independent rather than cumulative.
+conversation reply may be recorded in the active schema-version-4 site design
+specification (or an unmigrated schema-version-3 specification). Category Galleries are independent rather than cumulative.
 Stopping a local session preserves its gallery for review.
 
 The three content files under `input/` plus the content strategy, plan, quality,
@@ -139,7 +139,7 @@ Initialize `build-state.json` with this minimum shape:
 ```json
 {
   "schema_version": 4,
-  "skill_version": "1.2.0-react-vite",
+  "skill_version": "1.3.0-react-vite",
   "workflow_mode": "full",
   "discovery": {
     "design_discovery": {
@@ -157,7 +157,7 @@ Initialize `build-state.json` with this minimum shape:
     "site_design_approved": false,
     "site_plan_validated": false
   },
-  "stage": "prototype_generating",
+  "stage": "content_preflight",
   "editable_project": "site",
   "current_artifact": null,
   "current_preview": null,
@@ -170,7 +170,7 @@ Initialize `build-state.json` with this minimum shape:
   "visual_repair_round": 0,
   "user_feedback": [],
   "unresolved_defects": [],
-  "next_actions": ["generate_prototype"]
+  "next_actions": ["validate_content_handoff"]
 }
 ```
 

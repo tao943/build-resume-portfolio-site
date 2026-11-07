@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class StructureSeedWorkflowTests(unittest.TestCase):
     def test_skill_uses_agent_owned_three_direction_flow(self) -> None:
-        text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8") + (
+            ROOT / "references" / "workflow-implementation.md"
+        ).read_text(encoding="utf-8")
         for phrase in (
             "references/structure-seed-contract.md",
             "references/visual-fingerprint-contract.md",

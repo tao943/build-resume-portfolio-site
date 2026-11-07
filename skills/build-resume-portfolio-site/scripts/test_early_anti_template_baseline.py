@@ -310,9 +310,10 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
             )
 
     def test_skill_generates_anti_template_baseline_before_structure(self) -> None:
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8").replace(
-            "\r\n", "\n"
-        )
+        skill = "\n".join(
+            (SKILL_ROOT / "references" / name).read_text(encoding="utf-8")
+            for name in ("workflow-discovery.md", "workflow-implementation.md")
+        ).replace("\r\n", "\n")
         creative_contract = (
             SKILL_ROOT / "references" / "creative-direction-contract.md"
         ).read_text(encoding="utf-8")
@@ -322,7 +323,7 @@ class EarlyAntiTemplateBaselineTests(unittest.TestCase):
             skill.index("portfolio_design_search.py\" recommend"),
         )
         self.assertIn(
-            'anti-template-baseline.json" `\n  --expected-type anti_template_baseline',
+            'anti-template-baseline.json" \\\n  --expected-type anti_template_baseline',
             skill,
         )
         self.assertGreaterEqual(skill.count("--anti-template-baseline"), 6)

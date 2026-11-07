@@ -13,6 +13,8 @@
 - 在明确需求后生成 TODO 计划，等待批准，再生成并验证完整网站。
 - 自动执行 React + Vite 构建、响应式检查、视觉审计和有限范围修复。
 - 网站完成后支持“满意完成”“加强动效”或“提出修改”三种验收路径。
+- 按当前阶段加载内容、设计、实施或验收指南，避免启动时读取所有流程细节。
+- 不依赖额外 Word 库即可读取 DOCX 正文、表格和超链接文字；支持带 BOM 的 UTF-8 简历文本。
 
 ## 工作流程
 
@@ -67,4 +69,20 @@ skills/build-resume-portfolio-site/
 └── vendor/ui-ux-pro-max/ # 本地 UI/UX 设计数据库
 ```
 
-本 Skill 不要求外部内容 Skill、远程组件注册表、云端模型服务或外部运行时依赖。PDF/DOCX 提取工具仅在环境已有对应库时作为可选辅助；无法提取时可改用原生读取、文本文件或用户转录。
+本 Skill 不要求其他内容 Skill、远程组件注册表或专用云端模型服务。需要能读取文件、运行命令的编程 Agent，以及 Python 3 和 Node.js/npm。生成 React + Vite 项目时需要安装项目依赖，使用的模型额度、域名和部署服务由使用者自行准备。
+
+DOCX 和 UTF-8 文本提取使用 Python 标准库；PDF 提取仅在环境已有对应库时作为可选辅助。扫描件、页眉页脚、批注和嵌入图片中的文字应通过原生读取或用户确认补充，不以提取结果代替事实核验。
+
+## 交付范围
+
+Skill 包含工作流、校验工具、设计资料和本地视觉预览工具。运行后交付网站源码、构建产物、本地运行方式和实际完成的验证结果；网站发布需要使用者指定部署目标并授权。简历公开字段以使用者确认内容为准，不虚构经历、指标或 JD 要求，不承诺求职结果。
+
+## 验证与打包
+
+```sh
+python3 -m unittest discover -s skills/build-resume-portfolio-site/scripts -p 'test_*.py'
+python3 -m unittest discover -s tools -p 'test_*.py'
+python3 tools/package_skill.py skills/build-resume-portfolio-site /absolute/output/build-resume-portfolio-site.zip
+```
+
+Windows 可使用已安装的 Python 3 命令替换 `python3`。发布包只收录 Skill 运行资料，保留第三方许可；不包含测试、缓存、工作目录或环境密钥文件。打包命令拒绝覆盖已有发布包，并输出 SHA-256 供核验。
