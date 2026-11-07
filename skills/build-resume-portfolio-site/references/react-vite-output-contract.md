@@ -1,6 +1,7 @@
 # React + Vite Output Contract
 
-All stages edit one project at `.resume-site-work/site/`. Do not create a parallel standalone HTML implementation.
+All stages edit one project at `.resume-site-work/site/`. Do not create a parallel standalone HTML website. A printable resume HTML
+export is a separate document deliverable, not a second website implementation.
 
 ## Required project shape
 
@@ -21,7 +22,7 @@ Equivalent component boundaries are allowed. The project must use React, React D
 
 ## Content and layout contract
 
-The first runnable prototype must contain:
+The first integrated site must contain:
 
 - a near-full-screen Hero with navigation, a primary heading, contact action, and safe video/media fallback;
 - a personal experience or about region with only supplied facts;
@@ -37,21 +38,17 @@ Do not fabricate resume facts, metrics, links, photos, screenshots, or remote vi
 
 - Reject `javascript:` and `data:text/html` URLs.
 - Preserve semantic headings, keyboard navigation, visible focus, readable contrast, and alt text.
-- The motion stage must include `prefers-reduced-motion: reduce` behavior.
+- All motion must include `prefers-reduced-motion: reduce` behavior.
 - Avoid dependency changes unless they are necessary and approved.
 
 ## Validation and preview
 
 Validate source before building:
 
-```powershell
-python <skill-root>/scripts/validate_vite_project.py .resume-site-work/site --stage prototype
-```
-
-Use `styled`, `refined`, or `motion` for later stages. Then run from `.resume-site-work/site/`:
-
-```powershell
-npm run build
+```sh
+"$PYTHON" "$SKILL_ROOT/scripts/validate_vite_project.py" \
+  ".resume-site-work/site" --stage integrated
+(cd ".resume-site-work/site" && npm run build)
 ```
 
 Only a successful `dist/` build may be copied to `.resume-site-work/preview/dist/`, captured, or shown at a confirmation gate. Source validation does not replace a real Vite build.

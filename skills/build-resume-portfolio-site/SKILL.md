@@ -5,8 +5,8 @@ description: Turn resume materials and an optional job description into fact-che
 
 # Build Resume Portfolio Site
 
-Deliver a complete portfolio source project, a verified production build, and
-clear local run instructions. Keep resume facts traceable and approved copy
+Deliver a complete portfolio source project, a verified production build, a
+text-based resume PDF, and clear local run instructions. Keep resume facts traceable and approved copy
 separate from design decisions. Do not promise employment outcomes.
 
 ## Start or resume
@@ -22,6 +22,16 @@ separate from design decisions. Do not promise employment outcomes.
 4. For a new site, new resume/JD, or copy change, run content preflight. For a
    visual-only revision to a confirmed site, preserve the content baseline and
    use the bounded-change route instead.
+5. For first use or missing tools, read [Import and setup](references/import-guide.md)
+   and run `scripts/check_environment.py`. Finish supported content work while
+   resolving missing website tools. Do not install global packages automatically.
+6. Read [Interaction modes](references/interaction-modes.md). Recommend `quick`
+   for new work; honor `deep` or an existing preference. Persist the mode and
+   reuse one visual preview session. Quick mode combines design, TODO and
+   delegated execution approval; it never approves resume facts or wording.
+7. When resuming a version library, inspect `content-versions/active-version.json`
+   and use its selected workspace. For role-version requests, read
+   [Role versions](references/role-versions.md).
 
 ### Local commands
 
@@ -40,10 +50,11 @@ syntax to the actual shell. No global package installation is required.
 - `2 / CONTENT_PREPARATION_REQUIRED`: run content preparation.
 - `1 / CONTENT_INVALID`: repair content before changing website artifacts.
 
-PDF extraction is optional when a PDF reader is already available. DOCX and
-UTF-8 text extraction use the Python standard library. If a document is scanned
-or unsupported, explain what could not be read and use native reading or a
-text-readable copy; never treat missing text as an empty resume.
+DOCX and UTF-8 text extraction use the Python standard library. PDF input uses
+optional `pdfplumber`; PDF output uses `reportlab` and `pypdf`. The setup guide
+describes a local environment when required. Import exit `2` means a report was
+written but affected pages need review; exit `1` means failure. Local OCR is
+optional and must be explicitly selected. Never treat missing text as an empty resume.
 
 ## Phase routing
 
@@ -91,6 +102,11 @@ candidates as a new user gate or implement losing directions.
 - Keep private resume files, unapproved contact details, credentials, and local
   work reports out of public source and deployment output. A local preview is
   not permission to publish a website or register a paid service.
+- Generate PDF and printable HTML using [Resume export](references/resume-export-contract.md)
+  from the same approved copy as the website. Verify text order and render the
+  PDF before delivery. A private PDF must not become a public download; public
+  exports require approval of their selected blocks. Report missing capabilities
+  honestly rather than calling an HTML fallback a PDF.
 - A Skill purchase delivers this workflow and its bundled tools. It does not
   include model credits, hosting, a domain, or a guaranteed job outcome.
 - Finish with source/build locations, launch commands, checks actually run,

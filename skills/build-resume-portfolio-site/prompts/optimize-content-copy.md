@@ -12,7 +12,9 @@ Move unsupported, inflated, or unmatched-JD alternatives to blocked claims.
 When result evidence is unavailable, use a truthful qualitative fallback rather
 than inventing a metric.
 
-Write the block review into `reports/content-quality-review.json`. Show Original,
+Write the block review into `.resume-site-work/staging/content-quality-review.json`.
+Keep an existing canonical review intact; promote the staged review and package
+together through `write_resume_site_input.py --quality-review` after approval. Show Original,
 Recommended, Evidence, Why, and optional Stronger Version. Do not mark the copy
 approved; wait for explicit conversational approval of the exact wording and
 record whether the selected version is `recommended` or `stronger`.

@@ -6,6 +6,8 @@ import sys
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from workflow_modes import interaction_mode, validate_bundle
+
 
 DECISION_ORDER = (
     "structure",
@@ -241,6 +243,15 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
+    mode = interaction_mode(payload)
+    if mode not in {"quick", "deep"}:
+        errors.append("interaction_mode must be quick or deep")
+    if mode == "quick":
+        if payload["schema_version"] != 4:
+            errors.append("quick mode requires schema version 4")
+        errors.extend(validate_bundle(payload))
+    elif payload.get("bundle_approval") is not None:
+        errors.append("bundle approval is only valid in quick mode")
     if payload["schema_version"] not in {3, 4}:
         errors.append("schema_version must be 3 or 4")
     if payload["workflow_mode"] not in {"full", "fast-change"}:

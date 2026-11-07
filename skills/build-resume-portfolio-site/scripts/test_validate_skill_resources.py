@@ -50,6 +50,8 @@ VISUAL_COMPANION_FILES = (
     "scripts/visual_companion/stop.cjs",
 )
 AESTHETIC_QUALITY_FILES = (
+    "references/interaction-modes.md",
+    "scripts/workflow_modes.py",
     "references/creative-direction-contract.md",
     "references/creative-direction-schema.json",
     "references/design-discovery-schema.json",
@@ -70,6 +72,12 @@ AESTHETIC_QUALITY_FILES = (
     "scripts/portfolio_design_search.py",
 )
 CONTENT_WORKFLOW_FILES = (
+    "references/import-guide.md",
+    "references/resume-export-contract.md",
+    "references/role-versions.md",
+    "scripts/check_environment.py",
+    "scripts/export_resume.py",
+    "scripts/manage_resume_versions.py",
     "prompts/extract-content-facts.md",
     "prompts/ask-content-clarification.md",
     "prompts/optimize-content-copy.md",

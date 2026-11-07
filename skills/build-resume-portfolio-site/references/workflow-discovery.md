@@ -12,6 +12,9 @@ Before starting, read:
 - [visual-fingerprint-contract.md](visual-fingerprint-contract.md)
 - [design-intelligence-contract.md](design-intelligence-contract.md)
 
+Read [interaction-modes.md](interaction-modes.md) and persist the current
+`interaction_mode` before discovery.
+
 ## Full discovery gate
 
 Use the full route for a new site or a change to audience, overall structure,
@@ -62,7 +65,7 @@ visual thesis, interaction architecture, or implementation strategy.
    Browser preview and user choice remain approvals for the five user-selected
    categories. Structure selection itself remains an internal Agent decision.
 5. Initialize `reports/design-decisions-working.json`. Before presenting each
-   category, run the matching query below. Every later query reads all prior
+   category, run the matching query below. Each query reads only previously
    conversationally approved IDs through `inherited_decision_ids`, and every
    query evaluates candidates against the same anti-template baseline:
 
@@ -74,35 +77,30 @@ visual thesis, interaction architecture, or implementation strategy.
 "$PYTHON" "$SKILL_ROOT/scripts/portfolio_design_search.py" category --category secondary_motion --content-map ".resume-site-work/reports/content-map.json" --baseline ".resume-site-work/reports/design-discovery/baseline.json" --anti-template-baseline ".resume-site-work/reports/design-discovery/anti-template-baseline.json" --decisions ".resume-site-work/reports/design-decisions-working.json" --output ".resume-site-work/reports/design-discovery/secondary-motion.json"
 ```
 
-   These are five sequential transactions, not one batch: run only the current
-   category command, validate its report with `validate_design_discovery.py
-   --expected-type category`, present only its database-backed candidates, then
-   persist the approved selection before running the next command. A report
-   without non-empty `source_ids`, or with fewer than two candidates, cannot be
-   presented as database output.
+   Validate every report with `validate_design_discovery.py --expected-type
+   category`. A report without non-empty `source_ids`, or fewer than two
+   candidates, cannot be presented as database output.
 6. Record structure as Agent-delegated with `visual-impact` priority, universal
    scope, `fit-novelty-wildcard` exploration, and direct generation. Do not ask
-   the user to choose a seed. Ask one question at a time for typography, color
-   system, conditional media treatment, primary motion, and secondary motion.
-7. For every enabled category, compare candidates and recommend one with fit,
-   risk, and trade-offs. Then separately ask whether to open the browser
-   comparison before requesting the user's choice.
-8. On acceptance, follow `visual-style-preview-contract.md`, create an
-   independent display-only `gallery.html`, run `launch.cjs --open`, and give
-   the user the complete authenticated URL plus the absolute static HTML fallback.
-   On decline, record the decline and continue text-only. Previous
-   consent never applies to the next category.
-9. After the preview or decline, receive the user's selection and final category
-   confirmation in the conversation. Approval remains in the conversation:
-   browser visits, reloads, screenshots, and launch events do not select,
-   approve, or advance state.
-10. Media may be skipped only with an explicit reason and conversational
-   approval. Select exactly one
-   primary-motion system. Secondary motion may contain multiple compatible
-   effects without a fixed numeric cap.
-11. Summarize all decisions and mandatory responsive, accessibility,
-   coarse-pointer, fallback, and reduced-motion constraints. Obtain final
-   requirements confirmation.
+   the user to choose a seed.
+7. In deep mode, query, present, and confirm each category before querying the
+   next, saving approved IDs in the working decisions file. In quick mode,
+   query the five categories against the common baselines and only existing
+   approved IDs. Keep all new recommendations tentative until the bundle is
+   approved; internally verify compatibility across the combined selections.
+8. Follow `visual-style-preview-contract.md`. Reuse authorized preview
+   preference and one browser session. Quick mode uses one combined gallery;
+   deep mode refreshes that session with the current category. Declined
+   previews stay text-only for the user's stated scope.
+9. Quick mode presents a combined design and TODO plan with delegated execution;
+   record one explicit bundle approval as described in `interaction-modes.md`.
+   Deep mode receives conversational category selections and summarizes them
+   for final requirements approval. Browser activity never constitutes approval.
+10. Media can be skipped with an explicit reason included in that approval.
+    Select exactly one primary-motion system and compatible secondary effects.
+11. Retain responsive, accessibility, coarse-pointer, fallback, and reduced-motion
+    constraints in both modes. A user revision changes only affected choices
+    and requires updating the relevant approval, not restarting unrelated work.
 12. Write schema-version-4
    `.resume-site-work/reports/site-design-spec.json` and validate it:
 
@@ -110,4 +108,3 @@ visual thesis, interaction architecture, or implementation strategy.
 "$PYTHON" "$SKILL_ROOT/scripts/validate_site_design_spec.py" \
   ".resume-site-work/reports/site-design-spec.json"
 ```
-

@@ -1,67 +1,60 @@
 # Site Planning Contract
 
-Begin only after schema-version-3 `site-design-spec.json` validates and its
-final requirements confirmation is explicitly approved.
+The active design specification is schema version 4; existing unmigrated v3
+specifications remain readable. Follow [interaction-modes.md](interaction-modes.md)
+for mode-specific approval. No React edits precede validated design and plans.
 
-## Readable TODO plan
+## Readable TODO
 
-Create `.resume-site-work/reports/site-todo-plan.md` first. It must be concise
-and readable in the conversation, with checkbox tasks covering:
+Create `.resume-site-work/reports/site-todo-plan.md` with concise tasks for
+content and structure, design tokens, authorized media, compatible motion,
+exact files and component ownership, responsive and accessible behavior,
+build and screenshots, bounded repair, rollback, and deliverables.
 
-- content mapping and overall structure;
-- typography and color tokens;
-- authorized media treatment and fallbacks;
-- primary motion and every selected compatible secondary effect;
-- component and exact file boundaries;
-- responsive, accessibility, coarse-pointer, and reduced-motion behavior;
-- validation, build, screenshots, bounded repair, rollback, and delivery.
+In quick mode, prepare the TODO alongside the proposed design and obtain one
+approval for the whole bundle and delegated execution. Record the unchanged
+file's SHA-256 in `bundle_approval.todo_plan_sha256`. In deep mode, prepare the
+TODO after requirements approval and obtain explicit approval of the shown
+plan. A reply can cover multiple clearly displayed decisions; do not invent
+approval for material the user has not seen.
 
-Show the TODO plan, file scope, verification strategy, and expected artifacts.
-Wait for explicit conversational TODO plan approval. A browser action, silence,
-or approval of the design requirements is not plan approval.
+## Execution arrangement
 
-## Implementation strategy gate
+Quick mode lets the Agent choose `single-agent` or `parallel-wave` under the
+approved execution delegation, without asking the user to choose technical
+implementation details. Choose parallel work only for independently useful,
+disjoint file ownership and a demonstrated benefit; otherwise use single-agent.
 
-After TODO approval, evaluate the approved tasks, exact file scope,
-dependencies, shared-file coupling, independently useful work, and coordination
-cost. Recommend `当前会话单 Agent` or `多 Agent 并行` with plan-specific evidence
-and the expected speed trade-off. If parallel speedup cannot be demonstrated,
-recommend `当前会话单 Agent`.
-
-Present exactly the two numbered choices and ask the user to explicitly choose
-`1` or `2`. Set `stage=implementation_strategy_waiting_confirmation` and wait.
-Silence, browser activity, inferred preference, design approval, or TODO approval
-is not strategy selection.
-
-Use `single-agent` for choice `1`. Use `parallel-wave` for choice `2` only when
-at least two independently useful tasks have disjoint writes, compatible
-dependencies, independent acceptance criteria, and expected savings greater
-than coordination cost. Unsafe parallel work remains at the gate until the
-user approves a revised disjoint plan or makes a new explicit choice.
+Deep mode retains an explicit strategy selection if no equivalent authorization
+is already present. Explain the recommendation in plain language, and reuse an
+existing explicit selection for the unchanged plan. Parallel work always needs
+a validated multi-agent plan. If that validation fails, repair the plan or use
+single-agent within a quick bundle's delegation; never silently override an
+explicit user requirement to use a particular execution mode.
 
 ## Machine plan
 
-After explicit strategy selection, create schema-version-2
-`.resume-site-work/reports/site-implementation-plan.json`. It records the
-readable plan path and approval plus stable task IDs, dependencies, exact
-writable files, consumed inputs, produced interfaces, acceptance criteria,
-verification commands, rollback baseline, and `versions/v1-integrated`
-snapshot target. Set `generation_mode` to `one-integrated-site` and record:
+Write schema-version-2 `reports/site-implementation-plan.json`. Include the
+readable plan path and approval, stable task IDs, dependencies, exact writable
+files, consumed inputs, produced interfaces, acceptance, verification, rollback
+baseline, and `versions/v1-integrated` target. Use
+`generation_mode: one-integrated-site`. The selected strategy must match
+`strategy_selection.selected`.
 
-```json
-"strategy_selection": {
-  "status": "user_selected",
-  "source": "explicit_user",
-  "channel": "conversation",
-  "selected": "single-agent",
-  "recommended": "single-agent",
-  "reasons": ["Plan-specific recommendation evidence."]
-}
+Deep mode uses `strategy_selection.status: user_selected`,
+`source: explicit_user`, `channel: conversation`. Quick mode uses
+`status: agent_selected`, `source: approved_bundle`, `channel: workflow`, and
+the current `bundle_id`; see the complete record in the mode reference.
+
+Validate before source edits:
+
+```sh
+"$PYTHON" "$SKILL_ROOT/scripts/validate_site_implementation_plan.py" \
+  ".resume-site-work/reports/site-implementation-plan.json" \
+  --design-spec ".resume-site-work/reports/site-design-spec.json" \
+  --workspace-root "."
 ```
 
-The `selected` value must match `strategy`. Parallel execution requires explicit
-authorization and a separately validated `multi-agent-implementation.json`.
-
-Validate the JSON plan before any React source edit. If requirements change,
-invalidate both planning artifacts, regenerate them, show the new TODO plan,
-obtain a new explicit approval, and repeat the strategy gate.
+Quick validation checks the approved design and actual TODO file as well as
+plan structure. Changed requirements or tasks invalidate the relevant approval;
+show the revised scope and obtain approval before regeneration.

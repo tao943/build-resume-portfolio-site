@@ -38,7 +38,7 @@ standard.
 
 ## Approval and output
 
-Write `.resume-site-work/reports/content-quality-review.json` against
+Stage `.resume-site-work/staging/content-quality-review.json` against
 `content-quality-review-schema.json`. Show the proposed copy to the user and wait
 for explicit approval of the exact wording. Strategy approval, TODO approval,
 browser activity, or a generic request to continue is not copy approval.
@@ -46,11 +46,13 @@ browser activity, or a generic request to continue is not copy approval.
 After approval, record the conversational approval quote and the exact approved
 block IDs. Set `selected_version` to the wording the user approved, then run:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_content_quality_review.py" `
-  ".resume-site-work\reports\content-quality-review.json"
+```sh
+"$PYTHON" "$SKILL_ROOT/scripts/validate_content_quality_review.py" \
+  ".resume-site-work/staging/content-quality-review.json"
 ```
 
 Write `approved-copy.json` only after this command exits `0`. Any copy change
 invalidates the affected block approval and requires a new review and explicit
 approval.
+
+Promote the package and staged review together with `write_resume_site_input.py --quality-review`. Keep the old canonical handoff intact until the complete candidate validates; the writer snapshots it before replacement.

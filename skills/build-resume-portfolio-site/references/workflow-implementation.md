@@ -16,57 +16,30 @@ Before starting, read:
 
 ## TODO and implementation-plan gate
 
-After final requirements approval:
+Use [site-planning-contract.md](site-planning-contract.md) and
+[interaction-modes.md](interaction-modes.md). Validate `planning` resources.
+Quick mode consumes the approved design/TODO bundle and chooses the execution
+arrangement under its delegation. Deep mode consumes explicit requirements,
+TODO, and strategy approval, reusing authorization for an unchanged plan.
 
-1. Validate `planning` resources.
-2. Write `.resume-site-work/reports/site-todo-plan.md` with readable checkbox
-   tasks for content, structure, typography, color, media, primary and secondary
-   motion, file boundaries, responsive/accessibility work, validation, build,
-   screenshots, rollback, and delivery.
-3. Show the TODO plan, exact file scope, verification, and expected artifacts.
-4. Wait for explicit TODO plan approval in the conversation.
-5. Evaluate the approved TODO tasks, exact file scope, dependencies, shared-file
-   coupling, independently useful tasks, and expected coordination cost.
-6. Recommend one mode. If parallel speedup cannot be demonstrated, recommend
-   `当前会话单 Agent`.
-7. Present exactly this shape with plan-specific reasons:
-
-   > 执行方式推荐：<当前会话单 Agent | 多 Agent 并行>
-   >
-   > 原因：<actual file, dependency, speed, and coordination evidence>
-   >
-   > 1. 当前会话单 Agent
-   > 2. 多 Agent 并行
-   >
-   > 请明确选择 1 或 2。
-
-8. Set `stage=implementation_strategy_waiting_confirmation`. Wait for an
-   explicit conversational `1` or `2`. Prior approvals, silence, browser
-   activity, or inferred preference cannot select an execution mode.
-9. For choice `1`, use `single-agent`. For choice `2`, use `parallel-wave` and
-   require a validated `multi-agent-implementation.json`. If parallel tasks
-   overlap or cannot demonstrate a net speed benefit, show the exact conflict
-   and wait for a revised disjoint plan or a new explicit choice. Do not spawn
-   agents or silently fall back.
-10. Write schema-version-2
-    `.resume-site-work/reports/site-implementation-plan.json` with
-    `generation_mode: one-integrated-site`, the `strategy_selection` evidence,
-    exact tasks, dependencies, files, interfaces, acceptance, verification,
-    rollback, and `versions/v1-integrated`.
-11. Validate the plan:
+Write schema-version-2 `.resume-site-work/reports/site-implementation-plan.json`
+with `generation_mode: one-integrated-site`, current `interaction_mode`,
+strategy evidence, exact tasks, dependencies, files, interfaces, verification,
+rollback, and `versions/v1-integrated`. Parallel execution also requires a
+validated disjoint `multi-agent-implementation.json`.
 
 ```sh
 "$PYTHON" "$SKILL_ROOT/scripts/validate_site_implementation_plan.py" \
-  ".resume-site-work/reports/site-implementation-plan.json"
+  ".resume-site-work/reports/site-implementation-plan.json" \
+  --design-spec ".resume-site-work/reports/site-design-spec.json" \
+  --workspace-root "."
 ```
 
-Do not write the machine plan before final requirements approval, explicit TODO
-plan approval, and explicit strategy selection. Do not edit React source before those
-three approvals and successful JSON plan validation. Do not spawn agents
-before explicit choice `2` and successful validation of both required plans. A
-changed core decision invalidates final requirements approval and both planning
-artifacts. The main agent always owns shared files, state,
-integration, preview promotion, snapshots, and publication.
+Do not edit React source until the design and plan validate. Quick validation
+binds the current selection IDs and exact TODO content to the user's approval;
+changed choices or tasks need a revised bundle. Preserve facts and copy approval
+separately. The main agent owns shared files, integration, state, preview
+promotion, snapshots, and publication authorization.
 
 ## Generate one integrated website
 
@@ -111,7 +84,7 @@ integration, preview promotion, snapshots, and publication.
    The contract refines approved choices into observable commitments but cannot
    reopen or contradict them. On failure set `artifact_invalid`, preserve the
    last valid preview and snapshot, and stop source generation.
-5. Set `stage=integrated_generating`. Translate the approved six decisions and
+5. Set `stage=integrated_generating`. Translate the approved decisions and delegated structure and
    validated design contract into implementation detail without changing them.
    Create supporting media-direction, creative-direction, and motion reports
    when applicable.
@@ -127,7 +100,7 @@ integration, preview promotion, snapshots, and publication.
 ```sh
 "$PYTHON" "$SKILL_ROOT/scripts/validate_vite_project.py" \
   ".resume-site-work/site" --stage integrated
-npm run build
+(cd ".resume-site-work/site" && npm run build)
 ```
 
 8. On success, atomically promote `site/dist` to `preview/dist`, capture desktop,
@@ -148,4 +121,3 @@ npm run build
 
 The first React candidate is one integrated website. Do not return to the old
 prototype, media-direction, and motion confirmation chain.
-

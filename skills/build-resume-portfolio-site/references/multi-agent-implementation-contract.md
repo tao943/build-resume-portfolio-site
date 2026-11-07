@@ -1,21 +1,22 @@
 # Multi-Agent Implementation Contract
 
-Use this contract only after the user explicitly selects `多 Agent 并行`. It is
+Use this contract after explicit parallel selection or a quick-mode bundle
+authorizes the Agent to choose execution. It is
 an implementation strategy inside the existing workflow, not a new portfolio
 stage or confirmation gate.
 
 ## Strategy selection
 
-The only multi-Agent strategy is `parallel-wave`. Use it only after the user
-explicitly selects `多 Agent 并行` and both the site implementation plan and
-multi-Agent plan validate. Require at least two independently useful tasks in a
+The only multi-Agent strategy is `parallel-wave`. Use it only under the recorded selection/delegation and after both the site
+implementation plan and multi-Agent plan validate. Require at least two independently useful tasks in a
 parallel wave with disjoint write ownership and independent acceptance checks.
 
 Sequential waves may be used only for integration and dependent review inside
 the selected parallel strategy; they are not a separate user-facing mode.
 Never split work by page or section merely to increase agent count. If the
-parallel criteria cannot be met, return to the strategy gate and ask the user
-to approve a revised disjoint plan or select `当前会话单 Agent`.
+parallel criteria cannot be met, use single-agent within a quick delegation.
+For an explicit user requirement to use parallel work, explain the constraint
+and revise the plan without silently overriding that requirement.
 
 ## Controller and ownership
 
@@ -28,9 +29,9 @@ Before dispatch, write
 `.resume-site-work/reports/multi-agent-implementation.json` against
 `multi-agent-implementation-schema.json`, then run:
 
-```powershell
-python "$SKILL_ROOT\scripts\validate_multi_agent_plan.py" `
-  ".resume-site-work\reports\multi-agent-implementation.json"
+```sh
+"$PYTHON" "$SKILL_ROOT/scripts/validate_multi_agent_plan.py" \
+  ".resume-site-work/reports/multi-agent-implementation.json"
 ```
 
 Continue only on exit `0`. The plan must define task dependencies, waves,

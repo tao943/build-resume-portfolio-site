@@ -6,6 +6,9 @@ import sys
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from workflow_modes import interaction_mode, validate_quick_plan
+from validate_site_design_spec import validate as validate_design_spec
+
 
 STRATEGIES = {"single-agent", "parallel-wave"}
 REQUIRED = {
@@ -52,7 +55,7 @@ def _contains_placeholder(value: Any) -> bool:
     return False
 
 
-def validate(payload: Any) -> list[str]:
+def validate(payload: Any, design_spec: Any = None, todo_bytes: bytes | None = None) -> list[str]:
     if not isinstance(payload, dict):
         return ["site implementation plan must be a JSON object"]
     errors = [
@@ -61,6 +64,13 @@ def validate(payload: Any) -> list[str]:
     ]
     if errors:
         return errors
+    mode = interaction_mode(payload)
+    if mode not in {"quick", "deep"}:
+        errors.append("interaction_mode must be quick or deep")
+    if mode == "quick":
+        errors.extend(validate_quick_plan(payload, design_spec, todo_bytes))
+        if isinstance(design_spec, dict):
+            errors.extend(f"design spec: {error}" for error in validate_design_spec(design_spec))
     if payload["schema_version"] != 2:
         errors.append("schema_version must be 2")
     todo_plan = str(payload["todo_plan"]).replace("\\", "/")
@@ -94,7 +104,14 @@ def validate(payload: Any) -> list[str]:
             and selection.get("source") == "explicit_user"
             and selection.get("channel") == "conversation"
         )
-        if not conversational:
+        delegated = (
+            mode == "quick"
+            and selection.get("status") == "agent_selected"
+            and selection.get("source") == "approved_bundle"
+            and selection.get("channel") == "workflow"
+            and selection.get("bundle_id") == payload.get("bundle_approval_id")
+        )
+        if not conversational and not delegated:
             errors.append(
                 "strategy selection must be explicit and conversational"
             )
@@ -188,13 +205,25 @@ def main() -> int:
         description="Validate a website implementation plan."
     )
     parser.add_argument("plan", type=Path)
+    parser.add_argument("--design-spec", type=Path, help="Required for quick mode; verifies bundled approval.")
+    parser.add_argument("--workspace-root", type=Path, default=Path("."))
     args = parser.parse_args()
     try:
         payload = json.loads(args.plan.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: could not read site implementation plan: {exc}")
         return 1
-    errors = validate(payload)
+    design_spec = None
+    todo_bytes = None
+    if interaction_mode(payload) == "quick":
+        try:
+            if args.design_spec is not None:
+                design_spec = json.loads(args.design_spec.read_text(encoding="utf-8"))
+            todo_bytes = (args.workspace_root / ".resume-site-work/reports/site-todo-plan.md").read_bytes()
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"ERROR: could not read quick-mode approval artifacts: {exc}")
+            return 1
+    errors = validate(payload, design_spec, todo_bytes)
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

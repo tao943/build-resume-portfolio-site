@@ -70,7 +70,9 @@ Create all generated material under `.resume-site-work/` in the active user work
 not React source, production previews, confirmed snapshots, or publishable
 site output. Browser activity has no approval semantics; only an explicit
 conversation reply may be recorded in the active schema-version-4 site design
-specification (or an unmigrated schema-version-3 specification). Category Galleries are independent rather than cumulative.
+specification (or an unmigrated schema-version-3 specification). Deep comparisons
+isolate categories; quick mode shows a combined bundle. Reuse one session URL
+and retain immutable drafts of the material shown at each approval.
 Stopping a local session preserves its gallery for review.
 
 The three content files under `input/` plus the content strategy, plan, quality,
@@ -104,7 +106,8 @@ Schema v3 remains valid for unmigrated existing workspaces.
 `reports/site-todo-plan.md` is the readable plan
 shown and explicitly approved in the conversation.
 `reports/site-implementation-plan.json` records that approval plus the
-plan-based recommendation, reasons, explicit conversational strategy selection,
+plan-based recommendation, reasons, explicit strategy selection or quick-mode
+execution delegation,
 selected strategy, exact files, task boundaries, interfaces, verification,
 rollback, and the integrated snapshot target. All three gates complete before
 React source edits. The
@@ -121,11 +124,12 @@ conversation approval, or authorize React edits. Each category report records
 its exact catalog domains, privacy-safe query context, inherited prior decision
 IDs, anti-template evaluation, candidates, recommendation, and source IDs. The
 working decision file contains only approved candidate IDs and conversational
-approval metadata; it is the inheritance input for the next category and has
-no independent approval semantics.
+approval metadata. Quick-mode proposals stay outside this file until the bundle
+is approved; initial category reports can therefore inherit no decision IDs.
+The file has no independent approval semantics.
 
-`reports/multi-agent-implementation.json` exists only when the user explicitly
-selects parallel multi-Agent implementation. It records the parallel-wave
+`reports/multi-agent-implementation.json` exists only for parallel implementation authorized by an explicit selection
+or quick-mode execution delegation. It records the parallel-wave
 strategy, dependencies,
 waves, shared files, bounded write ownership, acceptance criteria, and
 verification. Validate it before dispatch. Task handoffs go to
@@ -139,14 +143,17 @@ Initialize `build-state.json` with this minimum shape:
 ```json
 {
   "schema_version": 4,
-  "skill_version": "1.3.0-react-vite",
+  "skill_version": "1.4.0-react-vite",
   "workflow_mode": "full",
+  "interaction_mode": "quick",
+  "preview_preference": "ask",
+  "preview_scope": "discovery",
+  "preview_session": null,
   "discovery": {
     "design_discovery": {
       "baseline": "reports/design-discovery/baseline.json",
       "anti_template_baseline": "reports/design-discovery/anti-template-baseline.json",
       "categories": {
-        "structure": "reports/design-discovery/structure.json",
         "typography": "reports/design-discovery/typography.json",
         "color": "reports/design-discovery/color.json",
         "media": "reports/design-discovery/media.json",
@@ -162,11 +169,9 @@ Initialize `build-state.json` with this minimum shape:
   "current_artifact": null,
   "current_preview": null,
   "last_confirmed_artifact": null,
-  "confirmations": {"prototype": false, "media_direction": false, "motion": false},
+  "confirmations": {"content_copy": false, "design_bundle": false, "integrated": false},
   "resource_versions": {},
   "selected_reference_ids": [],
-  "selected_media_direction_id": null,
-  "attempted_media_direction_ids": [],
   "visual_repair_round": 0,
   "user_feedback": [],
   "unresolved_defects": [],
@@ -174,7 +179,9 @@ Initialize `build-state.json` with this minimum shape:
 }
 ```
 
-Schema version `4` is the only active shape. A schema-version-3 state may be
+New states use quick mode unless the user prefers deep review. Missing
+`interaction_mode` in an existing state means deep; never infer new approvals
+from migration. Schema version `4` is the active shape. A schema-version-3 state may be
 migrated with `scripts/migrate_build_state.py <source> <distinct-output>`;
 the tool preserves prior confirmations and confirmed snapshots, derives no new
 approval, and refuses in-place or overwrite migrations. Systems reject every

@@ -71,6 +71,12 @@ AESTHETIC_QUALITY_FILES = (
 )
 
 CONTENT_WORKFLOW_FILES = (
+    "references/import-guide.md",
+    "references/resume-export-contract.md",
+    "references/role-versions.md",
+    "scripts/check_environment.py",
+    "scripts/export_resume.py",
+    "scripts/manage_resume_versions.py",
     "prompts/extract-content-facts.md",
     "prompts/ask-content-clarification.md",
     "prompts/optimize-content-copy.md",
@@ -102,6 +108,8 @@ CONTENT_WORKFLOW_FILES = (
 )
 
 DESIGN_DISCOVERY_FILES = (
+    "references/interaction-modes.md",
+    "scripts/workflow_modes.py",
     "references/design-discovery-schema.json",
     "scripts/validate_design_discovery.py",
     "scripts/portfolio_design_search.py",

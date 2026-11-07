@@ -1,6 +1,6 @@
 # Content Package Contract
 
-The skill owns content preparation and writes only these files:
+The skill owns content preparation. The canonical approved handoff consists of:
 
 ```text
 .resume-site-work/input/source-manifest.json
@@ -37,3 +37,7 @@ must reference no fact/evidence IDs and cannot authorize new resume copy.
 ## Claim rule
 
 Every generated claim must reference at least one evidence ID or have `confirmation_status: user_confirmed`. Missing evidence is a reason to ask the user a question, not a reason to invent a number, title, date, or responsibility.
+
+## Atomic content revisions
+
+Prepare new package, quality review and optional JD report under `.resume-site-work/staging/`. Pass them to `write_resume_site_input.py --package <path> --quality-review <path> --jd-report <path> --workspace-root <workspace>` (omit the JD argument without a JD). For updates, pass a strictly increasing `--revision`. The writer validates the complete candidate, snapshots the old valid handoff, then replaces the files with rollback on failure. Do not overwrite canonical quality/JD reports before this step. Saved revision workspaces live under `versions/content-rN/` and can be validated/restored independently. For named job variants, use [role-versions.md](role-versions.md).

@@ -13,7 +13,7 @@ def normalize(input_dir: Path) -> dict:
     for path in sorted(input_dir.rglob("*")):
         if not path.is_file() or path.name.startswith("."):
             continue
-        if path.suffix.lower() not in {".pdf", ".docx", ".md", ".txt"}:
+        if path.suffix.lower() not in {".pdf", ".docx", ".md", ".txt", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}:
             continue
         relative = path.relative_to(input_dir).as_posix()
         source_id = "source-" + hashlib.sha256(relative.encode("utf-8")).hexdigest()[:12]

@@ -1,9 +1,30 @@
 # Workflow Contract
 
 Persist state after every transition. Never infer approval from silence,
-browser activity, or approval of another category.
+browser activity, or approval of unrelated material. One explicit approval may
+cover a clearly displayed quick-mode bundle; preserve its exact scope.
 
-## Full workflow state machine
+## Interaction mode
+
+Persist `interaction_mode: quick | deep`; see
+[interaction-modes.md](interaction-modes.md). Existing states without the field
+retain deep mode. Scope routing (`workflow_mode`) remains independent. Both
+modes keep exact-copy approval and the same content/design/build checks.
+
+Quick discovery follows the common baseline generation, then:
+
+```text
+anti_template_baseline_ready -> design_bundle_generating
+-> design_bundle_waiting_confirmation
+--approve displayed design, TODO, and delegated execution--> implementation_plan_generating
+--revise--> design_bundle_generating
+```
+
+One combined gallery and approval replace separate category, requirements,
+TODO, and execution questions. The approved bundle binds selected IDs and the
+TODO file hash. It does not approve facts, copy, or external publication.
+
+## Deep workflow state machine
 
 ```text
 content_preflight
@@ -34,10 +55,9 @@ content_preflight
 -> integrated_waiting_confirmation
 ```
 
-Every enabled user-selected design state compares candidates and offers its separate browser
-comparison before user selection. An optional independent Gallery supports the
-decision; selection and confirmation happen afterward in the conversation. A
-decline affects only that category.
+Every enabled design state compares candidates. Reuse the stated preview
+preference and session URL; consent may cover the entire discovery or one
+category. Selection and confirmation happen in the conversation.
 
 Schema-version-4 workflows delegate structure to the Agent with visual-impact
 priority and universal scope. After planning, the Agent privately compares
@@ -73,7 +93,7 @@ anti_template_baseline_ready --delegate structure--> design_structure_delegated
 content_quality_validating --invalid or copy changes--> content_copy_waiting_confirmation
 ```
 
-`requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
+In deep mode, `requirements_waiting_confirmation --confirm--> todo_plan_generating` writes
 the schema-v4 design specification. Then:
 
 ```text
@@ -86,10 +106,11 @@ design_contract_compiling --contract validates--> integrated_generating
 design_contract_compiling --contract invalid--> artifact_invalid
 ```
 
-Silence, browser activity, inferred preference, or prior approval cannot select
-the strategy. Do not write the machine plan or edit React source while waiting.
-Do not spawn agents while waiting. Parallel choice requires a validated disjoint plan; failure
-returns to the strategy gate without automatic fallback.
+An explicit deep-mode strategy choice or quick-mode execution delegation must
+exist before execution. Silence and browser activity provide neither. Parallel
+work requires a validated disjoint plan; failures cannot override a user
+requirement. The quick bundle permits choosing single-agent when parallel work
+has no benefit.
 
 ## Integrated transaction
 
@@ -132,8 +153,9 @@ integrated_waiting_confirmation --提出修改 and core reversal--> affected des
 Motion enhancement preserves content, structure, typography, color, and media treatment. It may revise only primary/secondary motion plans and implementation.
 A core reversal invalidates that decision's downstream evidence, final
 requirements approval, TODO plan approval, and JSON implementation plan.
-The revised category report and every later category report must be regenerated
-in order so their inherited decision IDs remain truthful. Earlier reports remain
+In deep mode, the revised category report and later reports must be regenerated
+in order so their inherited decision IDs remain truthful. In quick mode, revise
+the affected reports and obtain a new bundle approval. Earlier reports remain
 valid and are not rerun. A change to content, audience, selected database
 direction, visual protagonist, or content-to-form thesis invalidates the
 anti-template baseline and every category report.
@@ -154,8 +176,9 @@ same bundled workflow repairs the package.
 conversation. `site-implementation-plan.json` schema v2 is the validated
 machine plan. All three precede React edits.
 
-Use `single-agent`, or an explicitly authorized and validated `parallel-wave`
-plan. The main agent owns integration, shared files, state, preview promotion,
+Use `single-agent`, or an authorized and validated `parallel-wave` plan.
+Quick-mode delegation may authorize the Agent to choose between these; it does
+not waive plan validation. The main agent owns integration, shared files, state, preview promotion,
 snapshots, and publication.
 
 ## Fast change

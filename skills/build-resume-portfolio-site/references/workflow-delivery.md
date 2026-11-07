@@ -11,6 +11,23 @@ Before starting, read:
 
 ## Final acceptance
 
+Before acceptance, follow [resume-export-contract.md](resume-export-contract.md)
+to export the selected approved content as printable HTML and a real PDF.
+Check extracted text order, page rendering and links. Default to a private
+delivery; include a website download only for explicitly approved public blocks.
+Copy only that public PDF into `site/public/`, then rebuild and check the download
+in the built preview. Promote this successful build to the preview and create a
+new integrated snapshot containing the PDF and download link before final
+acceptance; make that snapshot the accepted rollback baseline. Keep evidence,
+role comparisons and export reports local.
+Explain if a dependency or font limitation prevents PDF completion; an HTML file
+alone does not satisfy PDF delivery. Give the user source, build, PDF and HTML
+locations plus checks actually completed.
+
+For version libraries, show the active version label and how to select another
+version using `manage_resume_versions.py`. Re-export after any approved copy
+change; stale plans fail their content hash check.
+
 Offer exactly three outcomes:
 
 1. `当前效果满意，完成`
@@ -29,7 +46,8 @@ compatible planned effects without a numeric effect cap, validate/build/capture,
 snapshot an integrated retry, then return to `integrated_waiting_confirmation`.
 
 On `提出修改`, route bounded feedback to local repair. If feedback reverses a
-core decision, return to that decision category, invalidate its downstream
-decisions and approvals, reconfirm requirements, regenerate both plans, obtain
-new TODO plan approval, and generate a new integrated candidate.
+core decision, invalidate its affected downstream decisions and approvals.
+In quick mode, show and reapprove the changed design/execution bundle; in deep
+mode, return to the affected category, reconfirm requirements and TODO plan.
+Regenerate validated planning artifacts before a new integrated candidate.
 

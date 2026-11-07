@@ -14,10 +14,26 @@
     "requirements_approval"
   ],
   "properties": {
-    "schema_version": {"enum": [3, 4]},
-    "spec_id": {"type": "string", "minLength": 1},
-    "workflow_mode": {"enum": ["full", "fast-change"]},
-    "content_revision": {"type": "integer", "minimum": 1},
+    "schema_version": {
+      "enum": [
+        3,
+        4
+      ]
+    },
+    "spec_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow_mode": {
+      "enum": [
+        "full",
+        "fast-change"
+      ]
+    },
+    "content_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
     "decision_order": {
       "const": [
         "structure",
@@ -42,37 +58,93 @@
       "properties": {
         "structure": {
           "oneOf": [
-            {"$ref": "#/$defs/singleDecision"},
-            {"$ref": "#/$defs/agentDelegatedStructure"}
+            {
+              "$ref": "#/$defs/singleDecision"
+            },
+            {
+              "$ref": "#/$defs/agentDelegatedStructure"
+            }
           ]
         },
-        "typography": {"$ref": "#/$defs/singleDecision"},
-        "color": {"$ref": "#/$defs/singleDecision"},
+        "typography": {
+          "$ref": "#/$defs/singleDecision"
+        },
+        "color": {
+          "$ref": "#/$defs/singleDecision"
+        },
         "media": {
           "oneOf": [
-            {"$ref": "#/$defs/singleDecision"},
-            {"$ref": "#/$defs/skippedMedia"}
+            {
+              "$ref": "#/$defs/singleDecision"
+            },
+            {
+              "$ref": "#/$defs/skippedMedia"
+            }
           ]
         },
-        "primary_motion": {"$ref": "#/$defs/singleDecision"},
-        "secondary_motion": {"$ref": "#/$defs/multipleDecision"}
+        "primary_motion": {
+          "$ref": "#/$defs/singleDecision"
+        },
+        "secondary_motion": {
+          "$ref": "#/$defs/multipleDecision"
+        }
       }
     },
     "engineering_constraints": {
       "type": "array",
       "minItems": 5,
       "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1},
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "allOf": [
-        {"contains": {"const": "responsive"}},
-        {"contains": {"const": "accessible"}},
-        {"contains": {"const": "coarse-pointer"}},
-        {"contains": {"const": "reduced-motion"}},
-        {"contains": {"const": "media-fallbacks"}}
+        {
+          "contains": {
+            "const": "responsive"
+          }
+        },
+        {
+          "contains": {
+            "const": "accessible"
+          }
+        },
+        {
+          "contains": {
+            "const": "coarse-pointer"
+          }
+        },
+        {
+          "contains": {
+            "const": "reduced-motion"
+          }
+        },
+        {
+          "contains": {
+            "const": "media-fallbacks"
+          }
+        }
       ]
     },
-    "requirements_approval": {"$ref": "#/$defs/approval"},
-    "migration": {"type": ["object", "null"]}
+    "requirements_approval": {
+      "$ref": "#/$defs/approval"
+    },
+    "migration": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "interaction_mode": {
+      "enum": [
+        "quick",
+        "deep"
+      ],
+      "default": "deep"
+    },
+    "bundle_approval": {
+      "$ref": "#/$defs/bundleApproval"
+    }
   },
   "$defs": {
     "candidate": {
@@ -90,79 +162,156 @@
         "source_ids"
       ],
       "properties": {
-        "id": {"type": "string", "minLength": 1},
-        "label": {"type": "string", "minLength": 1},
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
         "fit": {
           "type": "array",
           "minItems": 1,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "risks": {
           "type": "array",
           "minItems": 1,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "tradeoffs": {
           "type": "array",
           "minItems": 1,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "compatibility": {
           "type": "array",
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
-        "responsive_fallback": {"type": "string", "minLength": 1},
+        "responsive_fallback": {
+          "type": "string",
+          "minLength": 1
+        },
         "accessibility_notes": {
           "type": "array",
           "minItems": 1,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "source_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
     "approval": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "source", "channel"],
+      "required": [
+        "status",
+        "source",
+        "channel"
+      ],
       "properties": {
-        "status": {"const": "user_approved"},
-        "source": {"const": "explicit_user"},
-        "channel": {"const": "conversation"}
+        "status": {
+          "const": "user_approved"
+        },
+        "source": {
+          "const": "explicit_user"
+        },
+        "channel": {
+          "const": "conversation"
+        },
+        "bundle_id": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "preview": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["offered", "response", "delivery", "artifact"],
+      "required": [
+        "offered",
+        "response",
+        "delivery",
+        "artifact"
+      ],
       "properties": {
-        "offered": {"const": true},
-        "response": {"enum": ["accepted", "declined"]},
+        "offered": {
+          "const": true
+        },
+        "response": {
+          "enum": [
+            "accepted",
+            "declined"
+          ]
+        },
         "delivery": {
-          "enum": ["local-gallery", "static-fallback", "not-requested"]
+          "enum": [
+            "local-gallery",
+            "static-fallback",
+            "not-requested"
+          ]
         },
         "artifact": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^\\.resume-site-work/style-preview/sessions/[^/]+/gallery\\.html$"
         }
       },
       "allOf": [
         {
-          "if": {"properties": {"response": {"const": "declined"}}},
+          "if": {
+            "properties": {
+              "response": {
+                "const": "declined"
+              }
+            }
+          },
           "then": {
             "properties": {
-              "delivery": {"const": "not-requested"},
-              "artifact": {"type": "null"}
+              "delivery": {
+                "const": "not-requested"
+              },
+              "artifact": {
+                "type": "null"
+              }
             }
           },
           "else": {
             "properties": {
-              "delivery": {"enum": ["local-gallery", "static-fallback"]},
-              "artifact": {"type": "string"}
+              "delivery": {
+                "enum": [
+                  "local-gallery",
+                  "static-fallback"
+                ]
+              },
+              "artifact": {
+                "type": "string"
+              }
             }
           }
         }
@@ -182,7 +331,9 @@
         "approval"
       ],
       "properties": {
-        "status": {"const": "confirmed"},
+        "status": {
+          "const": "confirmed"
+        },
         "discovery_report": {
           "type": "string",
           "pattern": "^\\.resume-site-work/reports/design-discovery/(structure|typography|color|media|primary-motion|secondary-motion)\\.json$"
@@ -191,59 +342,249 @@
           "type": "array",
           "minItems": 2,
           "uniqueItems": true,
-          "items": {"$ref": "#/$defs/candidate"}
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
         },
-        "recommended_candidate_id": {"type": "string", "minLength": 1},
+        "recommended_candidate_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "tentative_selection_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "selected_candidate_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
-        "preview": {"$ref": "#/$defs/preview"},
-        "approval": {"$ref": "#/$defs/approval"}
+        "preview": {
+          "$ref": "#/$defs/preview"
+        },
+        "approval": {
+          "$ref": "#/$defs/approval"
+        }
       }
     },
     "singleDecision": {
       "allOf": [
-        {"$ref": "#/$defs/decisionBase"},
+        {
+          "$ref": "#/$defs/decisionBase"
+        },
         {
           "properties": {
-            "tentative_selection_ids": {"maxItems": 1},
-            "selected_candidate_ids": {"maxItems": 1}
+            "tentative_selection_ids": {
+              "maxItems": 1
+            },
+            "selected_candidate_ids": {
+              "maxItems": 1
+            }
           }
         }
       ]
     },
-    "multipleDecision": {"$ref": "#/$defs/decisionBase"},
+    "multipleDecision": {
+      "$ref": "#/$defs/decisionBase"
+    },
     "agentDelegatedStructure": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "priority", "scope", "exploration_policy", "direct_generation", "approval"],
+      "required": [
+        "status",
+        "priority",
+        "scope",
+        "exploration_policy",
+        "direct_generation",
+        "approval"
+      ],
       "properties": {
-        "status": {"const": "agent_delegated"},
-        "priority": {"const": "visual-impact"},
-        "scope": {"const": "universal"},
-        "exploration_policy": {"const": "fit-novelty-wildcard"},
-        "direct_generation": {"const": true},
-        "approval": {"$ref": "#/$defs/approval"}
+        "status": {
+          "const": "agent_delegated"
+        },
+        "priority": {
+          "const": "visual-impact"
+        },
+        "scope": {
+          "const": "universal"
+        },
+        "exploration_policy": {
+          "const": "fit-novelty-wildcard"
+        },
+        "direct_generation": {
+          "const": true
+        },
+        "approval": {
+          "$ref": "#/$defs/approval"
+        }
       }
     },
     "skippedMedia": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "skip_reason", "approval"],
+      "required": [
+        "status",
+        "skip_reason",
+        "approval"
+      ],
       "properties": {
-        "status": {"const": "skipped"},
-        "skip_reason": {"type": "string", "minLength": 1},
-        "approval": {"$ref": "#/$defs/approval"}
+        "status": {
+          "const": "skipped"
+        },
+        "skip_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval": {
+          "$ref": "#/$defs/approval"
+        }
+      }
+    },
+    "bundleApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "quote",
+        "status",
+        "source",
+        "channel",
+        "structure_delegated",
+        "execution_delegated",
+        "todo_plan",
+        "todo_plan_sha256",
+        "selected_candidate_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "user_approved"
+        },
+        "source": {
+          "const": "explicit_user"
+        },
+        "channel": {
+          "const": "conversation"
+        },
+        "structure_delegated": {
+          "const": true
+        },
+        "execution_delegated": {
+          "const": true
+        },
+        "todo_plan": {
+          "const": ".resume-site-work/reports/site-todo-plan.md"
+        },
+        "todo_plan_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "selected_candidate_ids": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "typography",
+            "color",
+            "media",
+            "primary_motion",
+            "secondary_motion"
+          ],
+          "properties": {
+            "typography": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "color": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "media": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0
+            },
+            "primary_motion": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "secondary_motion": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          }
+        }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "interaction_mode"
+        ],
+        "properties": {
+          "interaction_mode": {
+            "const": "quick"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "bundle_approval"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": 4
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "bundle_approval"
+          ]
+        }
+      }
+    }
+  ]
 }

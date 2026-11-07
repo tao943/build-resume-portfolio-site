@@ -17,22 +17,43 @@
     "snapshot_target"
   ],
   "properties": {
-    "schema_version": {"const": 2},
-    "design_spec_id": {"type": "string", "minLength": 1},
+    "schema_version": {
+      "const": 2
+    },
+    "design_spec_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "todo_plan": {
       "const": ".resume-site-work/reports/site-todo-plan.md"
     },
     "todo_plan_approval": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "source", "channel"],
+      "required": [
+        "status",
+        "source",
+        "channel"
+      ],
       "properties": {
-        "status": {"const": "user_approved"},
-        "source": {"const": "explicit_user"},
-        "channel": {"const": "conversation"}
+        "status": {
+          "const": "user_approved"
+        },
+        "source": {
+          "const": "explicit_user"
+        },
+        "channel": {
+          "const": "conversation"
+        },
+        "bundle_id": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
-    "generation_mode": {"const": "one-integrated-site"},
+    "generation_mode": {
+      "const": "one-integrated-site"
+    },
     "strategy_selection": {
       "type": "object",
       "additionalProperties": false,
@@ -45,23 +66,99 @@
         "reasons"
       ],
       "properties": {
-        "status": {"const": "user_selected"},
-        "source": {"const": "explicit_user"},
-        "channel": {"const": "conversation"},
-        "selected": {"enum": ["single-agent", "parallel-wave"]},
-        "recommended": {"enum": ["single-agent", "parallel-wave"]},
+        "status": {
+          "enum": [
+            "user_selected",
+            "agent_selected"
+          ]
+        },
+        "source": {
+          "enum": [
+            "explicit_user",
+            "approved_bundle"
+          ]
+        },
+        "channel": {
+          "enum": [
+            "conversation",
+            "workflow"
+          ]
+        },
+        "selected": {
+          "enum": [
+            "single-agent",
+            "parallel-wave"
+          ]
+        },
+        "recommended": {
+          "enum": [
+            "single-agent",
+            "parallel-wave"
+          ]
+        },
         "reasons": {
           "type": "array",
           "minItems": 1,
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "bundle_id": {
+          "type": "string",
+          "minLength": 1
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "agent_selected"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "bundle_id"
+            ],
+            "properties": {
+              "source": {
+                "const": "approved_bundle"
+              },
+              "channel": {
+                "const": "workflow"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "source": {
+                "const": "explicit_user"
+              },
+              "channel": {
+                "const": "conversation"
+              }
+            }
+          }
+        }
+      ]
     },
     "strategy": {
-      "enum": ["single-agent", "parallel-wave"]
+      "enum": [
+        "single-agent",
+        "parallel-wave"
+      ]
     },
-    "multi_agent_authorized": {"type": "boolean"},
-    "multi_agent_plan": {"type": ["string", "null"]},
+    "multi_agent_authorized": {
+      "type": "boolean"
+    },
+    "multi_agent_plan": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "tasks": {
       "type": "array",
       "minItems": 1,
@@ -78,7 +175,54 @@
         ]
       }
     },
-    "rollback_baseline": {"type": "string", "minLength": 1},
-    "snapshot_target": {"type": "string", "minLength": 1}
-  }
+    "rollback_baseline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot_target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interaction_mode": {
+      "enum": [
+        "quick",
+        "deep"
+      ],
+      "default": "deep"
+    },
+    "bundle_approval_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "interaction_mode"
+        ],
+        "properties": {
+          "interaction_mode": {
+            "const": "quick"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "bundle_approval_id"
+        ]
+      },
+      "else": {
+        "properties": {
+          "strategy_selection": {
+            "properties": {
+              "status": {
+                "const": "user_selected"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

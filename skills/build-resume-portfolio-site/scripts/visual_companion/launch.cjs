@@ -2,6 +2,7 @@
 
 const crypto = require("crypto");
 const fs = require("fs");
+const http = require("http");
 const path = require("path");
 const {spawn} = require("child_process");
 
@@ -128,6 +129,69 @@ function openBrowser(url) {
   });
 }
 
+function assertRegularTree(root) {
+  const stat = fs.lstatSync(root);
+  if (stat.isSymbolicLink()) throw new Error("preview source must not contain symlinks");
+  if (stat.isDirectory()) {
+    for (const entry of fs.readdirSync(root)) assertRegularTree(path.join(root, entry));
+  } else if (!stat.isFile()) {
+    throw new Error("preview source contains an unsupported file");
+  }
+}
+
+async function reuseSession(workspaceRoot, sourceGallery, infoPath) {
+  const sessionsRoot = fs.realpathSync(path.join(workspaceRoot, ".resume-site-work", "style-preview", "sessions"));
+  const serverInfoPath = path.resolve(infoPath);
+  const sessionDir = path.dirname(path.dirname(serverInfoPath));
+  if (path.basename(serverInfoPath) !== "server-info.json"
+      || path.basename(path.dirname(serverInfoPath)) !== "state"
+      || path.dirname(sessionDir) !== sessionsRoot
+      || fs.realpathSync(sessionDir) !== sessionDir
+      || fs.lstatSync(serverInfoPath).isSymbolicLink()) {
+    throw new Error("reuse-session must identify a real session in this workspace");
+  }
+  const info = JSON.parse(fs.readFileSync(serverInfoPath, "utf8"));
+  const gallery = path.join(sessionDir, "gallery.html");
+  const url = new URL(info.url);
+  if (info.session_dir !== sessionDir || info.gallery !== gallery
+      || !Number.isInteger(info.pid) || info.pid <= 0
+      || url.protocol !== "http:" || !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)) {
+    throw new Error("reuse-session identity is inconsistent");
+  }
+  const healthUrl = new URL(url);
+  healthUrl.pathname = "/health";
+  const health = await new Promise((resolve, reject) => {
+    const request = http.get(healthUrl, (response) => {
+      let body = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => { body += chunk; });
+      response.on("end", () => {
+        try {
+          if (response.statusCode !== 200) throw new Error("session is not available");
+          resolve(JSON.parse(body));
+        } catch (error) { reject(error); }
+      });
+    });
+    request.setTimeout(1500, () => request.destroy(new Error("session health timed out")));
+    request.once("error", reject);
+  });
+  if (health.pid !== info.pid || health.session_dir !== sessionDir) {
+    throw new Error("session health identity does not match");
+  }
+  const sourceAssets = path.join(path.dirname(sourceGallery), "assets");
+  if (fs.existsSync(sourceAssets)) {
+    assertRegularTree(sourceAssets);
+    const targetAssets = path.join(sessionDir, "assets");
+    if (fs.existsSync(targetAssets)) assertRegularTree(targetAssets);
+    if (path.resolve(sourceAssets) !== targetAssets) fs.cpSync(sourceAssets, targetAssets, {recursive: true});
+  }
+  const temporary = path.join(sessionDir, `gallery.${process.pid}.tmp`);
+  fs.copyFileSync(sourceGallery, temporary);
+  fs.renameSync(temporary, gallery);
+  // Intentionally never call openBrowser: the existing URL stays valid.
+  return {...info, type: "server-reused", reused: true, open_warning: null};
+}
+
 async function main() {
   let args;
   try {
@@ -162,6 +226,12 @@ async function main() {
       "INVALID_PREVIEW_PATH",
       "gallery must be a regular HTML file",
     );
+    return;
+  }
+
+  if (args["reuse-session"]) {
+    const info = await reuseSession(workspaceRoot, sourceGallery, args["reuse-session"]);
+    process.stdout.write(`${JSON.stringify(info)}\n`);
     return;
   }
 
